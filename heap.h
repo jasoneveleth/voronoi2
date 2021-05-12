@@ -22,10 +22,12 @@ void free_heap(heap_t *);
 heap_t *init_heap(void);
 void *hremove_max(heap_t *);
 void hremove(heap_t *, hnode_t *);
+int hempty(heap_t *);
 // void hdecrease_key(heap_t *, hnode_t *, int32_t);
 hnode_t *hinsert(heap_t *, void *, key_t);
 
 // TODO NEED TO FREE ATTR
 
-// I often will leave the pointers as their old names when manipulating (upheaping and downheaping) in their new positions.
+// I often will leave the pointers as their old names when manipulating
+// (upheaping and downheaping) in their new positions.
 #endif
