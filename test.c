@@ -40,6 +40,12 @@ static inline void load(const char *path, key_t *keys, int32_t *vals, int num_in
 
 // **********************************************************
 
+static int new_heap_empty(void) {
+    heap_t *H = init_heap();
+    printf("testing new heap is empty: ");
+    return hempty(H);
+}
+
 static int simple_heap_inserts(void) {
     heap_t *H = init_heap();
     printf("testing 6 simple elements: ");
@@ -83,7 +89,7 @@ static int simple_heap_inserts_file(void) {
     load("heap_tests/simple_heap_inserts.output", correct_keys, correct_vals, 6); // CHANGED
 
     int goodsofar = 1;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6 && goodsofar; i++) {
         int next = *((int *)hremove_max(H));
         int diff = iabs(next - correct_vals[i]);
         goodsofar = goodsofar && (diff == 0);
@@ -107,7 +113,7 @@ static int twofiveseven_heap_inserts(void) {
     load("heap_tests/twofiveseven_heap_inserts.output", correct_keys, correct_vals, 257);
 
     int goodsofar = 1;
-    for (int i = 0; i < 257; i++) {
+    for (int i = 0; i < 257 && goodsofar; i++) {
         int next = *((int *)hremove_max(H));
         int diff = iabs(next - correct_vals[i]);
         goodsofar = goodsofar && (diff == 0);
@@ -117,22 +123,25 @@ static int twofiveseven_heap_inserts(void) {
     return goodsofar;
 }
 
-static int large_heap_inserts(void) {
+static int large_heap_inserts_with_dups(void) {
     heap_t *H = init_heap();
     printf("testing 1047 elements: ");
     key_t keys[1047];
     int vals[1047];
-    load("heap_tests/large_heap_inserts.input", keys, vals, 1047);
+    load("heap_tests/large_heap_inserts_with_dups.input", keys, vals, 1047);
     for (int i = 0; i < 1047; i++) {
         hinsert(H, &(vals[i]), keys[i]);
     }
     key_t correct_keys[1047];
     int correct_vals[1047];
-    load("heap_tests/large_heap_inserts.output", correct_keys, correct_vals, 1047);
+    load("heap_tests/large_heap_inserts_with_dups.output", correct_keys, correct_vals, 1047);
 
     int goodsofar = 1;
-    for (int i = 0; i < 1047; i++) {
+    for (int i = 0; i < 1047 && goodsofar; i++) {
         int next = *((int *)hremove_max(H));
+#ifdef DEBUG
+        printf("actual %d, correct: %d\n", next, correct_vals[i]);
+#endif
         int diff = iabs(next - correct_vals[i]);
         goodsofar = goodsofar && (diff == 0);
     }
@@ -143,7 +152,13 @@ static int large_heap_inserts(void) {
 
 int main() {
     // array of all tests, all return ints and take void
-    int (*tests[]) (void) = {simple_heap_inserts, simple_heap_inserts_file, twofiveseven_heap_inserts, large_heap_inserts};
+    int (*tests[]) (void) = {
+        new_heap_empty,
+        simple_heap_inserts, 
+        simple_heap_inserts_file, 
+        twofiveseven_heap_inserts, 
+        large_heap_inserts_with_dups
+    };
     size_t len = sizeof(tests)/sizeof(tests[0]);
     for (size_t i = 0; i < len; i++) {
         int passed = tests[i]();
