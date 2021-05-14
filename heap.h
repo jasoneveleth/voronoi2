@@ -3,27 +3,30 @@
 #include <stdlib.h>
 #define INIT_SIZE 1024
 
-typedef float key_t;
-// typedef int32_t key_t;
+#ifdef FLOAT
+typedef float key;
+#else
+typedef int32_t key;
+#endif
 
 typedef struct {
-    key_t key;
+    key key;
     int32_t index;
     void *attr;
-} hnode_t;
+} hnode;
 
 typedef struct {
-    hnode_t **arr;
+    hnode **arr;
     int32_t last;
     int32_t allocated;
-} heap_t;
+} heap;
 
-void free_heap(heap_t *);
-heap_t *init_heap(void);
-void *hremove_max(heap_t *);
-void *hremove(heap_t *, hnode_t *);
-int hempty(heap_t *);
-hnode_t *hinsert(heap_t *, void *, key_t);
+void free_heap(heap *);
+heap *init_heap(void);
+void *hremove_max(heap *);
+void *hremove(heap *, hnode *);
+int hempty(heap *);
+hnode *hinsert(heap *, void *, key);
 
 // TODO NEED TO FREE ATTR
 
