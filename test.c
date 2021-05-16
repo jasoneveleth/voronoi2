@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
+#include <stdlib.h>
 #include "heap.h"
 
 // length of max line in a test file
