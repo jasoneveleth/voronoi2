@@ -2,9 +2,12 @@ FLAGS = -std=c99 -Werror -Weverything -Wno-poison-system-directories
 FLAGS += -Ofast
 # FLAGS += -g -O0
 
-.PHONY: all run clean test debug
+.PHONY: all run clean test debug format
 
-all: heap.o short_test
+all: format heap.o short_test
+
+format:
+	./format.sh
 
 heap.o: heap.c heap.h
 	clang $(FLAGS) -c heap.c -DFLOAT
@@ -12,7 +15,7 @@ heap.o: heap.c heap.h
 short_test: test.c heap.o
 	clang $(FLAGS) heap.o test.c -o short_test -DFLOAT
 
-test: short_test
+test: format short_test
 	./short_test
 
 # debug
@@ -23,7 +26,7 @@ debug.o: heap.c heap.h
 debug_test: test.c debug.o
 	clang  $(FLAGS) -DDEBUG -DFLOAT debug.o test.c -o debug_test
 
-debug: debug_test
+debug: format debug_test
 	./debug_test
 
 # end of debug
