@@ -112,6 +112,11 @@ hremove(heap *H, hnode *node)
     free(node);
     upheap(H, last);
     downheap(H, last);
+#ifdef DEBUG
+    printf("remove ----------- %d\n", *(int *)val);
+    printall(H);
+    puts("/remove");
+#endif
     return val;
 }
 
@@ -119,9 +124,8 @@ hnode *
 hinsert(heap *H, void *attr, key key) 
 {
 #ifdef DEBUG
-    // printf("insert ----------- %d\n", H->last);
-    // printall(H);
-    // puts("/insert");
+    printf("insert ----------- %d\n", H->last);
+    printall(H);
 #endif
     H->last++;
     if (H->last >= H->allocated) { // (+1 used to) convert from index (last) to length
@@ -140,6 +144,9 @@ hinsert(heap *H, void *attr, key key)
     upheap(H, new);
     downheap(H, new);
 #ifdef DEBUG
+    printf("-----------\n");
+    printall(H);
+    puts("/insert");
     // if (key - (float)348.0 < (float)1e-4) {
     //     puts("----------------------------\n\n-----------------------");
     // }

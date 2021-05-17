@@ -169,14 +169,66 @@ large_heap_inserts_with_dups(void)
     return goodsofar;
 }
 
-int main() {
+static int 
+simple_removes(void) 
+{
+    heap *H = init_heap();
+    printf("testing simple removes ");
+
+    int goodsofar = 1;
+    int a = 10;
+    hnode *a_node = hinsert(H, &a, 41);
+    int b = 29;
+    hnode *b_node = hinsert(H, &b, 23);
+    int c = 21;
+    // hnode *c_node = hinsert(H, &c, 43);
+    hinsert(H, &c, 43);
+
+    goodsofar = goodsofar && (10 == *(int *)hremove(H, a_node));
+#ifdef DEBUG
+    printf("goodsofar: %d\n", goodsofar);
+#endif
+
+    int d = 39;
+    // hnode *d_node = hinsert(H, &d, 4);
+    hinsert(H, &d, 4);
+    int e = 7;
+    // hnode *e_node = hinsert(H, &e, 39);
+    hinsert(H, &e, 39);
+
+    goodsofar = goodsofar && (29 == *(int *)hremove(H, b_node));
+#ifdef DEBUG
+    printf("goodsofar: %d\n", goodsofar);
+#endif
+
+    int f = 38;
+    // hnode *f_node = hinsert(H, &f, 14);
+    hinsert(H, &f, 14);
+    int correct[] = {21, 7, 38, 39};
+
+    for (int i = 0; i < 4; i++) {
+        int next = *((int *)hremove_max(H));
+        goodsofar = goodsofar && (next == correct[i]);
+#ifdef DEBUG
+    printf("goodsofar: %d\n", goodsofar);
+#endif
+    }
+
+    free_heap(H);
+    return goodsofar;
+}
+
+int 
+main() 
+{
     // array of all tests, all return ints and take void
     int (*tests[]) (void) = {
         new_heap_empty,
         simple_heap_inserts, 
         simple_heap_inserts_file, 
         twofiveseven_heap_inserts, 
-        large_heap_inserts_with_dups
+        large_heap_inserts_with_dups,
+        simple_removes,
     };
     size_t len = sizeof(tests)/sizeof(tests[0]);
     for (size_t i = 0; i < len; i++) {

@@ -2,7 +2,7 @@ FLAGS = -std=c99 -Werror -Weverything -Wno-poison-system-directories
 FLAGS += -Ofast
 # FLAGS += -g -O0
 
-.PHONY: all run clean
+.PHONY: all run clean test debug
 
 all: heap.o short_test
 
