@@ -10,12 +10,16 @@
 //     return a > 0 ? a : -a;
 // }
 
-static inline int iabs(int a) {
+static inline int 
+iabs(int a) 
+{
     return a > 0 ? a : -a;
 }
 
 // assume vals are ints
-static inline void load(const char *path, key *keys, int32_t *vals, int num_inputs) {
+static inline void 
+load(const char *path, key *keys, int32_t *vals, int num_inputs)
+{
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         fprintf(stderr, "path not valid: %s\n", path);
@@ -45,13 +49,17 @@ static inline void load(const char *path, key *keys, int32_t *vals, int num_inpu
 
 // **********************************************************
 
-static int new_heap_empty(void) {
+static int 
+new_heap_empty(void)
+{
     heap *H = init_heap();
     printf("testing new heap is empty: ");
     return hempty(H);
 }
 
-static int simple_heap_inserts(void) {
+static int 
+simple_heap_inserts(void) 
+{
     heap *H = init_heap();
     printf("testing 6 simple elements: ");
 
@@ -80,7 +88,9 @@ static int simple_heap_inserts(void) {
 }
 
 // EXACT copy of twofiveseven_heap_inserts, except the 257 -> 6
-static int simple_heap_inserts_file(void) {
+static int 
+simple_heap_inserts_file(void)
+{
     heap *H = init_heap();
     printf("testing simple elements in file: "); // CHANGED
     key keys[6];
@@ -104,7 +114,9 @@ static int simple_heap_inserts_file(void) {
     return goodsofar;
 }
 
-static int twofiveseven_heap_inserts(void) {
+static int 
+twofiveseven_heap_inserts(void)
+{
     heap *H = init_heap();
     printf("testing 257 elements: ");
     key keys[257];
@@ -128,7 +140,9 @@ static int twofiveseven_heap_inserts(void) {
     return goodsofar;
 }
 
-static int large_heap_inserts_with_dups(void) {
+static int 
+large_heap_inserts_with_dups(void)
+{
     heap *H = init_heap();
     printf("testing 1047 elements: ");
     key keys[1047];
