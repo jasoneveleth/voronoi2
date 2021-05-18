@@ -10,14 +10,14 @@
 //     return a > 0 ? a : -a;
 // }
 
-static inline int 
-iabs(int a) 
+static inline int
+iabs(int a)
 {
     return a > 0 ? a : -a;
 }
 
 // assume vals are ints
-static inline void 
+static inline void
 load(const char *path, key *keys, int32_t *vals, int num_inputs)
 {
     FILE *file = fopen(path, "r");
@@ -30,26 +30,25 @@ load(const char *path, key *keys, int32_t *vals, int num_inputs)
         if (fgets(line, LINELEN, file) == NULL)
             fprintf(stderr, "got to end of file early\n");
         switch (line[0]) {
-            case 'i':
-                ; // needed because who knows why
-                char *next_key = strtok(&(line[2]), " \t\n"); // cut off 'i '
-                char *next_val = strtok(NULL, " \t\n");
+        case 'i':; // needed because who knows why
+            char *next_key = strtok(&(line[2]), " \t\n"); // cut off 'i '
+            char *next_val = strtok(NULL, " \t\n");
 #ifdef FLOAT
-                keys[i] = strtof(next_key, NULL); // HARD CODED TYPE for keys FIXME
+            keys[i] = strtof(next_key, NULL); // HARD CODED TYPE for keys FIXME
 #else
-                keys[i] = atoi(next_key); // HARD CODED TYPE for keys FIXME
+            keys[i] = atoi(next_key); // HARD CODED TYPE for keys FIXME
 #endif
-                vals[i] = atoi(next_val);
-                break;
-            default:
-                break;
+            vals[i] = atoi(next_val);
+            break;
+        default:
+            break;
         }
     }
 }
 
 // **********************************************************
 
-static int 
+static int
 new_heap_empty(void)
 {
     heap *H = init_heap();
@@ -57,8 +56,8 @@ new_heap_empty(void)
     return hempty(H);
 }
 
-static int 
-simple_heap_inserts(void) 
+static int
+simple_heap_inserts(void)
 {
     heap *H = init_heap();
     printf("testing 6 simple elements: ");
@@ -88,7 +87,7 @@ simple_heap_inserts(void)
 }
 
 // EXACT copy of twofiveseven_heap_inserts, except the 257 -> 6
-static int 
+static int
 simple_heap_inserts_file(void)
 {
     heap *H = init_heap();
@@ -96,12 +95,13 @@ simple_heap_inserts_file(void)
     key keys[6];
     int vals[6];
     load("heap_tests/simple_heap_inserts.input", keys, vals, 6); // CHANGED
-    for (int i = 0; i < 6; i++) {
-        hinsert(H, &(vals[i]), keys[i]);
-    }
+    for (int i = 0; i < 6; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[6];
     int correct_vals[6];
-    load("heap_tests/simple_heap_inserts.output", correct_keys, correct_vals, 6); // CHANGED
+    load("heap_tests/simple_heap_inserts.output",
+         correct_keys,
+         correct_vals,
+         6); // CHANGED
 
     int goodsofar = 1;
     for (int i = 0; i < 6 && goodsofar; i++) {
@@ -114,7 +114,7 @@ simple_heap_inserts_file(void)
     return goodsofar;
 }
 
-static int 
+static int
 twofiveseven_heap_inserts(void)
 {
     heap *H = init_heap();
@@ -122,12 +122,13 @@ twofiveseven_heap_inserts(void)
     key keys[257];
     int vals[257];
     load("heap_tests/twofiveseven_heap_inserts.input", keys, vals, 257);
-    for (int i = 0; i < 257; i++) {
-        hinsert(H, &(vals[i]), keys[i]);
-    }
+    for (int i = 0; i < 257; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[257];
     int correct_vals[257];
-    load("heap_tests/twofiveseven_heap_inserts.output", correct_keys, correct_vals, 257);
+    load("heap_tests/twofiveseven_heap_inserts.output",
+         correct_keys,
+         correct_vals,
+         257);
 
     int goodsofar = 1;
     for (int i = 0; i < 257 && goodsofar; i++) {
@@ -140,7 +141,7 @@ twofiveseven_heap_inserts(void)
     return goodsofar;
 }
 
-static int 
+static int
 large_heap_inserts_with_dups(void)
 {
     heap *H = init_heap();
@@ -148,12 +149,13 @@ large_heap_inserts_with_dups(void)
     key keys[1047];
     int vals[1047];
     load("heap_tests/large_heap_inserts_with_dups.input", keys, vals, 1047);
-    for (int i = 0; i < 1047; i++) {
-        hinsert(H, &(vals[i]), keys[i]);
-    }
+    for (int i = 0; i < 1047; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[1047];
     int correct_vals[1047];
-    load("heap_tests/large_heap_inserts_with_dups.output", correct_keys, correct_vals, 1047);
+    load("heap_tests/large_heap_inserts_with_dups.output",
+         correct_keys,
+         correct_vals,
+         1047);
 
     int goodsofar = 1;
     for (int i = 0; i < 1047 && goodsofar; i++) {
@@ -169,8 +171,8 @@ large_heap_inserts_with_dups(void)
     return goodsofar;
 }
 
-static int 
-simple_removes(void) 
+static int
+simple_removes(void)
 {
     heap *H = init_heap();
     printf("testing simple removes ");
@@ -210,7 +212,7 @@ simple_removes(void)
         int next = *((int *)hremove_max(H));
         goodsofar = goodsofar && (next == correct[i]);
 #ifdef DEBUG
-    printf("goodsofar: %d\n", goodsofar);
+        printf("goodsofar: %d\n", goodsofar);
 #endif
     }
 
@@ -218,19 +220,19 @@ simple_removes(void)
     return goodsofar;
 }
 
-int 
-main() 
+int
+main()
 {
     // array of all tests, all return ints and take void
-    int (*tests[]) (void) = {
+    int (*tests[])(void) = {
         new_heap_empty,
-        simple_heap_inserts, 
-        simple_heap_inserts_file, 
-        twofiveseven_heap_inserts, 
+        simple_heap_inserts,
+        simple_heap_inserts_file,
+        twofiveseven_heap_inserts,
         large_heap_inserts_with_dups,
         simple_removes,
     };
-    size_t len = sizeof(tests)/sizeof(tests[0]);
+    size_t len = sizeof(tests) / sizeof(tests[0]);
     for (size_t i = 0; i < len; i++) {
         int passed = tests[i]();
         if (passed) {

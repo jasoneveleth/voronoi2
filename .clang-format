@@ -151,7 +151,7 @@ RawStringFormats:
     CanonicalDelimiter: ''
     BasedOnStyle:    google
 ReflowComments:  true
-SortIncludes:    Never
+SortIncludes:    false
 # SortJavaStaticImport: Before
 SortUsingDeclarations: false
 SpaceAfterCStyleCast: false

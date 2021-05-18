@@ -3,14 +3,17 @@
 #include <assert.h>
 
 #ifdef DEBUG
-static inline void 
-printall(heap *H) 
+static inline void
+printall(heap *H)
 {
     int32_t max = 5;
     int32_t end = max > H->last + 1 ? H->last + 1 : max;
     for (int i = 1; i < end; i++) {
-        // printf("key: %.0f, val: %d, index: %d\n", (double)H->arr[i]->key, *(int *)H->arr[i]->attr, H->arr[i]->index);
-        printf("key: %.0f, val: %d\n", (double)H->arr[i]->key, *(int *)H->arr[i]->attr);
+        // printf("key: %.0f, val: %d, index: %d\n", (double)H->arr[i]->key,
+        // *(int *)H->arr[i]->attr, H->arr[i]->index);
+        printf("key: %.0f, val: %d\n",
+               (double)H->arr[i]->key,
+               *(int *)H->arr[i]->attr);
     }
 }
 #endif
@@ -19,18 +22,19 @@ static inline hnode *
 maxchild(heap *H, hnode *node)
 {
     hnode *lchild = H->arr[node->index * 2];
-    hnode *rchild = H->arr[node->index * 2 + 1]; // may be NULL -- but is handled properly
-    if (node->index*2 == H->last) { // no right child
+    hnode *rchild =
+        H->arr[node->index * 2 + 1];  // may be NULL -- but is handled properly
+    if (node->index * 2 == H->last) { // no right child
         return lchild;
-    } else  {
+    } else {
         return lchild->key > rchild->key ? lchild : rchild;
     }
 }
 
-static inline void 
-downheap(heap *H, hnode *node) 
+static inline void
+downheap(heap *H, hnode *node)
 {
-    while (node->index*2 <= H->last) { // has left child 
+    while (node->index * 2 <= H->last) { // has left child
         hnode *mchild = maxchild(H, node);
         if (node->key < mchild->key) {
             H->arr[mchild->index] = node;
@@ -43,11 +47,14 @@ downheap(heap *H, hnode *node)
     }
 }
 
-static inline void 
-upheap(heap *H, hnode *node) 
+static inline void
+upheap(heap *H, hnode *node)
 {
-    while (node->index > 1 && node->key > H->arr[node->index/2]->key) { // has parent && key > parent
-        hnode *parent = H->arr[node->index/2];
+    while (
+        node->index > 1
+        && node->key
+               > H->arr[node->index / 2]->key) { // has parent && key > parent
+        hnode *parent = H->arr[node->index / 2];
         H->arr[parent->index] = node;
         H->arr[node->index] = parent;
         parent->index = node->index;
@@ -55,31 +62,31 @@ upheap(heap *H, hnode *node)
     }
 }
 
-int 
-hempty(heap *H) 
+int
+hempty(heap *H)
 {
     return H->last == 0;
 }
 
-void 
-free_heap(heap *H) 
+void
+free_heap(heap *H)
 {
     free(H->arr);
     free(H);
 }
 
 heap *
-init_heap(void) 
+init_heap(void)
 {
     heap *H = malloc(sizeof(heap));
-    H->arr = malloc(sizeof(hnode *)*INIT_SIZE);
+    H->arr = malloc(sizeof(hnode *) * INIT_SIZE);
     H->last = 0;
     H->allocated = INIT_SIZE;
     return H;
 }
 
 void *
-hremove_max(heap *H) 
+hremove_max(heap *H)
 {
     if (hempty(H)) fprintf(stderr, "Can't remove max, heap empty");
     hnode *max = H->arr[1];
@@ -91,9 +98,9 @@ hremove_max(heap *H)
     printall(H);
     puts("/remove max");
 #endif
-    assert(max->index == 1); // this check enforces current implementation
+    assert(max->index == 1);   // this check enforces current implementation
     H->arr[max->index] = last; // <--|  are implementation agnostic
-    last->index = max->index; // <--/
+    last->index = max->index;  // <--/
 
     H->last--;
     free(max);
@@ -102,7 +109,7 @@ hremove_max(heap *H)
 }
 
 void *
-hremove(heap *H, hnode *node) 
+hremove(heap *H, hnode *node)
 {
     if (hempty(H)) fprintf(stderr, "Can't remove element, heap empty");
     hnode *last = H->arr[H->last];
@@ -121,16 +128,18 @@ hremove(heap *H, hnode *node)
 }
 
 hnode *
-hinsert(heap *H, void *attr, key key) 
+hinsert(heap *H, void *attr, key key)
 {
 #ifdef DEBUG
     printf("insert ----------- %d\n", H->last);
     printall(H);
 #endif
     H->last++;
-    if (H->last >= H->allocated) { // (+1 used to) convert from index (last) to length
-        // don't allow larger than 1GB, for the arr (doesn't count the nodes themselves
-        assert((H->last * ((long)sizeof(hnode *))) < 1024*1024*1024);
+    if (H->last
+        >= H->allocated) { // (+1 used to) convert from index (last) to length
+        // don't allow larger than 1GB, for the arr (doesn't count the nodes
+        // themselves
+        assert((H->last * ((long)sizeof(hnode *))) < 1024 * 1024 * 1024);
         H->allocated *= 2;
         H->arr = realloc(H->arr, sizeof(hnode) * (size_t)(H->allocated));
     }
@@ -155,4 +164,3 @@ hinsert(heap *H, void *attr, key key)
 #endif
     return new;
 }
-

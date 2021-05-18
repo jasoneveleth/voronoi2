@@ -4,7 +4,8 @@ if ! [ -x "`which clang-format`" ]; then
     exit
 fi
 
-find `pwd` -regex ".*\.[ch]$" | while read file; do
-    clang-format -i -style='.clang-format' "$file"
+find `pwd -P` -regex ".*\.[ch]$" | while read file; do
+    echo "$file"
+    clang-format -i -style=file "$file"
 done
 
