@@ -11,9 +11,10 @@ printall(heap *H)
     for (int i = 1; i < end; i++) {
         // printf("key: %.0f, val: %d, index: %d\n", (double)H->arr[i]->key,
         // *(int *)H->arr[i]->attr, H->arr[i]->index);
-        printf("key: %.0f, val: %d\n",
+        printf("key: %.0f, val: %d, index: %d\n",
                (double)H->arr[i]->key,
-               *(int *)H->arr[i]->attr);
+               *(int *)H->arr[i]->attr,
+               H->arr[i]->index);
     }
 }
 #endif
@@ -115,10 +116,11 @@ hremove(heap *H, hnode *node)
     hnode *last = H->arr[H->last];
     void *val = node->attr;
     H->arr[node->index] = last;
+    last->index = node->index;
     H->last--;
-    free(node);
     upheap(H, last);
     downheap(H, last);
+    free(node);
 #ifdef DEBUG
     printf("remove ----------- %d\n", *(int *)val);
     printall(H);
