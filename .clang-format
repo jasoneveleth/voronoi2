@@ -1,9 +1,9 @@
 Language:       Cpp
 BasedOnStyle: google
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: None
-AlignConsecutiveDeclarations: None
-AlignConsecutiveMacros: None
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
 AlignEscapedNewlines: Left
 AlignTrailingComments: true
 # AllowAllArgumentsOnNextLine
@@ -66,8 +66,8 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
-StatementAttributeLikeMacros:
-  - Q_EMIT
+# StatementAttributeLikeMacros:
+#   - Q_EMIT
 IncludeBlocks:   Preserve
 # IncludeCategories:
 #   - Regex:           '^<ext/.*\.h>'
@@ -117,7 +117,7 @@ PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
-PenaltyIndentedWhitespace: 0
+# PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 0
 PointerAlignment: Right
 RawStringFormats:
@@ -157,9 +157,9 @@ SortUsingDeclarations: false
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 # SpaceAfterTemplateKeyword: true
-SpaceAroundPointerQualifiers: Default
+# SpaceAroundPointerQualifiers: Default
 SpaceBeforeAssignmentOperators: true
-SpaceBeforeCaseColon: false
+# SpaceBeforeCaseColon: false
 # SpaceBeforeCpp11BracedList: false
 # SpaceBeforeCtorInitializerColon: true
 # SpaceBeforeInheritanceColon: true
