@@ -1,13 +1,14 @@
 FLAGS = -std=c99 -Werror -Weverything -Wno-poison-system-directories
 FLAGS += -Ofast
 # FLAGS += -g -O0
+C = heap.c bintree.h heap.h test.c bintree.c
 
 .PHONY: all clean test debug format
 
 all: format short_test
 
 format:
-	./format.sh
+	clang-format -i -style=file $C
 
 bintree.o: bintree.c bintree.h
 	clang $(FLAGS) -c bintree.c -DFLOAT
