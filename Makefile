@@ -11,7 +11,8 @@ format:
 	clang-format -i -style=file $C
 
 bintree.o: bintree.c bintree.h
-	clang $(FLAGS) -c bintree.c -DFLOAT
+	# floats are used as keys so need to compare floats
+	clang $(FLAGS) -Wno-float-equal -DFLOAT -c bintree.c
 
 heap.o: heap.c heap.h
 	clang $(FLAGS) -c heap.c -DFLOAT

@@ -14,6 +14,7 @@ typedef struct {
     int32_t index;
     key key;
     void *attr;
+    int64_t height;
 } bnode;
 
 typedef struct {
