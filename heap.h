@@ -15,11 +15,12 @@ typedef int32_t key;
 
 // Nodes store a void * which is the data that they hold, the key which is used
 // for up and down heaping and the index so each node knows where it is.
-typedef struct {
+typedef struct hnode hnode;
+struct hnode {
     key key;
     int32_t index;
     void *attr;
-} hnode;
+};
 
 // The 'last' field is the index of the last element. Because heaps are left
 // complete binary trees, we can use the inate structure of an array's indices
@@ -27,11 +28,12 @@ typedef struct {
 // the child, multiply the index by 2 and add 0 to go left, and add 1 to go
 // right. Draw out a complete binary tree using just numbers starting from 1 to
 // see how this works.
-typedef struct {
+typedef struct heap heap;
+struct heap {
     hnode **arr;
     int32_t last;
     int32_t allocated;
-} heap;
+};
 
 // Standard heap functions. They don't need explaination
 void free_heap(heap *);

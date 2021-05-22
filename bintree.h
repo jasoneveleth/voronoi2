@@ -1,5 +1,6 @@
 #ifndef BINTREE_H
 #define BINTREE_H
+
 #define INIT_SIZE 1024
 #include <stdint.h>
 #include <stdlib.h>
