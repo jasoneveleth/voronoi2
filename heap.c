@@ -136,14 +136,12 @@ hinsert(heap *H, void *attr, key key)
     printf("insert ----------- %d\n", H->last);
     printall(H);
 #endif
-    H->last++;
-    if (H->last
-        >= H->allocated) { // (+1 used to) convert from index (last) to length
-        // don't allow larger than 1GB, for the arr (doesn't count the nodes
-        // themselves
+    H->last++;                     // is an index
+    if (H->last >= H->allocated) { // allocated is a length
+        // no larger than 1GB for the arr (doesn't count the nodes memory)
         assert((H->last * ((long)sizeof(hnode *))) < 1024 * 1024 * 1024);
         H->allocated *= 2;
-        H->arr = realloc(H->arr, sizeof(hnode) * (size_t)(H->allocated));
+        H->arr = realloc(H->arr, sizeof(hnode *) * (size_t)(H->allocated));
     }
 
     hnode *new = malloc(sizeof(hnode));
