@@ -24,6 +24,9 @@ short_test: test.c heap.o bintree.o
 test: format short_test
 	./short_test
 
+voronoi: format heap.o bintree.o
+	clang $(FLAGS) heap.o bintree.o voronoi.c -o voronoi
+
 # debug
 
 heapdebug.o: heap.c heap.h
