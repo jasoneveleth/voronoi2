@@ -51,7 +51,7 @@ load(const char *path, key *keys, int32_t *vals, int num_inputs)
 static int
 new_heap_empty(void)
 {
-    heap *H = init_heap();
+    struct heap *H = init_heap();
     printf("testing new heap is empty: ");
     return hempty(H);
 }
@@ -59,7 +59,7 @@ new_heap_empty(void)
 static int
 simple_heap_inserts(void)
 {
-    heap *H = init_heap();
+    struct heap *H = init_heap();
     printf("testing 6 simple elements: ");
 
     int a = 10;
@@ -90,7 +90,7 @@ simple_heap_inserts(void)
 static int
 simple_heap_inserts_file(void)
 {
-    heap *H = init_heap();
+    struct heap *H = init_heap();
     printf("testing simple elements in file: "); // CHANGED
     key keys[6];
     int vals[6];
@@ -117,7 +117,7 @@ simple_heap_inserts_file(void)
 static int
 twofiveseven_heap_inserts(void)
 {
-    heap *H = init_heap();
+    struct heap *H = init_heap();
     printf("testing 257 elements: ");
     key keys[257];
     int vals[257];
@@ -144,7 +144,7 @@ twofiveseven_heap_inserts(void)
 static int
 large_heap_inserts_with_dups(void)
 {
-    heap *H = init_heap();
+    struct heap *H = init_heap();
     printf("testing 1047 elements: ");
     key keys[1047];
     int vals[1047];
@@ -174,14 +174,14 @@ large_heap_inserts_with_dups(void)
 static int
 simple_removes(void)
 {
-    heap *H = init_heap();
+    struct heap *H = init_heap();
     printf("testing simple removes ");
 
     int goodsofar = 1;
     int a = 10;
-    hnode *a_node = hinsert(H, &a, 41);
+    struct hnode *a_node = hinsert(H, &a, 41);
     int b = 29;
-    hnode *b_node = hinsert(H, &b, 23);
+    struct hnode *b_node = hinsert(H, &b, 23);
     int c = 21;
     // hnode *c_node = hinsert(H, &c, 43);
     hinsert(H, &c, 43);

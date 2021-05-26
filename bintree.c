@@ -14,7 +14,7 @@ print_tree(bintree *tree)
             if (bisinternal(tree, tree->arr[i])) {
                 printf("(node) index: %d, x: %f, bp\n",
                        tree->arr[i]->index,
-                       (double)((bp *)tree->arr[i]->attr)->sites[0].x);
+                       (double)(tree->arr[i]->bp->sites[0].x);
             } else {
                 printf("(node) index: %d, x: %f, arc\n",
                        tree->arr[i]->index,
@@ -38,40 +38,40 @@ realloc_zero(void *old, size_t oldsize, size_t newsize)
 }
 
 static void
-double_tree_size(bintree *tree)
+double_tree_size(struct bintree *tree)
 {
-    size_t old_size = sizeof(bnode *) * tree->allocated;
-    size_t new_size = sizeof(bnode *) * tree->allocated * 2;
+    size_t old_size = sizeof(struct bnode *) * tree->allocated;
+    size_t new_size = sizeof(struct bnode *) * tree->allocated * 2;
     tree->allocated *= 2;
     tree->arr = realloc_zero(tree->arr, old_size, new_size);
 }
 
 int
-bisinternal(bintree *tree, bnode *node)
+bisinternal(struct bintree *tree, struct bnode *node)
 {
     return node != NULL
            && (tree->arr[node->index * 2] != NULL
                || tree->arr[node->index * 2 + 1] != NULL);
 }
 
-bintree *
+struct bintree *
 init_tree(void)
 {
-    bintree *tree = malloc(sizeof(bintree));
-    tree->arr = calloc(INIT_SIZE, sizeof(bnode *));
+    struct bintree *tree = malloc(sizeof(struct bintree));
+    tree->arr = calloc(INIT_SIZE, sizeof(struct bnode *));
     tree->allocated = INIT_SIZE;
     tree->size = 0;
     return tree;
 }
 
-bnode *
-binsert(bintree *tree, void *val, int32_t index)
+struct bnode *
+binsert(struct bintree *tree, void *val, int32_t index)
 {
 #ifdef DEBUG
     printf("binsert(index: %d)\n", index);
 #endif
-    bnode *node = malloc(sizeof(bnode));
-    node->attr = val;
+    struct bnode *node = malloc(sizeof(struct bnode));
+    node->bp = val; // can be either ->bp or ->arc
     node->index = index;
     if ((size_t)index * 2 + 1 > tree->allocated) double_tree_size(tree);
     tree->arr[index] = node;
@@ -80,13 +80,13 @@ binsert(bintree *tree, void *val, int32_t index)
 }
 
 void *
-bremove(bintree *tree, bnode *node)
+bremove(struct bintree *tree, struct bnode *node)
 {
 #ifdef DEBUG
     printf("bremove(index: %d)\n", node->index);
 #endif
     // we assume node is a leaf
-    void *attr = node->attr;
+    void *attr = node->arc; // can be either -> arc or ->bp
     tree->arr[node->index] = NULL;
     tree->size--;
     free(node);
@@ -145,13 +145,13 @@ intersect_parabolas(float sweepline, point parabolas[2])
         return right;
 }
 
-bnode *
-bfindarc(bintree *tree, point site)
+struct bnode *
+bfindarc(struct bintree *tree, point site)
 {
-    bnode *node = tree->arr[1];
+    struct bnode *node = tree->arr[1];
     float sweepline = site.y;
     while (bisinternal(tree, node)) {
-        bp *breakpoint = node->attr;
+        struct bp *breakpoint = node->bp;
         point intersection = intersect_parabolas(sweepline, breakpoint->sites);
         if (site.x > intersection.x) {
             node = tree->arr[node->index * 2 + 1];
@@ -163,16 +163,16 @@ bfindarc(bintree *tree, point site)
 }
 
 int32_t
-bempty(bintree *tree)
+bempty(struct bintree *tree)
 {
     return tree->size == 0;
 }
 
-bnode *
-bpredecessor(bintree *tree, bnode *node)
+struct bnode *
+bpredecessor(struct bintree *tree, struct bnode *node)
 {
     if (tree->arr[node->index * 2] == NULL) {
-        bnode *child = node;
+        struct bnode *child = node;
         node = tree->arr[node->index / 2];
         while (node != NULL) {
             if (tree->arr[node->index * 2 + 1] == child) return node;
@@ -188,8 +188,8 @@ bpredecessor(bintree *tree, bnode *node)
     }
 }
 
-bnode *
-bgetmin(bintree *tree, bnode *node)
+struct bnode *
+bgetmin(struct bintree *tree, struct bnode *node)
 {
     while (tree->arr[node->index * 2] != NULL) {
         node = tree->arr[node->index * 2];
@@ -197,8 +197,8 @@ bgetmin(bintree *tree, bnode *node)
     return node;
 }
 
-bnode *
-bgetmax(bintree *tree, bnode *node)
+struct bnode *
+bgetmax(struct bintree *tree, struct bnode *node)
 {
     while (tree->arr[node->index * 2 + 1] != NULL) {
         node = tree->arr[node->index * 2 + 1];
@@ -206,15 +206,15 @@ bgetmax(bintree *tree, bnode *node)
     return node;
 }
 
-bnode *
-bsuccessor(bintree *tree, bnode *node)
+struct bnode *
+bsuccessor(struct bintree *tree, struct bnode *node)
 {
 #ifdef DEBUG
     printf("bsuccessor:\n");
     print_tree(tree);
 #endif
     if (tree->arr[node->index * 2 + 1] == NULL) {
-        bnode *child = node;
+        struct bnode *child = node;
         node = tree->arr[node->index / 2];
         while (tree->arr[node->index / 2] != NULL) {
             if (tree->arr[node->index * 2] == child) return node;
@@ -231,8 +231,8 @@ bsuccessor(bintree *tree, bnode *node)
     }
 }
 
-static bnode *
-blowestleaf(bintree *tree, bnode *node)
+static struct bnode *
+blowestleaf(struct bintree *tree, struct bnode *node)
 {
     while (1) {
         if (tree->arr[node->index * 2] != NULL) {
@@ -245,8 +245,8 @@ blowestleaf(bintree *tree, bnode *node)
     }
 }
 
-static bnode *
-bhighestleaf(bintree *tree, bnode *node)
+static struct bnode *
+bhighestleaf(struct bintree *tree, struct bnode *node)
 {
     while (1) {
         if (tree->arr[node->index * 2 + 1] != NULL) {
@@ -259,20 +259,20 @@ bhighestleaf(bintree *tree, bnode *node)
     }
 }
 
-bnode *
-bnextleaf(bintree *tree, bnode *node)
+struct bnode *
+bnextleaf(struct bintree *tree, struct bnode *node)
 {
-    bnode *successor;
+    struct bnode *successor;
     if ((successor = bsuccessor(tree, node)) != NULL) {
         return blowestleaf(tree, tree->arr[successor->index * 2 + 1]);
     }
     return NULL;
 }
 
-bnode *
-bprevleaf(bintree *tree, bnode *node)
+struct bnode *
+bprevleaf(struct bintree *tree, struct bnode *node)
 {
-    bnode *predecessor;
+    struct bnode *predecessor;
     if ((predecessor = bpredecessor(tree, node)) != NULL) {
         return bhighestleaf(tree, tree->arr[predecessor->index * 2]);
     }

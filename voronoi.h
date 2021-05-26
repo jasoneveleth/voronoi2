@@ -6,39 +6,34 @@
 
 // These two structs depend on each other, so I have to declare them both before
 // I can define them
-typedef struct halfedge halfedge;
-typedef struct face face;
 
 struct halfedge {
     point origin;
-    halfedge *twin;
-    halfedge *next;
-    halfedge *prev;
-    face *face;
+    struct halfedge *twin;
+    struct halfedge *next;
+    struct halfedge *prev;
+    struct face *face;
 };
 
 struct face {
-    halfedge *outercompnent;
+    struct halfedge *outercompnent;
     point site;
 };
 
-typedef struct edgelist edgelist;
 struct edgelist {
-    face *face;
-    halfedge *edges[2];
+    struct face *face;
+    struct halfedge *edges[2];
     char padding[4];
     int32_t nedges;
 };
 
-typedef struct bp bp;
 struct bp {
     point sites[2];
-    halfedge *edge;
+    struct halfedge *edge;
 };
 
-typedef struct arc arc;
 struct arc {
-    hnode *circle_event;
+    struct hnode *circle_event;
     point site;
 };
 
@@ -53,10 +48,10 @@ union event {
         char kind;
         char padding[7];
         point lowest_point;
-        arc *arc;
+        struct arc *arc;
     } circle_event;
 };
 
-void fortunes(point *, int32_t, edgelist *);
+void fortunes(point *, int32_t, struct edgelist *);
 
 #endif

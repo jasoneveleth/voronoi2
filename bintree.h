@@ -17,32 +17,37 @@ struct point {
     float y;
 };
 
-typedef struct {
+struct bp;
+struct arc;
+struct bnode {
     int32_t index;
     char padding[4];
-    void *attr;
-} bnode;
+    union {
+        struct bp *bp;
+        struct arc *arc;
+    };
+};
 
-typedef struct {
-    bnode **arr;
+struct bintree {
+    struct bnode **arr;
     size_t allocated; // # of pointers
     int32_t size;
     char padding[4];
-} bintree;
+};
 
-bintree *init_tree(void);
-bnode *binsert(bintree *, void *, int32_t);
-void *bremove(bintree *, bnode *);
-bnode *bfindarc(bintree *, point);
-int32_t bempty(bintree *);
-bnode *bpredecessor(bintree *, bnode *);
-bnode *bsuccessor(bintree *, bnode *);
+struct bintree *init_tree(void);
+struct bnode *binsert(struct bintree *, void *, int32_t);
+void *bremove(struct bintree *, struct bnode *);
+struct bnode *bfindarc(struct bintree *, point);
+int32_t bempty(struct bintree *);
+struct bnode *bpredecessor(struct bintree *, struct bnode *);
+struct bnode *bsuccessor(struct bintree *, struct bnode *);
 
-bnode *bnextleaf(bintree *, bnode *);
-bnode *bprevleaf(bintree *, bnode *);
-bnode *bgetmin(bintree *, bnode *);
-bnode *bgetmax(bintree *, bnode *);
-int bisinternal(bintree *, bnode *);
+struct bnode *bnextleaf(struct bintree *, struct bnode *);
+struct bnode *bprevleaf(struct bintree *, struct bnode *);
+struct bnode *bgetmin(struct bintree *, struct bnode *);
+struct bnode *bgetmax(struct bintree *, struct bnode *);
+int bisinternal(struct bintree *, struct bnode *);
 // bnode *findMin(void);
 // bnode *findMax(void);
 point intersect_parabolas(float, point *);

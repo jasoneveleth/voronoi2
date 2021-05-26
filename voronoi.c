@@ -24,7 +24,7 @@ print_edge(halfedge *e)
 #endif
 
 static void
-fill_queue(heap *heap, point *sites, int32_t nsites)
+fill_queue(struct heap *heap, point *sites, int32_t nsites)
 {
     for (int i = 0; i < nsites; i++) {
         event *e = malloc(sizeof(event));
@@ -34,20 +34,20 @@ fill_queue(heap *heap, point *sites, int32_t nsites)
     }
 }
 
-static bp *
-new_bp(halfedge *edge, point lparabola, point rparabola)
+static struct bp *
+new_bp(struct halfedge *edge, point lparabola, point rparabola)
 {
-    bp *breakpoint = malloc(sizeof(bp));
+    struct bp *breakpoint = malloc(sizeof(struct bp));
     breakpoint->edge = edge;
     breakpoint->sites[0] = lparabola;
     breakpoint->sites[1] = rparabola;
     return breakpoint;
 }
 
-static arc *
-new_arc(point site, hnode *event)
+static struct arc *
+new_arc(point site, struct hnode *event)
 {
-    arc *arc = malloc(sizeof(struct arc));
+    struct arc *arc = malloc(sizeof(struct arc));
     arc->circle_event = event;
     arc->site = site;
     return arc;
@@ -55,7 +55,7 @@ new_arc(point site, hnode *event)
 
 // TODO wrogn
 static int
-converge(bp *b1, bp *b2)
+converge(struct bp *b1, struct bp *b2)
 {
     return (int)(b1 - b2) * (int)0;
 }
@@ -87,31 +87,33 @@ circleBottom(point a, point b, point c)
 }
 
 static void
-check_new_circle(
-    bintree *tree, heap *heap, bnode *lnode, bnode *mnode, bnode *rnode)
+check_new_circle(struct bintree *tree,
+                 struct heap *heap,
+                 struct bnode *lnode,
+                 struct bnode *mnode,
+                 struct bnode *rnode)
 {
     if (lnode == NULL || rnode == NULL) return;
-    bnode *pre = bpredecessor(tree, mnode);
-    bp *b1 = pre->attr; // TODO TODO predecesoor
-    bp *b2 = bsuccessor(tree, mnode)->attr;
+    struct bp *b1 = bpredecessor(tree, mnode)->bp;
+    struct bp *b2 = bsuccessor(tree, mnode)->bp;
     if (converge(b1, b2)) {
-        point p = circleBottom(((arc *)lnode->attr)->site,
-                               ((arc *)mnode->attr)->site,
-                               ((arc *)rnode->attr)->site);
+        point p =
+            circleBottom(lnode->arc->site, mnode->arc->site, rnode->arc->site);
         event *e = malloc(sizeof(event));
         e->circle_event.kind = 'c';
         e->circle_event.lowest_point = p;
-        e->circle_event.arc = mnode->attr;
-        hnode *event_hnode = hinsert(heap, e, e->circle_event.lowest_point.y);
-        ((arc *)mnode->attr)->circle_event = event_hnode;
+        e->circle_event.arc = mnode->arc;
+        struct hnode *event_hnode =
+            hinsert(heap, e, e->circle_event.lowest_point.y);
+        mnode->arc->circle_event = event_hnode;
     }
 }
 
 static void
-new_edge(edgelist *edgelist, halfedge **h1, halfedge **h2)
+new_edge(struct edgelist *edgelist, struct halfedge **h1, struct halfedge **h2)
 {
-    halfedge *e1 = malloc(sizeof(halfedge));
-    halfedge *e2 = malloc(sizeof(halfedge));
+    struct halfedge *e1 = malloc(sizeof(struct halfedge));
+    struct halfedge *e2 = malloc(sizeof(struct halfedge));
     e1->twin = e2;
     e2->twin = e1;
     edgelist->edges[edgelist->nedges] = e1;
@@ -123,21 +125,24 @@ new_edge(edgelist *edgelist, halfedge **h1, halfedge **h2)
 }
 
 static void
-handle_site_event(event *event, bintree *tree, heap *heap, edgelist *edgelist)
+handle_site_event(event *event,
+                  struct bintree *tree,
+                  struct heap *heap,
+                  struct edgelist *edgelist)
 {
     point new_site = event->site_event.site;
     free(event);
 
     if (bempty(tree)) {
-        arc *arc = malloc(sizeof(struct arc));
+        struct arc *arc = malloc(sizeof(struct arc));
         arc->circle_event = NULL;
         arc->site = new_site;
         binsert(tree, arc, 1);
         return;
     }
 
-    bnode *old_node = bfindarc(tree, event->site_event.site);
-    arc *old_arc = (arc *)old_node->attr;
+    struct bnode *old_node = bfindarc(tree, event->site_event.site);
+    struct arc *old_arc = old_node->arc;
     bremove(tree, old_node);
     int32_t old_index = old_node->index;
     point old_site = old_arc->site;
@@ -149,22 +154,22 @@ handle_site_event(event *event, bintree *tree, heap *heap, edgelist *edgelist)
     free(old_arc);
 
     // make edges
-    halfedge *edge, *edgetwin;
+    struct halfedge *edge, *edgetwin;
     new_edge(edgelist, &edge, &edgetwin);
 
     // add subtree (ordered here by inorder traversal)
-    arc *larc = new_arc(old_site, NULL);
-    bnode *larc_node = binsert(tree, larc, old_index * 2);
-    bp *lbreakpoint = new_bp(edge, old_site, new_site);
+    struct arc *larc = new_arc(old_site, NULL);
+    struct bnode *larc_node = binsert(tree, larc, old_index * 2);
+    struct bp *lbreakpoint = new_bp(edge, old_site, new_site);
     // bnode *lbp_node = binsert(tree, lbreakpoint, old_index);
     binsert(tree, lbreakpoint, old_index);
-    arc *marc = new_arc(new_site, NULL);
-    bnode *marc_node = binsert(tree, marc, (old_index * 2 + 1) * 2);
-    bp *rbreakpoint = new_bp(edgetwin, new_site, old_site);
+    struct arc *marc = new_arc(new_site, NULL);
+    struct bnode *marc_node = binsert(tree, marc, (old_index * 2 + 1) * 2);
+    struct bp *rbreakpoint = new_bp(edgetwin, new_site, old_site);
     // bnode *rbp_node = binsert(tree, rbreakpoint, old_index*2 + 1);
     binsert(tree, rbreakpoint, old_index * 2 + 1);
-    arc *rarc = new_arc(old_site, NULL);
-    bnode *rarc_node = binsert(tree, rarc, (old_index * 2 + 1) * 2 + 1);
+    struct arc *rarc = new_arc(old_site, NULL);
+    struct bnode *rarc_node = binsert(tree, rarc, (old_index * 2 + 1) * 2 + 1);
 
     check_new_circle(
         tree, heap, bprevleaf(tree, larc_node), larc_node, marc_node);
@@ -173,7 +178,10 @@ handle_site_event(event *event, bintree *tree, heap *heap, edgelist *edgelist)
 }
 
 static void
-handle_circle_event(event *event, bintree *tree, heap *heap, edgelist *edgelist)
+handle_circle_event(event *event,
+                    struct bintree *tree,
+                    struct heap *heap,
+                    struct edgelist *edgelist)
 {
     return;
 }
@@ -206,18 +214,17 @@ intersect_lines(point *dest,
 }
 
 static void
-compute_bounding_box(bintree *tree, edgelist *edgelist)
+compute_bounding_box(struct bintree *tree, struct edgelist *edgelist)
 {
     float l = (float)-1.4143; // hard coded -sqrt(2), (diagonal of bounding box)
-    bnode *node = bgetmin(tree, tree->arr[1]);
+    struct bnode *node = bgetmin(tree, tree->arr[1]);
     while ((node = bsuccessor(tree, node)) != NULL) {
         if (!bisinternal(tree, node)) continue;
-        bp *breakpoint = (bp *)node->attr;
-        point intersection = intersect_parabolas(l, breakpoint->sites);
-        breakpoint->edge->twin->origin = intersection;
+        point intersection = intersect_parabolas(l, node->bp->sites);
+        node->bp->edge->twin->origin = intersection;
     }
     for (int i = 0; i < edgelist->nedges; i++) {
-        halfedge *edge = edgelist->edges[i];
+        struct halfedge *edge = edgelist->edges[i];
         // this is just copy pasta except for the 4 numbers in the middle
         if (edge->origin.x < 0) {
             intersect_lines(&edge->origin,
@@ -267,10 +274,10 @@ compute_bounding_box(bintree *tree, edgelist *edgelist)
 }
 
 void
-fortunes(point *sites, int32_t nsites, edgelist *edgelist)
+fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
 {
-    heap *heap = init_heap();
-    bintree *tree = init_tree();
+    struct heap *heap = init_heap();
+    struct bintree *tree = init_tree();
 
     fill_queue(heap, sites, nsites);
     while (!hempty(heap)) {
@@ -290,7 +297,7 @@ main()
     point first = {(float)0.23, (float)0.53};
     point second = {(float)0.74, (float)0.923};
     point sites[2] = {first, second};
-    edgelist e;
+    struct edgelist e;
     e.nedges = 0;
     fortunes(sites, 2, &e);
     printf("(%f, %f), (%f, %f)\n",
