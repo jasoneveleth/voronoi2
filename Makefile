@@ -1,8 +1,10 @@
-FLAGS = -std=c99 -Werror -Weverything -Wno-poison-system-directories
-FLAGS += -Ofast
-# FLAGS += -g -O0 -Wno-unused-parameter -Wno-unused-variable
+FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
+# FLAGS += -Ofast
+FLAGS += -g -O0 -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
+# makes the debug verbose
+# FLAGS += -DDEBUG
 FLAGS += -DFLOAT
-C = heap.c bintree.h heap.h test.c bintree.c
+C = bintree.c bintree.h heap.c heap.h test.c voronoi.c voronoi.h
 
 .PHONY: all clean test debug format
 
@@ -25,26 +27,6 @@ test: format short_test
 
 voronoi: format heap.o bintree.o
 	clang $(FLAGS) heap.o bintree.o voronoi.c -o voronoi
-
-# debug
-
-debug_heap.o: heap.c heap.h
-	clang $(FLAGS) -DDEBUG -c heap.c -o debug_heap.o
-
-debug_bintree.o: bintree.c bintree.h
-	clang $(FLAGS) -DDEBUG -c bintree.c -o debug_bintree.o
-
-debug_test: test.c debug_heap.o
-	clang  $(FLAGS) -DDEBUG debug_heap.o test.c -o debug_test
-
-debug_voronoi: voronoi.c debug_heap.o debug_bintree.o
-	clang $(FLAGS) -DDEBUG debug_heap.o debug_bintree.o voronoi.c -o debug_voronoi
-
-debug: format debug_test debug_voronoi
-	./debug_test > /dev/null
-	./debug_voronoi
-
-# end of debug
 
 clean:
 	rm -rf *.dSYM *.o *.s

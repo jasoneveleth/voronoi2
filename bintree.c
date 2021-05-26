@@ -93,7 +93,7 @@ bremove(bintree *tree, bnode *node)
     return attr;
 }
 
-static float
+float
 fsqrt(float x)
 {
     return (float)sqrt((double)x);
@@ -171,7 +171,21 @@ bempty(bintree *tree)
 bnode *
 bpredecessor(bintree *tree, bnode *node)
 {
-    return tree->arr[node->index];
+    if (tree->arr[node->index * 2] == NULL) {
+        bnode *child = node;
+        node = tree->arr[node->index / 2];
+        while (node != NULL) {
+            if (tree->arr[node->index * 2 + 1] == child) return node;
+            child = node;
+            node = tree->arr[node->index / 2];
+        }
+        // this handles if we got to the root as the min
+        if (node == tree->arr[1])
+            if (tree->arr[node->index * 2 + 1] != child) return NULL;
+        return node;
+    } else {
+        return bgetmax(tree, tree->arr[node->index * 2]);
+    }
 }
 
 bnode *
@@ -217,13 +231,50 @@ bsuccessor(bintree *tree, bnode *node)
     }
 }
 
+static bnode *
+blowestleaf(bintree *tree, bnode *node)
+{
+    while (1) {
+        if (tree->arr[node->index * 2] != NULL) {
+            node = tree->arr[node->index * 2];
+        } else if (tree->arr[node->index * 2 + 1] != NULL) {
+            node = tree->arr[node->index * 2 + 1];
+        } else {
+            return node;
+        }
+    }
+}
+
+static bnode *
+bhighestleaf(bintree *tree, bnode *node)
+{
+    while (1) {
+        if (tree->arr[node->index * 2 + 1] != NULL) {
+            node = tree->arr[node->index * 2 + 1];
+        } else if (tree->arr[node->index * 2] != NULL) {
+            node = tree->arr[node->index * 2];
+        } else {
+            return node;
+        }
+    }
+}
+
 bnode *
 bnextleaf(bintree *tree, bnode *node)
 {
-    return tree->arr[node->index];
+    bnode *successor;
+    if ((successor = bsuccessor(tree, node)) != NULL) {
+        return blowestleaf(tree, tree->arr[successor->index * 2 + 1]);
+    }
+    return NULL;
 }
+
 bnode *
 bprevleaf(bintree *tree, bnode *node)
 {
-    return tree->arr[node->index];
+    bnode *predecessor;
+    if ((predecessor = bpredecessor(tree, node)) != NULL) {
+        return bhighestleaf(tree, tree->arr[predecessor->index * 2]);
+    }
+    return NULL;
 }

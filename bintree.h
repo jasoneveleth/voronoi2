@@ -46,5 +46,6 @@ int bisinternal(bintree *, bnode *);
 // bnode *findMin(void);
 // bnode *findMax(void);
 point intersect_parabolas(float, point *);
+float fsqrt(float);
 
 #endif
