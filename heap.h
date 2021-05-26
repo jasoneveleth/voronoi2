@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #define INIT_SIZE 1024
 
-// This is a general purpose heap, so it works with floats and integers as 
-// keys. In this case we are using floats, so I passed that as an argument 
+// This is a general purpose heap, so it works with floats and integers as
+// keys. In this case we are using floats, so I passed that as an argument
 // in the Makefile. Here we define the 'key' type to whichever we are using.
 #ifdef FLOAT
 typedef float key;

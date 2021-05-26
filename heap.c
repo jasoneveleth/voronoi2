@@ -11,7 +11,7 @@ printall(heap *H)
     for (int i = 1; i < end; i++) {
         // printf("key: %.0f, val: %d, index: %d\n", (double)H->arr[i]->key,
         // *(int *)H->arr[i]->attr, H->arr[i]->index);
-        printf("key: %.0f, val: %d, index: %d\n",
+        printf("key: %f, val: %d, index: %d\n",
                (double)H->arr[i]->key,
                *(int *)H->arr[i]->attr,
                H->arr[i]->index);
@@ -95,7 +95,7 @@ hremove_max(heap *H)
     void *val = max->attr;
 #ifdef DEBUG
     puts("remove max ----");
-    printf("(removing) key: %.0f, val: %d\n", (double)max->key, *(int *)val);
+    printf("(removing) key: %f, val: %d\n", (double)max->key, *(int *)val);
     printall(H);
     puts("/remove max");
 #endif

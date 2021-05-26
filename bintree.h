@@ -6,35 +6,45 @@
 #include <stdlib.h>
 
 #ifdef FLOAT
-typedef float key;
+typedef float bkey;
 #else
-typedef int32_t key;
+typedef int32_t bkey;
 #endif
+
+typedef struct point point;
+struct point {
+    float x;
+    float y;
+};
 
 typedef struct {
     int32_t index;
-    key key;
+    char padding[4];
     void *attr;
-    int64_t height;
 } bnode;
 
 typedef struct {
     bnode **arr;
+    size_t allocated; // # of pointers
     int32_t size;
-    int32_t allocated;
+    char padding[4];
 } bintree;
 
 bintree *init_tree(void);
-bnode *binsert(bintree *, void *, key);
+bnode *binsert(bintree *, void *, int32_t);
 void *bremove(bintree *, bnode *);
-bnode *bfind(bintree *, key);
+bnode *bfindarc(bintree *, point);
 int32_t bempty(bintree *);
 bnode *bpredecessor(bintree *, bnode *);
 bnode *bsuccessor(bintree *, bnode *);
 
-// bnode *nextleaf(bnode *);
-// bnode *prevleaf(bnode *);
+bnode *bnextleaf(bintree *, bnode *);
+bnode *bprevleaf(bintree *, bnode *);
+bnode *bgetmin(bintree *, bnode *);
+bnode *bgetmax(bintree *, bnode *);
+int bisinternal(bintree *, bnode *);
 // bnode *findMin(void);
 // bnode *findMax(void);
+point intersect_parabolas(float, point *);
 
 #endif
