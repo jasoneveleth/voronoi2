@@ -392,5 +392,6 @@ main(int argc, char **argv)
         fortunes(sites, nsites, &e);
     }
     print_edgelist(&e);
+    free(e.edges);
     return 0;
 }
