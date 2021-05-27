@@ -68,13 +68,19 @@ quadraticFormula(float a, float b, float c, float *smaller, float *larger)
 {
     float x1 = (-b - fsqrt(b * b - 4 * a * c)) / (2 * a);
     float x2 = (-b + fsqrt(b * b - 4 * a * c)) / (2 * a);
-    *smaller = x1 > x2 ? x1 : x2;
-    *larger = x1 > x2 ? x2 : x1;
+    *smaller = x1 > x2 ? x2 : x1;
+    *larger = x1 > x2 ? x1 : x2;
 }
 
 point
 intersect_parabolas(float sweepline, point parabolas[2])
 {
+    printf("intersecting: (%f, %f), (%f, %f) at %f\n",
+           (double)parabolas[0].x,
+           (double)parabolas[0].y,
+           (double)parabolas[1].x,
+           (double)parabolas[1].y,
+           (double)sweepline);
     point p1 = parabolas[0]; // parabola on the left of bp
     point p2 = parabolas[1]; // parabola on the right of bp
     float l = sweepline;
@@ -103,10 +109,13 @@ intersect_parabolas(float sweepline, point parabolas[2])
     point right = {x2, y2};
 
     int parabola_order_is_old_then_new = p1.y > p2.y;
-    if (parabola_order_is_old_then_new)
+    if (parabola_order_is_old_then_new) {
+        printf("got: (%f, %f)\n", (double)left.x, (double)left.y);
         return left;
-    else
+    } else {
+        printf("got: (%f, %f)\n", (double)right.x, (double)right.y);
         return right;
+    }
 }
 
 struct bnode *
@@ -129,7 +138,7 @@ bfindarc(struct bnode *root, point site)
 struct bnode *
 bpredecessor(struct bnode *node)
 {
-    printf("pred for: %p\n", (void *)node);
+    // printf("pred for: %p\n", (void *)node);
     if (node->left == NULL) {
         struct bnode *child = node;
         node = node->parent;
@@ -159,23 +168,10 @@ bgetmax(struct bnode *node)
     return node;
 }
 
-static void
-print_tree(struct bnode *root)
-{
-    if (root == NULL) return;
-    printf("node: %lx, parent: %lx, left: %lx, right: %lx\n",
-           (long)root / 16 % (16 * 16 * 16),
-           (long)root->parent / 16 % (16 * 16 * 16),
-           (long)root->left / 16 % (16 * 16 * 16),
-           (long)root->right / 16 % (16 * 16 * 16));
-    print_tree(root->left);
-    print_tree(root->right);
-}
-
 struct bnode *
 bsuccessor(struct bnode *node)
 {
-    printf("succ for: %p\n", (void *)node);
+    // printf("succ for: %p\n", (void *)node);
     if (node->right == NULL) {
         struct bnode *child = node;
         node = node->parent;

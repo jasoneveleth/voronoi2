@@ -3,9 +3,8 @@
 #include "heap.h"
 #include <stdio.h>
 
-#ifdef DEBUG
 static void
-print_edgelist(edgelist *edgelist)
+print_edgelist(struct edgelist *edgelist)
 {
     for (int i = 0; i < edgelist->nedges; i++) {
         printf("edge: address: %p, origin: (%f, %f), twin: %p\n",
@@ -16,6 +15,7 @@ print_edgelist(edgelist *edgelist)
     }
 }
 
+#ifdef DEBUG
 static void
 print_edge(halfedge *e)
 {
@@ -150,6 +150,12 @@ new_edge(struct edgelist *edgelist, struct halfedge **h1, struct halfedge **h2)
     struct halfedge *e2 = malloc(sizeof(struct halfedge));
     e1->twin = e2;
     e2->twin = e1;
+
+    e1->origin.x = 69;
+    e1->origin.y = 69;
+    e2->origin.x = 69;
+    e2->origin.y = 69;
+
     if (edgelist->nedges >= edgelist->allocated) {
         edgelist->allocated *= 2;
         edgelist->edges =
@@ -181,6 +187,7 @@ handle_site_event(struct event *event,
                   struct edgelist *edgelist)
 {
     point new_site = event->site;
+    printf("%f, %f\n", (double)new_site.x, (double)new_site.y);
     free(event);
 
     if (root->arc == NULL) {
@@ -206,13 +213,7 @@ handle_site_event(struct event *event,
     struct bnode *marc = baddleft(bp, new_arc(new_site, NULL));
     struct bnode *rarc = baddright(bp, new_arc(old_site, NULL));
 
-    puts("\n");
-    print_tree(root);
-    puts("\n");
     check_new_circle(heap, bprevleaf(larc), larc, marc);
-    puts("\n");
-    print_tree(root);
-    puts("\n");
     check_new_circle(heap, marc, rarc, bnextleaf(rarc));
 }
 
@@ -226,11 +227,6 @@ handle_circle_event(struct event *event,
     struct bnode *parent = leaf->parent;
     struct bnode *nextleaf = bnextleaf(leaf);
     struct bnode *prevleaf = bprevleaf(leaf);
-    // printf("leaf: %lx, parent: %lx, next: %lx, prev: %lx\n",
-    //        (long)leaf / 16 % (16 * 16 * 16),
-    //        (long)parent / 16 % (16 * 16 * 16),
-    //        (long)nextleaf / 16 % (16 * 16 * 16),
-    //        (long)prevleaf / 16 % (16 * 16 * 16));
     point center = circle_center(
         prevleaf->arc->site, leaf->arc->site, nextleaf->arc->site);
     int leaf_is_left_child = parent->left == leaf;
@@ -243,8 +239,8 @@ handle_circle_event(struct event *event,
     // fix remaining bp (the not-parent one) with the correct two sites
     other_bp->sites[leaf_is_left_child] = parent->bp->sites[leaf_is_left_child];
 
-    other_bp->edge->twin->origin = center;
-    parent->bp->edge->twin->origin = center;
+    other_bp->edge->origin = center;
+    parent->bp->edge->origin = center;
 
     // replace parent with 'other child' of parent (i.e. the one that's not
     // 'leaf')
@@ -258,10 +254,6 @@ handle_circle_event(struct event *event,
     remove_false_alarm(heap, nextleaf->arc);
     remove_false_alarm(heap, prevleaf->arc);
 
-    printf("parent->left: %lx, parent->right: %lx\n",
-           (long)parent->left / 16 % (16 * 16 * 16),
-           (long)parent->right / 16 % (16 * 16 * 16));
-
     struct halfedge *edge, *edgetwin;
     new_edge(edgelist, &edge, &edgetwin);
     edgetwin->origin = center;
@@ -273,15 +265,8 @@ handle_circle_event(struct event *event,
     // Set the pointers between them appropriately. Attach the three
     // new records to the half-edge records that end at the vertex.
 
-    puts("\n");
-    print_tree(root);
-    puts("\n");
     check_new_circle(heap, bprevleaf(prevleaf), prevleaf, nextleaf);
-    puts("\n");
-    print_tree(root);
-    puts("\n");
     check_new_circle(heap, prevleaf, nextleaf, bnextleaf(nextleaf));
-    puts("done");
 }
 
 static void
@@ -307,8 +292,11 @@ compute_bounding_box(struct bnode *root, struct edgelist *edgelist)
     while ((node = bsuccessor(node)) != NULL) { // finish edges
         if (!bisinternal(node)) continue;
         point intersection = intersect_parabolas(l, node->bp->sites);
-        node->bp->edge->twin->origin = intersection;
+        node->bp->edge->origin = intersection;
     }
+    puts("finshed edges");
+    print_edgelist(edgelist);
+    puts("cropping");
     for (int i = 0; i < edgelist->nedges; i++) { // bound edges
         struct halfedge *edge = edgelist->edges[i];
         if (edge->origin.x < 0) {
@@ -353,9 +341,11 @@ fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
         if (e->kind == 's') {
             handle_site_event(e, &root, heap, edgelist);
         } else {
-            puts("here");
-            printf("for: %p\n", (void *)e->leaf);
+            puts("pre circle event");
+            print_edgelist(edgelist);
             handle_circle_event(e, &root, heap, edgelist);
+            puts("post circle event");
+            print_edgelist(edgelist);
         }
     }
     compute_bounding_box(&root, edgelist);
