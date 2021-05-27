@@ -1,5 +1,4 @@
-short_test
-debug_test
+heap_test
 *.o
 *.dSYM/
 voronoi

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "heap.h"
+#include "../heap.h"
 
 // length of max line in a test file
 #define LINELEN 256
@@ -94,11 +94,11 @@ simple_heap_inserts_file(void)
     printf("testing simple elements in file: "); // CHANGED
     key keys[6];
     int vals[6];
-    load("heap_tests/simple_heap_inserts.input", keys, vals, 6); // CHANGED
+    load("tests/heap/simple_heap_inserts.input", keys, vals, 6); // CHANGED
     for (int i = 0; i < 6; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[6];
     int correct_vals[6];
-    load("heap_tests/simple_heap_inserts.output",
+    load("tests/heap/simple_heap_inserts.output",
          correct_keys,
          correct_vals,
          6); // CHANGED
@@ -121,11 +121,11 @@ twofiveseven_heap_inserts(void)
     printf("testing 257 elements: ");
     key keys[257];
     int vals[257];
-    load("heap_tests/twofiveseven_heap_inserts.input", keys, vals, 257);
+    load("tests/heap/twofiveseven_heap_inserts.input", keys, vals, 257);
     for (int i = 0; i < 257; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[257];
     int correct_vals[257];
-    load("heap_tests/twofiveseven_heap_inserts.output",
+    load("tests/heap/twofiveseven_heap_inserts.output",
          correct_keys,
          correct_vals,
          257);
@@ -148,11 +148,11 @@ large_heap_inserts_with_dups(void)
     printf("testing 1047 elements: ");
     key keys[1047];
     int vals[1047];
-    load("heap_tests/large_heap_inserts_with_dups.input", keys, vals, 1047);
+    load("tests/heap/large_heap_inserts_with_dups.input", keys, vals, 1047);
     for (int i = 0; i < 1047; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[1047];
     int correct_vals[1047];
-    load("heap_tests/large_heap_inserts_with_dups.output",
+    load("tests/heap/large_heap_inserts_with_dups.output",
          correct_keys,
          correct_vals,
          1047);

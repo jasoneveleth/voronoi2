@@ -17,6 +17,7 @@ print_edgelist(struct edgelist *edgelist)
                (double)edgelist->edges[i + 1]->origin.x,
                (double)edgelist->edges[i + 1]->origin.y);
     }
+    printf("\n");
 }
 
 #ifdef DEBUG
@@ -28,10 +29,9 @@ print_edge(halfedge *e)
 #endif
 
 static void
-free_edgelist(struct edgelist *e) {
-    for (int i = 0; i < e->nedges; i++) {
-        free(e->edges[i]);
-    }
+free_edgelist(struct edgelist *e)
+{
+    for (int i = 0; i < e->nedges; i++) { free(e->edges[i]); }
     free(e->edges);
 }
 

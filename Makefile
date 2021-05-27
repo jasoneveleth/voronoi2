@@ -12,11 +12,11 @@ ifeq ($(UNAME), Linux)
 MATH = -lm
 endif
 
-C = bintree.c bintree.h heap.c heap.h test.c voronoi.c voronoi.h
+C = bintree.c bintree.h heap.c heap.h voronoi.c voronoi.h tests/heap_test.c
 
-.PHONY: all clean test debug format
+.PHONY: all format clean test
 
-all: format short_test voronoi
+all: format voronoi
 
 format:
 	clang-format -i -style=file $C
@@ -27,15 +27,16 @@ bintree.o: bintree.c bintree.h
 heap.o: heap.c heap.h
 	clang $(FLAGS) -c heap.c
 
-short_test: test.c heap.o bintree.o
-	clang $(FLAGS) $(MATH) heap.o bintree.o test.c -o short_test
+tests/heap_test: tests/heap_test.c heap.o bintree.o
+	clang $(FLAGS) $(MATH) heap.o bintree.o tests/heap_test.c -o tests/heap_test
 
-test: format short_test
-	./short_test
+test: format tests/heap_test
+	./tests/heap_test
+	sh tests/main_test.sh
 
 voronoi: format heap.o bintree.o
 	clang $(FLAGS) $(MATH) heap.o bintree.o voronoi.c -o voronoi
 
 clean:
-	rm -rf *.dSYM *.o *.s
-	rm -f heap short_test debug_test voronoi debug_voronoi
+	rm -rf *.dSYM *.o *.s tests/*.dSYM
+	rm -f tests/heap_test voronoi
