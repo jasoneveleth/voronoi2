@@ -30,7 +30,7 @@ heap.o: heap.c heap.h
 tests/heap_test: tests/heap_test.c heap.o bintree.o
 	clang $(FLAGS) $(MATH) heap.o bintree.o tests/heap_test.c -o tests/heap_test
 
-test: format tests/heap_test
+test: format voronoi tests/heap_test
 	./tests/heap_test
 	sh tests/main_test.sh
 
