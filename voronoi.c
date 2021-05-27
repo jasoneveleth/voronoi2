@@ -11,7 +11,7 @@ static void
 print_edgelist(struct edgelist *edgelist)
 {
     for (int i = 0; i < edgelist->nedges; i += 2) {
-        printf("(%f,%f),(%f,%f)\t",
+        printf("(%f,%f),(%f,%f),\t",
                (double)edgelist->edges[i]->origin.x,
                (double)edgelist->edges[i]->origin.y,
                (double)edgelist->edges[i + 1]->origin.x,
@@ -19,6 +19,26 @@ print_edgelist(struct edgelist *edgelist)
     }
     printf("\n");
 }
+
+#ifdef DEBUG
+static void
+print_tree(struct bnode *root)
+{
+    if (root == NULL) return;
+    // printf("node: %p, parent: %p, left: %p, right: %p\n",
+    // (void *)root,
+    // (void *)root->parent,
+    // (void *)root->left,
+    // (void *)root->right);
+    printf("node: %lx, parent: %lx, left: %lx, right: %lx\n",
+           (long)root / 16 % (16 * 16 * 16),
+           (long)root->parent / 16 % (16 * 16 * 16),
+           (long)root->left / 16 % (16 * 16 * 16),
+           (long)root->right / 16 % (16 * 16 * 16));
+    print_tree(root->left);
+    print_tree(root->right);
+}
+#endif
 
 #ifdef DEBUG
 static void
@@ -211,6 +231,7 @@ handle_site_event(struct event *event,
 
 static void
 handle_circle_event(struct event *event,
+                    // struct bnode *root,
                     struct heap *heap,
                     struct edgelist *edgelist)
 {
@@ -242,6 +263,9 @@ handle_circle_event(struct event *event,
     parent->right = other_child->right;
     if (parent->left) parent->left->parent = parent;
     if (parent->right) parent->right->parent = parent;
+    // refresh the leaves in case they were the other child
+    if (nextleaf == other_child) nextleaf = parent;
+    if (prevleaf == other_child) prevleaf = parent;
     free(other_child);
 
     remove_false_alarm(heap, nextleaf->arc);
@@ -373,7 +397,7 @@ static void
 print_sites(point *sites, int32_t length)
 {
     for (int i = 0; i < length; i++)
-        printf("(%f,%f)\t", (double)sites[i].x, (double)sites[i].y);
+        printf("(%f,%f),\t", (double)sites[i].x, (double)sites[i].y);
     printf("\n");
 }
 
