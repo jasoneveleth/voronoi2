@@ -72,7 +72,6 @@ hempty(struct heap *H)
 void
 free_heap(struct heap *H)
 {
-    for (int i = 0; i <= H->last; i++) free(H->arr[i]->attr);
     free(H->arr);
     free(H);
 }
