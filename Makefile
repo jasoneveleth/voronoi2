@@ -1,4 +1,10 @@
 FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
+# FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
+# FLAGS += -Ofast
+FLAGS += -g -O0 
+# # makes the debug verbose
+# FLAGS += -DDEBUG
+FLAGS += -DFLOAT
 
 # linux is annoying and doesn't link math library by default
 UNAME := $(shell uname)
@@ -6,11 +12,6 @@ ifeq ($(UNAME), Linux)
 MATH = -lm
 endif
 
-FLAGS += -Ofast
-# FLAGS += -g -O0 -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
-# makes the debug verbose
-# FLAGS += -DDEBUG
-FLAGS += -DFLOAT
 C = bintree.c bintree.h heap.c heap.h test.c voronoi.c voronoi.h
 
 .PHONY: all clean test debug format
