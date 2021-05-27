@@ -2,3 +2,4 @@ short_test
 debug_test
 *.o
 *.dSYM/
+voronoi
