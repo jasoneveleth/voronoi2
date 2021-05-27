@@ -6,8 +6,8 @@ ifeq ($(UNAME), Linux)
 MATH = -lm
 endif
 
-# FLAGS += -Ofast
-FLAGS += -g -O0 -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
+FLAGS += -Ofast
+# FLAGS += -g -O0 -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
 # makes the debug verbose
 # FLAGS += -DDEBUG
 FLAGS += -DFLOAT

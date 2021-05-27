@@ -1,21 +1,23 @@
+#include <stdio.h>
+#include <string.h>
 #include "bintree.h"
 #include "voronoi.h"
 #include "heap.h"
-#include <stdio.h>
 
-#ifdef DEBUG
+// length of lines when reading file
+#define LINELEN 80
+
 static void
 print_edgelist(struct edgelist *edgelist)
 {
-    for (int i = 0; i < edgelist->nedges; i++) {
-        printf("edge: address: %p, origin: (%f, %f), twin: %p\n",
-               (void *)edgelist->edges[i],
+    for (int i = 0; i < edgelist->nedges; i += 2) {
+        printf("(%f,%f),(%f,%f)\t",
                (double)edgelist->edges[i]->origin.x,
                (double)edgelist->edges[i]->origin.y,
-               (void *)edgelist->edges[i]->twin);
+               (double)edgelist->edges[i + 1]->origin.x,
+               (double)edgelist->edges[i + 1]->origin.y);
     }
 }
-#endif
 
 #ifdef DEBUG
 static void
@@ -24,24 +26,6 @@ print_edge(halfedge *e)
     printf("new edges: edge: %p, twin: %p\n", (void *)e, (void *)e->twin);
 }
 #endif
-
-static void
-print_tree(struct bnode *root)
-{
-    if (root == NULL) return;
-    // printf("node: %p, parent: %p, left: %p, right: %p\n",
-    // (void *)root,
-    // (void *)root->parent,
-    // (void *)root->left,
-    // (void *)root->right);
-    printf("node: %lx, parent: %lx, left: %lx, right: %lx\n",
-           (long)root / 16 % (16 * 16 * 16),
-           (long)root->parent / 16 % (16 * 16 * 16),
-           (long)root->left / 16 % (16 * 16 * 16),
-           (long)root->right / 16 % (16 * 16 * 16));
-    print_tree(root->left);
-    print_tree(root->right);
-}
 
 static void
 fill_queue(struct heap *heap, point *sites, int32_t nsites)
@@ -220,7 +204,6 @@ handle_site_event(struct event *event,
 
 static void
 handle_circle_event(struct event *event,
-                    struct bnode *root,
                     struct heap *heap,
                     struct edgelist *edgelist)
 {
@@ -342,34 +325,70 @@ fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
         if (e->kind == 's') {
             handle_site_event(e, &root, heap, edgelist);
         } else {
-            handle_circle_event(e, &root, heap, edgelist);
+            handle_circle_event(e, heap, edgelist);
         }
     }
     compute_bounding_box(&root, edgelist);
 }
 
-int
-main()
+static inline void
+read_sites_from_file(const char *path, point **arr_ptr, int32_t *length)
 {
-#define NSITES 3
-    point sites[NSITES] = {
-        {(float)0.875, (float)0.169},
-        {(float)0.852, (float)0.792},
-        {(float)0.233, (float)0.434},
-    };
+    FILE *file = fopen(path, "r");
+    if (file == NULL) {
+        fprintf(stderr, "path not valid: %s\n", path);
+        exit(1);
+    }
+    char line[LINELEN];
+    point *arr = malloc(2 * sizeof(point));
+    int32_t allocated = 2;
+    int nsites;
+    for (nsites = 0; fgets(line, LINELEN, file) != NULL; nsites++) {
+        if (nsites >= allocated) {
+            allocated *= 2;
+            arr = realloc(arr, sizeof(point) * (size_t)(allocated));
+        }
+        char *first = strtok(line, ", \t");
+        char *second = strtok(NULL, ", \t");
+        arr[nsites].x = strtof(first, NULL);
+        arr[nsites].y = strtof(second, NULL);
+    }
+    arr = realloc(arr, (size_t)nsites * sizeof(point));
+    *length = nsites;
+    *arr_ptr = arr;
+}
+
+static void
+print_sites(point *sites, int32_t length)
+{
+    for (int i = 0; i < length; i++)
+        printf("(%f,%f)\t", (double)sites[i].x, (double)sites[i].y);
+    printf("\n");
+}
+
+int
+main(int argc, char **argv)
+{
     struct edgelist e;
     e.nedges = 0;
     e.allocated = 1024;
-    e.edges = malloc((size_t)e.allocated * sizeof(struct halfedge *));
     // maybe make it an array of structs rather than pointers
-    fortunes(sites, NSITES, &e);
-    for (int i = 0; i < NSITES; i++)
-        printf("(%f, %f), ", (double)sites[i].x, (double)sites[i].y);
-    printf("\n");
-    for (int i = 0; i < e.nedges; i++)
-        printf("(%f, %f), ",
-               (double)e.edges[i]->origin.x,
-               (double)e.edges[i]->origin.y);
-    printf("\n");
+    e.edges = malloc((size_t)e.allocated * sizeof(struct halfedge *));
+    if (argc == 1) {
+        point sites[3] = {
+            {(float)0.875, (float)0.169},
+            {(float)0.852, (float)0.792},
+            {(float)0.233, (float)0.434},
+        };
+        print_sites(sites, 3);
+        fortunes(sites, 3, &e);
+    } else {
+        int32_t nsites = 0;
+        point *sites;
+        read_sites_from_file(argv[argc - 1], &sites, &nsites);
+        print_sites(sites, nsites);
+        fortunes(sites, nsites, &e);
+    }
+    print_edgelist(&e);
     return 0;
 }

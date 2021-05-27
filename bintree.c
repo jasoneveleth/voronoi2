@@ -5,18 +5,6 @@
 #include <string.h>
 #include <math.h>
 
-static void *
-realloc_zero(void *old, size_t oldsize, size_t newsize)
-{
-    void *new = realloc(old, newsize);
-    if (newsize > oldsize && new) {
-        size_t diff = newsize - oldsize;
-        void *start = ((char *)new) + oldsize;
-        memset(start, 0, diff);
-    }
-    return new;
-}
-
 int
 bisinternal(struct bnode *node)
 {
