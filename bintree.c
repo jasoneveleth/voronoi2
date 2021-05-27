@@ -236,6 +236,6 @@ free_tree(struct bnode *root)
     }
     free_tree(root->left);
     free_tree(root->right);
-    free(root->arc);
+    free(root->bp); // could be ->arc or ->bp
     free(root);
 }

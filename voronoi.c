@@ -180,7 +180,6 @@ handle_site_event(struct event *event,
     }
 
     struct bnode *old_node = bfindarc(root, event->site);
-    free(event);
     struct arc *old_arc = old_node->arc;
     point old_site = old_arc->site;
     remove_false_alarm(heap, old_arc);
@@ -313,24 +312,25 @@ void
 fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
 {
     struct heap *heap = init_heap();
-    struct bnode root;
-    root.parent = NULL;
-    root.left = NULL;
-    root.right = NULL;
-    root.arc = NULL;
+    struct bnode *root = malloc(sizeof(struct bnode));
+    root->parent = NULL;
+    root->left = NULL;
+    root->right = NULL;
+    root->arc = NULL;
 
     fill_queue(heap, sites, nsites);
     while (!hempty(heap)) {
         struct event *e = hremove_max(heap);
         if (e->kind == 's') {
-            handle_site_event(e, &root, heap, edgelist);
+            handle_site_event(e, root, heap, edgelist);
         } else {
             handle_circle_event(e, heap, edgelist);
         }
+        free(e);
     }
-    compute_bounding_box(&root, edgelist);
+    compute_bounding_box(root, edgelist);
     free_heap(heap);
-    free_tree(&root);
+    free_tree(root);
 }
 
 static inline void
@@ -368,14 +368,20 @@ print_sites(point *sites, int32_t length)
     printf("\n");
 }
 
+static void
+init_edgelist(struct edgelist *e)
+{
+    e->nedges = 0;
+    e->allocated = 1024;
+    // maybe make it an array of structs rather than pointers
+    e->edges = malloc((size_t)e->allocated * sizeof(struct halfedge *));
+}
+
 int
 main(int argc, char **argv)
 {
     struct edgelist e;
-    e.nedges = 0;
-    e.allocated = 1024;
-    // maybe make it an array of structs rather than pointers
-    e.edges = malloc((size_t)e.allocated * sizeof(struct halfedge *));
+    init_edgelist(&e);
     if (argc == 1) {
         point sites[3] = {
             {(float)0.875, (float)0.169},
