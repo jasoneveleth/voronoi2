@@ -363,6 +363,7 @@ read_sites_from_file(const char *path, point **arr_ptr, int32_t *length)
         arr[nsites].x = strtof(first, NULL);
         arr[nsites].y = strtof(second, NULL);
     }
+    fclose(file);
     arr = realloc(arr, (size_t)nsites * sizeof(point));
     *length = nsites;
     *arr_ptr = arr;
