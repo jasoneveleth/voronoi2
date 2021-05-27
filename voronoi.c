@@ -28,6 +28,14 @@ print_edge(halfedge *e)
 #endif
 
 static void
+free_edgelist(struct edgelist *e) {
+    for (int i = 0; i < e->nedges; i++) {
+        free(e->edges[i]);
+    }
+    free(e->edges);
+}
+
+static void
 fill_queue(struct heap *heap, point *sites, int32_t nsites)
 {
     for (int i = 0; i < nsites; i++) {
@@ -399,6 +407,6 @@ main(int argc, char **argv)
         free(sites);
     }
     print_edgelist(&e);
-    free(e.edges);
+    free_edgelist(&e);
     return 0;
 }
