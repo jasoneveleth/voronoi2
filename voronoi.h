@@ -22,8 +22,8 @@ struct face {
 
 struct edgelist {
     struct face *face;
-    struct halfedge *edges[2];
-    char padding[4];
+    struct halfedge **edges;
+    int32_t allocated;
     int32_t nedges;
 };
 
@@ -37,19 +37,16 @@ struct arc {
     point site;
 };
 
-typedef union event event;
-union event {
-    struct site_event {
-        char kind;
-        char padding[3];
+struct event {
+    char kind;
+    char padding[7];
+    union {
         point site;
-    } site_event;
-    struct circle_event {
-        char kind;
-        char padding[7];
-        point lowest_point;
-        struct arc *arc;
-    } circle_event;
+        struct {
+            point circle_bottom;
+            struct bnode *leaf;
+        };
+    };
 };
 
 void fortunes(point *, int32_t, struct edgelist *);

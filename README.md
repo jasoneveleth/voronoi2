@@ -25,13 +25,13 @@ the point than it is from the sweep line. We make that impossible by moving the
 status line far down enough that the longest straight line is too short. Thus, 
 the formula is `ymin - sqrt((xmax - xmin)^2 + (ymax - ymin)^2)`.
 
-
-* need to get 'checkNewCircle' to not depend on _vector for halfedges
-  'initCircleVector' 'initSiteVector'
-
-
 # Debug
 
 - I had the wrong criteria for being an internal node, I said both children 
 need to be null, when what I meant was that one of them needs to be null but 
 not necessarily. Also didn't null check.
+
+- I had the wrong sign for calculating if two vectors formed a right turn, I
+  was calculating if they took a left turn
+
+- Didn't update the index of the nodes in bintree (MAYBE)

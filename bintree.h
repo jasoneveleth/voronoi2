@@ -17,8 +17,6 @@ struct point {
     float y;
 };
 
-struct bp;
-struct arc;
 struct bnode {
     int32_t index;
     char padding[4];
@@ -48,8 +46,6 @@ struct bnode *bprevleaf(struct bintree *, struct bnode *);
 struct bnode *bgetmin(struct bintree *, struct bnode *);
 struct bnode *bgetmax(struct bintree *, struct bnode *);
 int bisinternal(struct bintree *, struct bnode *);
-// bnode *findMin(void);
-// bnode *findMax(void);
 point intersect_parabolas(float, point *);
 float fsqrt(float);
 
