@@ -390,6 +390,7 @@ main(int argc, char **argv)
         read_sites_from_file(argv[argc - 1], &sites, &nsites);
         print_sites(sites, nsites);
         fortunes(sites, nsites, &e);
+        free(sites);
     }
     print_edgelist(&e);
     free(e.edges);
