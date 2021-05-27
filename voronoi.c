@@ -203,38 +203,37 @@ handle_circle_event(struct event *event,
                     struct heap *heap,
                     struct edgelist *edgelist)
 {
-    int32_t removed_leaf_index = event->leaf->index;
-    struct bnode *to_be_removed = event->leaf;
-    struct bnode **parent = &tree->arr[removed_leaf_index / 2];
-    int leaf_is_left_child = removed_leaf_index % 2 == 0;
-    int offset = leaf_is_left_child * 2 - 1; // from leaf to other child
-    struct bnode **other_child = &tree->arr[removed_leaf_index + offset];
+    for (int i = 0; i < 40; i++) printf("[%d] %p\n", i, (void *)tree->arr[i]);
+    printf("[%d] %p\n", event->leaf->index, (void *)event->leaf);
+    struct bnode *leaf = event->leaf;
+    struct bnode **parent = &tree->arr[leaf->index / 2];
+    struct bnode *nextleaf = bnextleaf(tree, leaf);
+    struct bnode *prevleaf = bprevleaf(tree, leaf);
+    point center = circle_center(
+        prevleaf->arc->site, leaf->arc->site, nextleaf->arc->site);
+    int leaf_is_left_child = leaf->index % 2 == 0;
+    int offset = leaf_is_left_child * 2 - 1; // from leaf to other_child
+    struct bnode **other_child = &tree->arr[leaf->index + offset];
+    // this will be the not-parent bp
+    struct bp *other_bp = leaf_is_left_child ? bpredecessor(tree, leaf)->bp
+                                             : bsuccessor(tree, leaf)->bp;
 
-    // remove parent, replace with 'other child' - the not-removed-leaf one
+    // 1. fix remaining bp (the not-parent one) with the correct two sites
+    other_bp->sites[leaf_is_left_child] =
+        (*parent)->bp->sites[leaf_is_left_child];
+
+    // 2. replace parent with 'other child' of parent (i.e. the one that's not
+    // 'leaf')
+    free((*parent)->bp);
     (*parent)->arc = (*other_child)->arc;
-    free((*other_child)->arc);
     *other_child = NULL;
 
-    // replace remaining bp (the not-parent one) with the correct two points
-    struct bp *other_bp; // this will be the not-parent bp
-    if (leaf_is_left_child) {
-        other_bp = bpredecessor(tree, to_be_removed)->bp;
-        other_bp->sites[1] = (*parent)->bp->sites[1];
-    } else { // node was a right child
-        other_bp = bsuccessor(tree, to_be_removed)->bp;
-        other_bp->sites[0] = (*parent)->bp->sites[0];
-    }
-
-    struct bnode *nextleaf = bnextleaf(tree, to_be_removed);
-    struct bnode *prevleaf = bprevleaf(tree, to_be_removed);
     remove_false_alarm(heap, nextleaf->arc);
     remove_false_alarm(heap, prevleaf->arc);
 
     struct bp *parent_bp = bremove(tree, *parent);
-    struct arc *arc = bremove(tree, to_be_removed);
+    struct arc *arc = bremove(tree, leaf);
 
-    point center =
-        circle_center(prevleaf->arc->site, arc->site, nextleaf->arc->site);
     other_bp->edge->twin->origin = center;
     parent_bp->edge->twin->origin = center;
 
@@ -245,7 +244,8 @@ handle_circle_event(struct event *event,
     new_edge(edgelist, &edge, &edgetwin);
     edgetwin->origin = center;
     other_bp->edge = edge;
-    // set pointers between the two new halfedges, and two (maybe 4) old
+
+    // TODO set pointers between the two new halfedges, and two (maybe 4) old
     // halfedges right
     //                 ==
     // Set the pointers between them appropriately. Attach the three
@@ -253,6 +253,7 @@ handle_circle_event(struct event *event,
 
     check_new_circle(tree, heap, bprevleaf(tree, prevleaf), prevleaf, nextleaf);
     check_new_circle(tree, heap, prevleaf, nextleaf, bnextleaf(tree, nextleaf));
+    for (int i = 0; i < 40; i++) printf("[%d] %p\n", i, (void *)tree->arr[i]);
 }
 
 static void
