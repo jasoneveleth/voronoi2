@@ -31,6 +31,12 @@ rearrange the tree in a nontrivial way - like skipping over a node by
 reassigning pointers. To do that it'd be like O(n) or something idk. Anyway, I 
 reimplemented everything and now it works (at least for 3 points)!
 
+So, I had a lot of memory issues, luckily valgrind really saved the day here. I 
+didn't initialize a lot of fields in structs to NULL, like bnodes and hnodes. 
+That caused undefined jumping behavior if that memory wasn't right. I also 
+forgot to reset the children of the parent's '-\>parent' which was leading to a 
+weird tree.
+
 # Debug
 
 - I had the wrong criteria for being an internal node, I said both children 
