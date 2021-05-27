@@ -240,8 +240,8 @@ handle_circle_event(struct event *event,
     parent->arc = other_child->arc;
     parent->left = other_child->left;
     parent->right = other_child->right;
-    parent->left->parent = parent;
-    parent->right->parent = parent;
+    if (parent->left) parent->left->parent = parent;
+    if (parent->right) parent->right->parent = parent;
     free(other_child);
 
     remove_false_alarm(heap, nextleaf->arc);
