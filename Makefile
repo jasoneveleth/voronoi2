@@ -3,7 +3,7 @@ FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
 # linux is annoying and doesn't link math library by default
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-FLAGS += -lm
+MATH = -lm
 endif
 
 # FLAGS += -Ofast
@@ -27,13 +27,13 @@ heap.o: heap.c heap.h
 	clang $(FLAGS) -c heap.c
 
 short_test: test.c heap.o bintree.o
-	clang $(FLAGS) heap.o bintree.o test.c -o short_test
+	clang $(FLAGS) $(MATH) heap.o bintree.o test.c -o short_test
 
 test: format short_test
 	./short_test
 
 voronoi: format heap.o bintree.o
-	clang $(FLAGS) heap.o bintree.o voronoi.c -o voronoi
+	clang $(FLAGS) $(MATH) heap.o bintree.o voronoi.c -o voronoi
 
 clean:
 	rm -rf *.dSYM *.o *.s
