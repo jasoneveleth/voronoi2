@@ -3,6 +3,7 @@
 #include "heap.h"
 #include <stdio.h>
 
+#ifdef DEBUG
 static void
 print_edgelist(struct edgelist *edgelist)
 {
@@ -14,6 +15,7 @@ print_edgelist(struct edgelist *edgelist)
                (void *)edgelist->edges[i]->twin);
     }
 }
+#endif
 
 #ifdef DEBUG
 static void
@@ -187,8 +189,6 @@ handle_site_event(struct event *event,
                   struct edgelist *edgelist)
 {
     point new_site = event->site;
-    printf("%f, %f\n", (double)new_site.x, (double)new_site.y);
-    free(event);
 
     if (root->arc == NULL) {
         root->arc = new_arc(new_site, NULL);
@@ -196,6 +196,7 @@ handle_site_event(struct event *event,
     }
 
     struct bnode *old_node = bfindarc(root, event->site);
+    free(event);
     struct arc *old_arc = old_node->arc;
     point old_site = old_arc->site;
     remove_false_alarm(heap, old_arc);
@@ -249,6 +250,8 @@ handle_circle_event(struct event *event,
     parent->arc = other_child->arc;
     parent->left = other_child->left;
     parent->right = other_child->right;
+    parent->left->parent = parent;
+    parent->right->parent = parent;
     free(other_child);
 
     remove_false_alarm(heap, nextleaf->arc);
@@ -294,9 +297,6 @@ compute_bounding_box(struct bnode *root, struct edgelist *edgelist)
         point intersection = intersect_parabolas(l, node->bp->sites);
         node->bp->edge->origin = intersection;
     }
-    puts("finshed edges");
-    print_edgelist(edgelist);
-    puts("cropping");
     for (int i = 0; i < edgelist->nedges; i++) { // bound edges
         struct halfedge *edge = edgelist->edges[i];
         if (edge->origin.x < 0) {
@@ -334,6 +334,7 @@ fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
     root.parent = NULL;
     root.left = NULL;
     root.right = NULL;
+    root.arc = NULL;
 
     fill_queue(heap, sites, nsites);
     while (!hempty(heap)) {
@@ -341,11 +342,7 @@ fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
         if (e->kind == 's') {
             handle_site_event(e, &root, heap, edgelist);
         } else {
-            puts("pre circle event");
-            print_edgelist(edgelist);
             handle_circle_event(e, &root, heap, edgelist);
-            puts("post circle event");
-            print_edgelist(edgelist);
         }
     }
     compute_bounding_box(&root, edgelist);

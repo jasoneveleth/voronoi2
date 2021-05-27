@@ -104,8 +104,8 @@ hremove_max(struct heap *H)
     last->index = max->index;  // <--/
 
     H->last--;
-    free(max);
     downheap(H, last);
+    free(max);
     return val;
 }
 

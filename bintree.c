@@ -27,9 +27,11 @@ struct bnode *
 baddleft(struct bnode *root, void *val)
 {
     struct bnode *node = malloc(sizeof(struct bnode));
+    node->parent = root;
+    node->left = NULL;
+    node->right = NULL;
     node->bp = val; // can be either ->bp or ->arc
     root->left = node;
-    node->parent = root;
     return node;
 }
 
@@ -37,9 +39,11 @@ struct bnode *
 baddright(struct bnode *root, void *val)
 {
     struct bnode *node = malloc(sizeof(struct bnode));
+    node->parent = root;
+    node->left = NULL;
+    node->right = NULL;
     node->bp = val; // can be either ->bp or ->arc
     root->right = node;
-    node->parent = root;
     return node;
 }
 
@@ -75,12 +79,12 @@ quadraticFormula(float a, float b, float c, float *smaller, float *larger)
 point
 intersect_parabolas(float sweepline, point parabolas[2])
 {
-    printf("intersecting: (%f, %f), (%f, %f) at %f\n",
-           (double)parabolas[0].x,
-           (double)parabolas[0].y,
-           (double)parabolas[1].x,
-           (double)parabolas[1].y,
-           (double)sweepline);
+    /* printf("intersecting: (%f, %f), (%f, %f) at %f\n", */
+    /*        (double)parabolas[0].x, */
+    /*        (double)parabolas[0].y, */
+    /*        (double)parabolas[1].x, */
+    /*        (double)parabolas[1].y, */
+    /*        (double)sweepline); */
     point p1 = parabolas[0]; // parabola on the left of bp
     point p2 = parabolas[1]; // parabola on the right of bp
     float l = sweepline;
@@ -110,10 +114,10 @@ intersect_parabolas(float sweepline, point parabolas[2])
 
     int parabola_order_is_old_then_new = p1.y > p2.y;
     if (parabola_order_is_old_then_new) {
-        printf("got: (%f, %f)\n", (double)left.x, (double)left.y);
+        /* printf("got: (%f, %f)\n", (double)left.x, (double)left.y); */
         return left;
     } else {
-        printf("got: (%f, %f)\n", (double)right.x, (double)right.y);
+        /* printf("got: (%f, %f)\n", (double)right.x, (double)right.y); */
         return right;
     }
 }
@@ -138,7 +142,6 @@ bfindarc(struct bnode *root, point site)
 struct bnode *
 bpredecessor(struct bnode *node)
 {
-    // printf("pred for: %p\n", (void *)node);
     if (node->left == NULL) {
         struct bnode *child = node;
         node = node->parent;
@@ -171,7 +174,7 @@ bgetmax(struct bnode *node)
 struct bnode *
 bsuccessor(struct bnode *node)
 {
-    // printf("succ for: %p\n", (void *)node);
+    /* printf("succ for: %p\n", (void *)node); */
     if (node->right == NULL) {
         struct bnode *child = node;
         node = node->parent;
