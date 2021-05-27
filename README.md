@@ -25,6 +25,12 @@ the point than it is from the sweep line. We make that impossible by moving the
 status line far down enough that the longest straight line is too short. Thus, 
 the formula is `ymin - sqrt((xmax - xmin)^2 + (ymax - ymin)^2)`.
 
+Turns out I knew what I was doing when I didn't go with the array implementaion 
+of a binary tree. That works great and is super elegant until you are trying to 
+rearrange the tree in a nontrivial way - like skipping over a node by 
+reassigning pointers. To do that it'd be like O(n) or something idk. Anyway, I 
+reimplemented everything and now it works (at least for 3 points)!
+
 # Debug
 
 - I had the wrong criteria for being an internal node, I said both children 
@@ -34,4 +40,5 @@ not necessarily. Also didn't null check.
 - I had the wrong sign for calculating if two vectors formed a right turn, I
   was calculating if they took a left turn
 
-- Didn't update the index of the nodes in bintree (MAYBE)
+- was always returning biggest then smallest, when I thought it was smallest
+  then biggest

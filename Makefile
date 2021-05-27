@@ -1,4 +1,11 @@
 FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
+
+# linux is annoying and doesn't link math library by default
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+FLAGS += -lm
+endif
+
 # FLAGS += -Ofast
 FLAGS += -g -O0 -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
 # makes the debug verbose
