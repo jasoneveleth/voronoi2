@@ -329,6 +329,8 @@ fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
         }
     }
     compute_bounding_box(&root, edgelist);
+    free_heap(heap);
+    free_tree(&root);
 }
 
 static inline void

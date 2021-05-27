@@ -38,6 +38,7 @@ struct bnode *bnextleaf(struct bnode *);
 struct bnode *bprevleaf(struct bnode *);
 struct bnode *bgetmin(struct bnode *);
 struct bnode *bgetmax(struct bnode *);
+void free_tree(struct bnode *);
 int bisinternal(struct bnode *);
 point intersect_parabolas(float, point *);
 float fsqrt(float);

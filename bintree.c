@@ -225,3 +225,15 @@ bprevleaf(struct bnode *node)
     }
     return NULL;
 }
+
+void
+free_tree(struct bnode *root)
+{
+    if (!bisinternal(root)) {
+        free(root->arc); // could be ->arc or ->bp
+        free(root);
+        return;
+    }
+    free_tree(root->left);
+    free_tree(root->right);
+}
