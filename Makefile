@@ -13,7 +13,7 @@ ifeq ($(UNAME), Linux)
 MATH = -lm
 endif
 
-C = bintree.c bintree.h heap.c heap.h fortunes.c fortunes.h voronoi.c tests/heap_test.c
+C = bintree.c bintree.h heap.c heap.h fortunes.c fortunes.h main.c tests/heap_test.c
 
 .PHONY: all format clean test
 
@@ -28,7 +28,7 @@ format:
 tests/heap_test: tests/heap_test.c heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-voronoi: voronoi.o heap.o bintree.o fortunes.o
+voronoi: main.o heap.o bintree.o fortunes.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
 test: format voronoi tests/heap_test
