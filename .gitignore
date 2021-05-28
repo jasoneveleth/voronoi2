@@ -2,3 +2,7 @@ heap_test
 *.o
 *.dSYM/
 voronoi
+build/
+
+voronoi.c
+voronoi.cpython-39-darwin.so
