@@ -1,6 +1,6 @@
 CC = clang
 FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
-# FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
+FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
 # FLAGS += -Ofast
 FLAGS += -g -O0 
 # # makes the debug verbose
@@ -15,7 +15,7 @@ endif
 
 C = bintree.c bintree.h heap.c heap.h fortunes.c fortunes.h main.c tests/heap_test.c
 
-.PHONY: all format clean test
+.PHONY: all format clean test python
 
 all: format voronoi
 
@@ -36,5 +36,10 @@ test: format voronoi tests/heap_test
 	sh tests/main_test.sh
 
 clean:
-	rm -rf *.dSYM *.o *.s tests/*.dSYM
-	rm -f tests/heap_test voronoi
+	rm -rf *.dSYM tests/*.dSYM build/
+	rm -f tests/heap_test voronoi *.o *.s voronoi.c voronoi.cpython-39-darwin.so
+
+python:
+	. ./.env/bin/activate
+	python --version
+	env VIRTUAL_ENV="$$PWD/.env" .env/bin/python setup.py build_ext -i
