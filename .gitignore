@@ -1,3 +1,4 @@
+.env/
 heap_test
 *.o
 *.dSYM/
@@ -6,3 +7,4 @@ build/
 
 voronoi.c
 voronoi.cpython-39-darwin.so
+voronoi.cpython-39-x86_64-linux-gnu.so
