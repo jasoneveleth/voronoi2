@@ -10,13 +10,13 @@ for file in tests/sites/*.in; do
     file_no_extension="$(echo "$file" | cut -f1 -d'.')"
     printf "testing $file_no_extension: "
 
-    ./voronoi "${file_no_extension}.in" > tmp
+    ./voronoi "${file_no_extension}.in" > tests/tmp_file
 
-    if cmp --silent "${file_no_extension}.out" tmp; then
+    if cmp --silent "${file_no_extension}.out" tests/tmp_file; then
         printf "${GRN}PASSED${CLR}\n"
     else
         printf "${RED}FAILED${CLR}\n"
     fi
 done
 
-rm -f tmp
+rm -f tests/tmp_file

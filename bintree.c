@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "bintree.h"
-#include "voronoi.h"
+#include "fortunes.h"
 #include <assert.h>
 #include <string.h>
 #include <math.h>
