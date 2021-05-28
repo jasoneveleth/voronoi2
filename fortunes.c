@@ -182,11 +182,12 @@ new_edge(struct edgelist *edgelist, struct halfedge **h1, struct halfedge **h2)
 }
 
 static inline void
-remove_false_alarm(struct heap *heap, struct arc *old_arc)
+remove_false_alarm(struct heap *heap, struct arc *arc)
 {
-    if (old_arc->circle_event) {
+    if (arc->circle_event) {
         // remove false alarm
-        struct event *old_event = hremove(heap, old_arc->circle_event);
+        struct event *old_event = hremove(heap, arc->circle_event);
+        arc->circle_event = NULL;
         free(old_event);
     }
 }

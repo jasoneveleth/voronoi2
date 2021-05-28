@@ -39,10 +39,19 @@ void simple_diagram(float *numpy_arr, int size)
 {
     struct edgelist e;
     init_edgelist(&e);
-    int32_t nsites = 0;
     point *sites;
+    int32_t nsites;
     read_sites_from_file("tests/sites/simple.in", &sites, &nsites);
     fortunes(sites, nsites, &e);
+
+    // increase by 4 because: 1 edge = 2 points = 4 floats
+    for (int i = 0; i < e->nedges; i += 4) {
+        numpy_arr[i] = 0;
+        numpy_arr[i+1] = 0;
+        numpy_arr[i+2] = 0;
+        numpy_arr[i+3] = 0;
+    }
+
     free(sites);
     free_edgelist(&e);
 }

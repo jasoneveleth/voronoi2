@@ -4,17 +4,19 @@
 
 #ifdef DEBUG
 static inline void
-printall(heap *H)
+print_heap(heap *H)
 {
     int32_t max = 5;
     int32_t end = max > H->last + 1 ? H->last + 1 : max;
     for (int i = 1; i < end; i++) {
-        // printf("key: %.0f, val: %d, index: %d\n", (double)H->arr[i]->key,
+        // fprintf(stderr, "key: %.0f, val: %d, index: %d\n",
+        // (double)H->arr[i]->key,
         // *(int *)H->arr[i]->attr, H->arr[i]->index);
-        printf("key: %f, val: %d, index: %d\n",
-               (double)H->arr[i]->key,
-               *(int *)H->arr[i]->attr,
-               H->arr[i]->index);
+        fprintf(stderr,
+                "key: %f, val: %d, index: %d\n",
+                (double)H->arr[i]->key,
+                *(int *)H->arr[i]->attr,
+                H->arr[i]->index);
     }
 }
 #endif
@@ -72,6 +74,7 @@ hempty(struct heap *H)
 void
 free_heap(struct heap *H)
 {
+    assert(hempty(H));
     free(H->arr);
     free(H);
 }
@@ -93,12 +96,6 @@ hremove_max(struct heap *H)
     struct hnode *max = H->arr[1];
     struct hnode *last = H->arr[H->last];
     void *val = max->attr;
-#ifdef DEBUG
-    puts("remove max ----");
-    printf("(removing) key: %f, val: %d\n", (double)max->key, *(int *)val);
-    printall(H);
-    puts("/remove max");
-#endif
     assert(max->index == 1);   // this check enforces current implementation
     H->arr[max->index] = last; // <--|  are implementation agnostic
     last->index = max->index;  // <--/
@@ -121,21 +118,12 @@ hremove(struct heap *H, struct hnode *node)
     upheap(H, last);
     downheap(H, last);
     free(node);
-#ifdef DEBUG
-    printf("remove ----------- %d\n", *(int *)val);
-    printall(H);
-    puts("/remove");
-#endif
     return val;
 }
 
 struct hnode *
 hinsert(struct heap *H, void *attr, key key)
 {
-#ifdef DEBUG
-    printf("insert ----------- %d\n", H->last);
-    printall(H);
-#endif
     H->last++;                     // is an index
     if (H->last >= H->allocated) { // allocated is a length
         // no larger than 1GB for the arr (doesn't count the nodes memory)
@@ -153,15 +141,5 @@ hinsert(struct heap *H, void *attr, key key)
 
     upheap(H, new);
     downheap(H, new);
-#ifdef DEBUG
-    printf("-----------\n");
-    printall(H);
-    puts("/insert");
-    // if (key - (float)348.0 < (float)1e-4) {
-    //     puts("----------------------------\n\n-----------------------");
-    // }
-    // printall(H);
-    // puts("++++++++++++++++++++++++++++\n\n+++++++++++++++++++++++");
-#endif
     return new;
 }

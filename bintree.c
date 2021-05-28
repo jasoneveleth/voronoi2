@@ -65,7 +65,7 @@ quadraticFormula(float a, float b, float c, float *smaller, float *larger)
 }
 
 point
-intersect_parabolas(float sweepline, point parabolas[2])
+intersect_parabolas(float sweepline, point *parabolas)
 {
     /* printf("intersecting: (%f, %f), (%f, %f) at %f\n", */
     /*        (double)parabolas[0].x, */
@@ -162,7 +162,6 @@ bgetmax(struct bnode *node)
 struct bnode *
 bsuccessor(struct bnode *node)
 {
-    /* printf("succ for: %p\n", (void *)node); */
     if (node->right == NULL) {
         struct bnode *child = node;
         node = node->parent;
