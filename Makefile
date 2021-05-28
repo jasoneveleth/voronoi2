@@ -1,3 +1,4 @@
+CC = clang
 FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
 # FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
 # FLAGS += -Ofast
@@ -12,7 +13,7 @@ ifeq ($(UNAME), Linux)
 MATH = -lm
 endif
 
-C = bintree.c bintree.h heap.c heap.h voronoi.c voronoi.h tests/heap_test.c
+C = bintree.c bintree.h heap.c heap.h fortunes.c fortunes.h voronoi.c tests/heap_test.c
 
 .PHONY: all format clean test
 
@@ -21,21 +22,18 @@ all: format voronoi
 format:
 	clang-format -i -style=file $C
 
-bintree.o: bintree.c bintree.h
-	clang $(FLAGS) -c bintree.c
+%.o: %.c
+	$(CC) $(FLAGS) -c $<
 
-heap.o: heap.c heap.h
-	clang $(FLAGS) -c heap.c
+tests/heap_test: tests/heap_test.c heap.o
+	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-tests/heap_test: tests/heap_test.c heap.o bintree.o
-	clang $(FLAGS) $(MATH) heap.o bintree.o tests/heap_test.c -o tests/heap_test
+voronoi: voronoi.o heap.o bintree.o fortunes.o
+	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
 test: format voronoi tests/heap_test
 	./tests/heap_test
 	sh tests/main_test.sh
-
-voronoi: format heap.o bintree.o
-	clang $(FLAGS) $(MATH) heap.o bintree.o voronoi.c -o voronoi
 
 clean:
 	rm -rf *.dSYM *.o *.s tests/*.dSYM
