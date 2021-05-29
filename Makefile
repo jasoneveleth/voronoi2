@@ -1,46 +1,50 @@
 CC = clang
+
 FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
 # FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
 # FLAGS += -Ofast
 FLAGS += -g -O0 
-# # makes the debug verbose
 # FLAGS += -DDEBUG
-FLAGS += -DFLOAT
+
+UNAME := $(shell uname)
 
 # linux is annoying and doesn't link math library by default
-UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
 MATH = -lm
 endif
 
-C = bintree.c bintree.h heap.c heap.h fortunes.c fortunes.h main.c tests/heap_test.c
+SRC := $(wildcard src/*.c)
+OBJ := $(SRC:.c=.o)
+ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
 
-.PHONY: all format clean test python
+.PHONY: all format clean test python dirs
 
-all: format voronoi
+all: format dirs build/voronoi
 
 format:
-	clang-format -i -style=file $C
+	clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
 
 %.o: %.c
-	$(CC) $(FLAGS) -c $<
+	$(CC) $(FLAGS) -c $< -o $@
 
-tests/heap_test: tests/heap_test.c heap.o
+build/voronoi: $(OBJ)
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-voronoi: main.o heap.o bintree.o fortunes.o
+build/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-test: format voronoi tests/heap_test
-	./tests/heap_test
+test: format dirs build/voronoi build/heap_test
+	build/heap_test
 	sh tests/main_test.sh
 
+dirs:
+	mkdir -p build
+
 clean:
-	rm -rf *.dSYM tests/*.dSYM build/
-	rm -f tests/heap_test voronoi *.o *.s voronoi.c voronoi.cpython*
+	rm -rf build/
+	rm -f voronoi.cpython* $(OBJ)
 
 python:
 	. ./.env/bin/activate
-	python --version
 	env VIRTUAL_ENV="$$PWD/.env" .env/bin/python setup.py build_ext -i
 	# env PYTHONMALLOC=malloc valgrind python main.py

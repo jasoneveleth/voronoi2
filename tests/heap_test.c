@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../heap.h"
+#include "../src/heap.h"
 
 // length of max line in a test file
 #define LINELEN 256

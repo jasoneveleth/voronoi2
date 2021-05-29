@@ -50,7 +50,7 @@ def plot(edges, sites):
     plt.show()
 
 # edges each with two points of 2 coordinates
-edges = np.zeros((110, 2, 2), 'float32')
+edges = np.zeros((160, 2, 2), 'float32')
 voronoi.simple_diagram_func(edges)
 
 # sites = np.array([

@@ -7,7 +7,7 @@ cimport numpy as np
 np.import_array()
 
 # cdefine the signature of our c function
-cdef extern from "cython_stuff.h":
+cdef extern from "src/cython_stuff.h":
     void simple_diagram(float *edges, int size)
 
 # wrapper function. 

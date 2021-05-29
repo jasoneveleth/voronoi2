@@ -36,17 +36,21 @@ read_sites_from_file(const char *path, point **arr_ptr, int32_t *length)
     *arr_ptr = arr;
 }
 
-void simple_diagram(float *numpy_arr, int size)
+void
+simple_diagram(float *numpy_arr, int size)
 {
     struct edgelist e;
     init_edgelist(&e);
     point *sites;
     int32_t nsites;
-    read_sites_from_file("tests/sites/simple.in", &sites, &nsites);
+    read_sites_from_file("input", &sites, &nsites);
     fortunes(sites, nsites, &e);
 
-    if (size != e.nedges) {
-        fprintf(stderr, "error: size of numpy arr %d, num of edges %d\n", size, e.nedges);
+    if (size < e.nedges) {
+        fprintf(stderr,
+                "error: size of numpy arr %d, num of edges %d\nexiting\n",
+                size,
+                e.nedges);
         exit(1);
     }
 
@@ -71,33 +75,45 @@ print_sites(point *sites, int32_t length)
     printf("\n");
 }
 
-#ifndef CYTHON
+#ifndef NMAIN
+static void
+default_graph(void)
+{
+    struct edgelist e;
+    init_edgelist(&e);
+    point sites[3] = {
+        {(float)0.875, (float)0.169},
+        {(float)0.852, (float)0.792},
+        {(float)0.233, (float)0.434},
+    };
+    print_sites(sites, 3);
+    fortunes(sites, 3, &e);
+    print_edgelist(&e);
+    free_edgelist(&e);
+}
+
+static void
+graph_file(const char *path)
+{
+    struct edgelist e;
+    init_edgelist(&e);
+    int32_t nsites = 0;
+    point *sites;
+    read_sites_from_file(path, &sites, &nsites);
+    print_sites(sites, nsites);
+    fortunes(sites, nsites, &e);
+    free(sites);
+    print_edgelist(&e);
+    free_edgelist(&e);
+}
+
 int
 main(int argc, char **argv)
 {
     if (argc == 1) {
-        struct edgelist e;
-        init_edgelist(&e);
-        point sites[3] = {
-            {(float)0.875, (float)0.169},
-            {(float)0.852, (float)0.792},
-            {(float)0.233, (float)0.434},
-        };
-        print_sites(sites, 3);
-        fortunes(sites, 3, &e);
-        print_edgelist(&e);
-        free_edgelist(&e);
+        default_graph();
     } else {
-        struct edgelist e;
-        init_edgelist(&e);
-        int32_t nsites = 0;
-        point *sites;
-        read_sites_from_file(argv[argc - 1], &sites, &nsites);
-        print_sites(sites, nsites);
-        fortunes(sites, nsites, &e);
-        free(sites);
-        print_edgelist(&e);
-        free_edgelist(&e);
+        graph_file(argv[argc - 1]);
     }
     return 0;
 }
