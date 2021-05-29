@@ -1,6 +1,6 @@
 CC = clang
 FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
-FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
+# FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
 # FLAGS += -Ofast
 FLAGS += -g -O0 
 # # makes the debug verbose
