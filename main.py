@@ -49,7 +49,8 @@ def plot(edges, sites):
     plt.gca().add_collection(edges)
     plt.show()
 
-edges = np.zeros((30), 'float32')
+# edges each with two points of 2 coordinates
+edges = np.zeros((110, 2, 2), 'float32')
 voronoi.simple_diagram_func(edges)
 
 # sites = np.array([
@@ -57,23 +58,9 @@ voronoi.simple_diagram_func(edges)
 #     (0.85674, 0.75645),
 #     (0.43525, 0.987867)
 #     ])
-# three edges each with two points of 2 coordinates
-# edges = np.zeros((3, 2, 2), 'float');
-# edges[0][0][0] = 0.23423
-# edges[0][0][1] = 0.342
-# edges[0][1][0] = 0.43525
-# edges[0][1][1] = 0.75645
-# edges[1][0][0] = 0.85674
-# edges[1][0][1] = 0.987867
-# edges[1][1][0] = 0.3248
-# edges[1][1][1] = 0.6478
-# edges[2][0][0] = 0.18763
-# edges[2][0][1] = 0.16378
-# edges[2][1][0] = 0.9832
-# edges[2][1][1] = 0.4783
-# line_collection = matplotlib.collections.LineCollection(edges)
-# plt.axis([0, 1, 0, 1])
-# plt.gca().add_collection(line_collection)
+line_collection = matplotlib.collections.LineCollection(edges)
+plt.axis([0, 1, 0, 1])
+plt.gca().add_collection(line_collection)
 # plt.plot(sites[:,0], sites[:,1], 'ro')
-# plt.show()
+plt.show()
 

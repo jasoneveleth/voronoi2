@@ -44,12 +44,13 @@ void simple_diagram(float *numpy_arr, int size)
     read_sites_from_file("tests/sites/simple.in", &sites, &nsites);
     fortunes(sites, nsites, &e);
 
-    // increase by 4 because: 1 edge = 2 points = 4 floats
-    for (int i = 0; i < e->nedges; i += 4) {
-        numpy_arr[i] = 0;
-        numpy_arr[i+1] = 0;
-        numpy_arr[i+2] = 0;
-        numpy_arr[i+3] = 0;
+    for (int i = 0, n = 0; i < e.nedges; i++) {
+        numpy_arr[n] = e.edges[i]->origin.x;
+        numpy_arr[n + 1] = e.edges[i]->origin.y;
+        numpy_arr[n + 2] = e.edges[i]->twin->origin.x;
+        numpy_arr[n + 3] = e.edges[i]->twin->origin.y;
+        // increase by 4 because: 1 edge = 2 points = 4 floats
+        n += 4;
     }
 
     free(sites);

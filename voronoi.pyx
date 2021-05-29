@@ -1,7 +1,3 @@
-# http://claudiovz.github.io/scipy-lecture-notes-ES/advanced/interfacing_with_c/interfacing_with_c.html#id12
-""" Example of wrapping a C function that takes C double arrays as input using
-    the Numpy declarations from Cython """
-
 # import both numpy and the Cython declarations for numpy
 import numpy as np
 cimport numpy as np
@@ -12,8 +8,13 @@ np.import_array()
 
 # cdefine the signature of our c function
 cdef extern from "cython_stuff.h":
-    void simple_diagram (float * in_array, int size)
+    void simple_diagram(float *edges, int size)
 
-# create the wrapper code, with numpy type annotations
-def simple_diagram_func(np.ndarray[float, ndim=1, mode="c"] in_array not None):
-    simple_diagram(<float*> np.PyArray_DATA(in_array), in_array.shape[0])
+# wrapper function. 
+# ::1 in the last axis makes 'arr' contiguous in memory, and the rest of the type
+# definition make 'arr' a memory view. To call the c function we need a pointer
+# though, which we can get by making a point to the first element of the memory
+# view. The 'not None' tells Cython that I never intend to pass None, so it can
+# turn off some checks for speed
+def simple_diagram_func(float[:,:,::1] arr not None):
+    simple_diagram(&arr[0,0,0], arr.shape[0])

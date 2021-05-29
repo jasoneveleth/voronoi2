@@ -37,7 +37,7 @@ test: format voronoi tests/heap_test
 
 clean:
 	rm -rf *.dSYM tests/*.dSYM build/
-	rm -f tests/heap_test voronoi *.o *.s voronoi.c voronoi.cpython-39-darwin.so voronoi.cpython-39-x86_64-linux-gnu.so
+	rm -f tests/heap_test voronoi *.o *.s voronoi.c voronoi.cpython*
 
 python:
 	. ./.env/bin/activate
