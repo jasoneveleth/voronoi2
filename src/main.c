@@ -37,33 +37,50 @@ read_sites_from_file(const char *path, point **arr_ptr, int32_t *length)
 }
 
 void
-simple_diagram(float *numpy_arr, int size)
+simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
 {
     struct edgelist e;
     init_edgelist(&e);
-    point *sites;
-    int32_t nsites;
-    read_sites_from_file("input", &sites, &nsites);
-    fortunes(sites, nsites, &e);
+    point *sites_found;
+    int32_t nsites_found;
 
-    if (size < e.nedges) {
+    read_sites_from_file("input", &sites_found, &nsites_found);
+    if (nsites_found != nsites_expected)
         fprintf(stderr,
-                "error: size of numpy arr %d, num of edges %d\nexiting\n",
-                size,
-                e.nedges);
+                "nsites found %d, nsites expected %d\n",
+                nsites_found,
+                nsites_expected);
+    if (nsites_found > nsites_expected) {
+        fprintf(stderr, "exiting from fatal error\n");
         exit(1);
     }
 
-    for (int i = 0, n = 0; i < size; i++) {
-        numpy_arr[n] = e.edges[i]->origin.x;
-        numpy_arr[n + 1] = e.edges[i]->origin.y;
-        numpy_arr[n + 2] = e.edges[i]->twin->origin.x;
-        numpy_arr[n + 3] = e.edges[i]->twin->origin.y;
-        // increase by 4 because: 1 edge = 2 points = 4 floats
-        n += 4;
+    fortunes(sites_found, nsites_found, &e);
+    if (size != e.nedges)
+        fprintf(stderr,
+                "error: size of numpy arr %d, num of edges %d\n",
+                size,
+                e.nedges);
+    if (e.nedges > size) {
+        fprintf(stderr, "exiting from fatal error\n");
+        exit(1);
     }
 
-    free(sites);
+    for (int i = 0; i < e.nedges; i++) {
+        // multiply by 4 because: 1 edge = 2 points = 4 floats
+        numpy_arr[i * 4] = e.edges[i]->origin.x;
+        numpy_arr[i * 4 + 1] = e.edges[i]->origin.y;
+        numpy_arr[i * 4 + 2] = e.edges[i]->twin->origin.x;
+        numpy_arr[i * 4 + 3] = e.edges[i]->twin->origin.y;
+    }
+
+    for (int i = 0; i < nsites_found; i++) {
+        // multiply by 2 because: 1 site = 1 points = 2 floats
+        sites[2 * i] = sites_found[i].x;
+        sites[2 * i + 1] = sites_found[i].y;
+    }
+
+    free(sites_found);
     free_edgelist(&e);
 }
 

@@ -42,25 +42,18 @@ def plotAnimation(collection, fileNum=''):
     anim.save(f'visuals/newest.gif', writer='imagemagick')
 
 def plot(edges, sites):
+    """ edges - numpy arr (n, 2, 2)
+        sites - numpy arr (m, 2)"""
     plt.axis([0, 1, 0, 1])
-    sites = np.array(sites)
-    edges = matplotlib.collections.LineCollection(edges)
+    line_coll = matplotlib.collections.LineCollection(edges)
     plt.plot(sites[:,0], sites[:,1], 'ro')
-    plt.gca().add_collection(edges)
+    plt.gca().add_collection(line_coll)
     plt.show()
 
-# edges each with two points of 2 coordinates
-edges = np.zeros((160, 2, 2), 'float32')
-voronoi.simple_diagram_func(edges)
-
-# sites = np.array([
-#     (0.342, 0.23423),
-#     (0.85674, 0.75645),
-#     (0.43525, 0.987867)
-#     ])
-line_collection = matplotlib.collections.LineCollection(edges)
-plt.axis([0, 1, 0, 1])
-plt.gca().add_collection(line_collection)
-# plt.plot(sites[:,0], sites[:,1], 'ro')
-plt.show()
+# edges each with two points (2 coordinates)
+edges = np.zeros((400, 2, 2), 'float32')
+# 31 sites of 1 point (2 coordinates)
+sites = np.zeros((31, 2), 'float32')
+voronoi.simple_diagram_func(edges, sites)
+plot(edges, sites)
 
