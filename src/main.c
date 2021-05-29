@@ -45,23 +45,21 @@ simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
     int32_t nsites_found;
 
     read_sites_from_file("input", &sites_found, &nsites_found);
-    if (nsites_found != nsites_expected)
+    if (nsites_found > nsites_expected) {
         fprintf(stderr,
                 "nsites found %d, nsites expected %d\n",
                 nsites_found,
                 nsites_expected);
-    if (nsites_found > nsites_expected) {
         fprintf(stderr, "exiting from fatal error\n");
         exit(1);
     }
 
     fortunes(sites_found, nsites_found, &e);
-    if (size != e.nedges)
+    if (e.nedges > size) {
         fprintf(stderr,
                 "error: size of numpy arr %d, num of edges %d\n",
                 size,
                 e.nedges);
-    if (e.nedges > size) {
         fprintf(stderr, "exiting from fatal error\n");
         exit(1);
     }

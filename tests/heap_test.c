@@ -33,11 +33,7 @@ load(const char *path, key *keys, int32_t *vals, int num_inputs)
         case 'i':; // needed because who knows why
             char *next_key = strtok(&(line[2]), " \t\n"); // cut off 'i '
             char *next_val = strtok(NULL, " \t\n");
-#ifdef FLOAT
             keys[i] = strtof(next_key, NULL); // HARD CODED TYPE for keys FIXME
-#else
-            keys[i] = atoi(next_key); // HARD CODED TYPE for keys FIXME
-#endif
             vals[i] = atoi(next_val);
             break;
         default:
