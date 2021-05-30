@@ -5,12 +5,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifdef FLOAT
-typedef float bkey;
-#else
-typedef int32_t bkey;
-#endif
-
 typedef struct point point;
 struct point {
     float x;
