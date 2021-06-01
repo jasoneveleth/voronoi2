@@ -53,5 +53,6 @@ void fortunes(point *, int32_t, struct edgelist *);
 void init_edgelist(struct edgelist *);
 void free_edgelist(struct edgelist *);
 void print_edgelist(struct edgelist *);
+float calc_perimeter(struct edgelist *);
 
 #endif

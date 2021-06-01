@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "bintree.h"
 #include "fortunes.h"
@@ -34,6 +35,104 @@ read_sites_from_file(const char *path, point **arr_ptr, int32_t *length)
     arr = realloc(arr, (size_t)nsites * sizeof(point));
     *length = nsites;
     *arr_ptr = arr;
+}
+
+static void
+copy_edges(struct edgelist *edgelist, point *dest)
+{
+    for (int i = 0; i < edgelist->nedges; i++) {
+        // multiply by 2 because: 1 edge = 2 points
+        dest[i * 2].x = edgelist->edges[i]->origin.x;
+        dest[i * 2].y = edgelist->edges[i]->origin.y;
+        dest[i * 2 + 1].x = edgelist->edges[i]->twin->origin.x;
+        dest[i * 2 + 1].y = edgelist->edges[i]->twin->origin.y;
+    }
+}
+
+// -------------------------- ploting stuff ----------------------------
+void
+monte_carlo(float *edges,
+            float *sites,
+            float *perimeter,
+            float jiggle,
+            int nsites,
+            int trials)
+{
+}
+
+static void
+update_sites(point *src, point *dest, point *grad, int nsites)
+{
+}
+
+void
+gradient_descent(float *edges_to_be_cast,
+                 float *sites_to_be_cast,
+                 float *perimeter,
+                 float jiggle,
+                 int nsites,
+                 int trials)
+{
+    point *edges = (point *)edges_to_be_cast;
+    point *sites = (point *)sites_to_be_cast;
+    size_t edges_trial_size = (3 * nsites - 6) * 2; // (in terms of points)
+    struct edgelist e;
+    init_edgelist(&e);
+
+    point *sites_found;
+    int32_t nsites_found;
+    read_sites_from_file("input", &sites_found, &nsites_found);
+    if (nsites_found > nsites) {
+        fprintf(stderr,
+                "error: nsites found %d, nsites expected %d\n",
+                nsites_found,
+                nsites);
+        fprintf(stderr, "exiting from fatal error\n");
+        exit(1);
+    }
+
+    fortunes(sites_found, nsites_found, &e);
+    copy_edges(&e, &edges[0 * edges_trial_size]);
+    memcpy(sites, sites_found, nsites * sizeof(point));
+    free(sites_found);
+    perimeter[0] = calc_perimeter(&e);
+    free_edgelist(&e);
+
+    point *gradient = malloc(nsites * sizeof(point));
+    for (int i = 1; i < trials; i++) {
+        // start at 1, becuase there is no prev perimeter
+        memset(gradient, 0, sizeof(point) * nsites);
+        float prev_perimeter = perimeter[i - 1];
+        for (int j = 0; j < nsites; j++) {
+            point *local_sites = malloc(nsites * sizeof(point));
+            memcpy(
+                local_sites, &sites[(i - 1) * nsites], nsites * sizeof(point));
+            struct edgelist edgelist;
+            // x
+            local_sites[j].x += jiggle;
+            init_edgelist(&edgelist);
+            fortunes(local_sites, nsites, &edgelist);
+            gradient[j].x = calc_perimeter(&edgelist) - prev_perimeter;
+
+            local_sites[j].x = sites[(i - 1) * nsites + j].x;
+            free_edgelist(&edgelist);
+            // y
+            local_sites[j].y += jiggle;
+            init_edgelist(&edgelist);
+            fortunes(local_sites, nsites, &edgelist);
+            gradient[j].y = calc_perimeter(&edgelist) - prev_perimeter;
+
+            free(local_sites);
+            free_edgelist(&edgelist);
+        }
+        update_sites(
+            &sites[(i - 1) * nsites], &sites[i * nsites], gradient, nsites);
+        struct edgelist edgelist;
+        fortunes(&sites[i * nsites], nsites, &edgelist);
+        copy_edges(&edgelist, &edges[i * edges_trial_size]);
+        perimeter[i] = calc_perimeter(&edgelist);
+        free_edgelist(&edgelist);
+    }
 }
 
 void
@@ -72,6 +171,7 @@ simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
         numpy_arr[i * 4 + 3] = e.edges[i]->twin->origin.y;
     }
 
+    // TODO make this memcpy
     for (int i = 0; i < nsites_found; i++) {
         // multiply by 2 because: 1 site = 1 points = 2 floats
         sites[2 * i] = sites_found[i].x;
@@ -81,7 +181,9 @@ simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
     free(sites_found);
     free_edgelist(&e);
 }
+// ------------------------- end of plot methods -------------------
 
+#ifndef NMAIN
 static void
 print_sites(point *sites, int32_t length)
 {
@@ -90,7 +192,6 @@ print_sites(point *sites, int32_t length)
     printf("\n");
 }
 
-#ifndef NMAIN
 static void
 default_graph(void)
 {

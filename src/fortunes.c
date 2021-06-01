@@ -4,6 +4,18 @@
 #include "fortunes.h"
 #include "heap.h"
 
+float
+calc_perimeter(struct edgelist *edgelist)
+{
+    float length = 0;
+    for (int i = 0; i < edgelist->nedges; i++) {
+        float x = edgelist->edges[i]->origin.x;
+        float y = edgelist->edges[i]->origin.y;
+        length += fsqrt(x * x + y * y);
+    }
+    return length / 2;
+}
+
 void
 print_edgelist(struct edgelist *edgelist)
 {
