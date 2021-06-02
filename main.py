@@ -57,8 +57,8 @@ def plot_diagram(edges, sites):
 
 ntrials = 3
 nsites = 100
-# trials, linesegs/trial, pts/seg, floats/pt
-linesegs = np.zeros((ntrials, 3*nsites - 6, 2, 2), 'float32') 
+# trials, linesegs(halfedges)/trial, pts/seg, floats/pt
+linesegs = np.zeros((ntrials, 2*(3*nsites - 6), 2, 2), 'float32') 
 sites = np.zeros((ntrials, nsites, 2), 'float32') # 31 sites of 1 point (2 coordinates)
 perimeter = np.zeros((ntrials), 'float32')
 print(f"bytes for linesegs: {linesegs.size * linesegs.itemsize}")

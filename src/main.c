@@ -93,6 +93,7 @@ gradient_descent(float *linesegs_to_be_cast,
                  int trials)
 {
     printf("%p\n", (void *)linesegs_to_be_cast);
+    printf("%d\n", points_per_trial);
     point *linesegs = (point *)linesegs_to_be_cast;
     point *sites = (point *)sites_to_be_cast;
 
