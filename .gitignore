@@ -4,3 +4,4 @@
 build/
 
 voronoi.cpython*
+*.gif

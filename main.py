@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.collections
 import matplotlib.animation
 import matplotlib.pyplot as plt
+import time
 
 def plot_animation(edges, sites, perimeters):
     """ perimeters : numpy arr (n, 1)
@@ -29,17 +30,16 @@ def plot_animation(edges, sites, perimeters):
     edge_line_coll = matplotlib.collections.LineCollection(())
     ax2.add_collection(edge_line_coll)
 
-    def animate(i):
-        edge_line_coll.set_segments(edges[i])
-        sites_line.set_data(sites[i,0], sites[i,1])
-        gamma_line.set_data(np.arange(i), gamma[:i])
-        return gamma_line,edges,sites,
+    def animate(trial_num):
+        edge_line_coll.set_segments(edges[trial_num])
+        sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
+        perimeter_line.set_data(np.arange(trial_num), perimeters[:trial_num])
+        return perimeter_line,edge_line_coll,sites_line,
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=20, blit=True)
-    # try write='imagemagick' writer='ffmpeg' and nothing to see the fastest 
     # animation.writers.list()
     # https://stackoverflow.com/questions/4092927/generating-movie-from-python-without-saving-individual-frames-to-files
-    anim.save('newest.gif', writer='imagemagick')
+    anim.save('newest.gif') # writer='ffmpeg'
 
 def plot_diagram(edges, sites):
     """ edges - numpy arr (n, 2, 2)
@@ -55,17 +55,19 @@ def plot_diagram(edges, sites):
 # voronoi.simple_diagram_func(edges, sites)
 # plot_diagram(edges, sites)
 
-ntrials = 3
+start = time.time()
+ntrials = 100
 nsites = 100
 # trials, linesegs(halfedges)/trial, pts/seg, floats/pt
 linesegs = np.zeros((ntrials, 2*(3*nsites - 6), 2, 2), 'float32') 
 sites = np.zeros((ntrials, nsites, 2), 'float32') # 31 sites of 1 point (2 coordinates)
 perimeter = np.zeros((ntrials), 'float32')
-print(f"bytes for linesegs: {linesegs.size * linesegs.itemsize}")
-voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-5)
+print("\ndescending . . .")
+voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-4)
 # np.set_printoptions(threshold=np.inf)
 # print(perimeter)
 # print(sites)
 # print(linesegs)
+print("plotting . . .")
 plot_animation(linesegs, sites, perimeter)
-
+print(f"elapsed: {(((time.time() - start)*1000)//1) / 1000} secs")
