@@ -57,10 +57,10 @@ def plot_diagram(edges, sites):
 
 ntrials = 100
 nsites = 100
-# NOTE: 3n - 6 is baked into the library
-edges = np.zeros((ntrials, 3*nsites - 6, 2, 2), 'float32') # edges each with two points (2 coordinates)
+# NOTE: 3n - 6 is baked into the library -- don't change it
+linesegs = np.zeros((ntrials, 3*nsites - 6, 2, 2), 'float32') # trials, linesegs/trial, pts/seg, floats/pt
 sites = np.zeros((ntrials, nsites, 2), 'float32') # 31 sites of 1 point (2 coordinates)
 perimeter = np.zeros((ntrials), 'float32')
-voronoi.gradient_descent_func(edges, sites, perimeter, 1e-5)
-plot_animation(edges, sites, perimeter)
+voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-5)
+plot_animation(linesegs, sites, perimeter)
 

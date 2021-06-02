@@ -63,25 +63,13 @@ monte_carlo(float *edges,
 static void
 update_sites(point *src, point *dest, point *grad, int nsites)
 {
+    for (int i = 0; i < nsites; i++) {
+        dest[i].x = src[i].x + grad[i].x;
+        dest[i].y = src[i].y + grad[i].y;
+    }
 }
 
-void
-gradient_descent(float *edges_to_be_cast,
-                 float *sites_to_be_cast,
-                 float *perimeter,
-                 float jiggle,
-                 int nsites,
-                 int trials)
-{
-    point *edges = (point *)edges_to_be_cast;
-    point *sites = (point *)sites_to_be_cast;
-    size_t edges_trial_size = (3 * nsites - 6) * 2; // (in terms of points)
-    struct edgelist e;
-    init_edgelist(&e);
-
-    point *sites_found;
-    int32_t nsites_found;
-    read_sites_from_file("input", &sites_found, &nsites_found);
+void verify_nsites(int nsites_found, int nsites) {
     if (nsites_found > nsites) {
         fprintf(stderr,
                 "error: nsites found %d, nsites expected %d\n",
@@ -90,46 +78,66 @@ gradient_descent(float *edges_to_be_cast,
         fprintf(stderr, "exiting from fatal error\n");
         exit(1);
     }
+}
 
+void
+gradient_descent(float *linesegs_to_be_cast,
+                 float *sites_to_be_cast,
+                 float *perimeter,
+                 float jiggle,
+                 int nsites,
+                 int points_per_trial,
+                 int trials)
+{
+    point *linesegs = (point *)linesegs_to_be_cast;
+    point *sites = (point *)sites_to_be_cast;
+
+    point *sites_found;
+    int32_t nsites_found;
+    read_sites_from_file("input", &sites_found, &nsites_found);
+    verify_nsites(nsites_found, nsites);
+
+    struct edgelist e;
+    init_edgelist(&e);
     fortunes(sites_found, nsites_found, &e);
-    copy_edges(&e, &edges[0 * edges_trial_size]);
+    copy_edges(&e, &linesegs[0 * points_per_trial]);
     memcpy(sites, sites_found, nsites * sizeof(point));
     free(sites_found);
     perimeter[0] = calc_perimeter(&e);
     free_edgelist(&e);
 
     point *gradient = malloc(nsites * sizeof(point));
-    for (int i = 1; i < trials; i++) {
-        // start at 1, becuase there is no prev perimeter
+    for (int i = 1; i < trials; i++) { // start at 1, becuase there is no prev perimeter
         memset(gradient, 0, sizeof(point) * nsites);
         float prev_perimeter = perimeter[i - 1];
+        // PARALLEL
         for (int j = 0; j < nsites; j++) {
             point *local_sites = malloc(nsites * sizeof(point));
             memcpy(
                 local_sites, &sites[(i - 1) * nsites], nsites * sizeof(point));
-            struct edgelist edgelist;
+            struct edgelist local_edgelist;
             // x
             local_sites[j].x += jiggle;
-            init_edgelist(&edgelist);
-            fortunes(local_sites, nsites, &edgelist);
-            gradient[j].x = calc_perimeter(&edgelist) - prev_perimeter;
+            init_edgelist(&local_edgelist);
+            fortunes(local_sites, nsites, &local_edgelist);
+            gradient[j].x = calc_perimeter(&local_edgelist) - prev_perimeter;
 
             local_sites[j].x = sites[(i - 1) * nsites + j].x;
-            free_edgelist(&edgelist);
+            free_edgelist(&local_edgelist);
             // y
             local_sites[j].y += jiggle;
-            init_edgelist(&edgelist);
-            fortunes(local_sites, nsites, &edgelist);
-            gradient[j].y = calc_perimeter(&edgelist) - prev_perimeter;
+            init_edgelist(&local_edgelist);
+            fortunes(local_sites, nsites, &local_edgelist);
+            gradient[j].y = calc_perimeter(&local_edgelist) - prev_perimeter;
 
             free(local_sites);
-            free_edgelist(&edgelist);
+            free_edgelist(&local_edgelist);
         }
         update_sites(
             &sites[(i - 1) * nsites], &sites[i * nsites], gradient, nsites);
         struct edgelist edgelist;
         fortunes(&sites[i * nsites], nsites, &edgelist);
-        copy_edges(&edgelist, &edges[i * edges_trial_size]);
+        copy_edges(&edgelist, &linesegs[i * points_per_trial]);
         perimeter[i] = calc_perimeter(&edgelist);
         free_edgelist(&edgelist);
     }

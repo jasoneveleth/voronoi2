@@ -11,7 +11,7 @@ cdef extern from "src/cython_stuff.h":
     void simple_diagram(float *edges, int size, float *sites, int nsites)
 
 cdef extern from "src/cython_stuff.h":
-    void gradient_descent(float *edges, float *sites, float *perimeter, float jiggle, int sites, int trials)
+    void gradient_descent(float *edges, float *sites, float *perimeter, float jiggle, int sites, int pts_per_trial, int trials)
 
 cdef struct point:
     float x
@@ -27,8 +27,8 @@ def simple_diagram_func(float[:,:,::1] arr not None, float[:,::1] sites not None
     simple_diagram(&arr[0,0,0], arr.shape[0], &sites[0,0], sites.shape[0])
 
 def gradient_descent_func(
-        float[:,:,:,::1] edges not None, 
+        float[:,:,:,::1] linesegs not None, 
         float[:,:,::1] sites not None,
         float[::1] perimeter not None, 
         float jiggle):
-    gradient_descent(&edges[0,0,0,0], &sites[0,0,0], &perimeter[0], jiggle, sites.shape[0], perimeter.shape[0])
+    gradient_descent(&linesegs[0,0,0,0], &sites[0,0,0], &perimeter[0], jiggle, sites.shape[0], linesegs.shape[1]*linesegs.shape[2], perimeter.shape[0])
