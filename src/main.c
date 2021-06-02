@@ -42,6 +42,7 @@ copy_edges(struct edgelist *edgelist, point *dest)
 {
     for (int i = 0; i < edgelist->nedges; i++) {
         // multiply by 2 because: 1 edge = 2 points
+        printf("%p\n", (void *)&dest[i*2]);
         dest[i * 2].x = edgelist->edges[i]->origin.x;
         dest[i * 2].y = edgelist->edges[i]->origin.y;
         dest[i * 2 + 1].x = edgelist->edges[i]->twin->origin.x;
@@ -91,6 +92,7 @@ gradient_descent(float *linesegs_to_be_cast,
                  int points_per_trial,
                  int trials)
 {
+    printf("%p\n", (void *)linesegs_to_be_cast);
     point *linesegs = (point *)linesegs_to_be_cast;
     point *sites = (point *)sites_to_be_cast;
 
@@ -109,8 +111,7 @@ gradient_descent(float *linesegs_to_be_cast,
     free_edgelist(&edgelist_first_perimeter);
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
-    for (int i = 1; i < trials;
-         i++) { // start at 1, becuase there is no prev perimeter
+    for (int i = 1; i < trials; i++) { // start at 1: there is no prev perimeter
         memset(gradient, 0, (size_t)nsites * sizeof(point));
         float prev_perimeter = perimeter[i - 1];
         // PARALLEL
