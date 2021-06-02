@@ -1,6 +1,6 @@
 CC = clang
 
-FLAGS = -std=c11 -Werror -Weverything -Wno-poison-system-directories
+FLAGS = -std=c11 -Werror -Weverything
 # FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
 # FLAGS += -Ofast
 FLAGS += -g -O0 
@@ -13,6 +13,11 @@ ifeq ($(UNAME), Linux)
 MATH = -lm
 endif
 
+# probably shouldn't use Weverthing but this fixes it for mac
+ifeq ($(UNAME), Darwin)
+FLAGS += -Wno-poison-system-directories
+endif
+
 SRC := $(wildcard src/*.c)
 OBJ := $(SRC:.c=.o)
 ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
@@ -22,7 +27,8 @@ ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
 all: format dirs build/voronoi
 
 format:
-	clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
+	# the leading - cause 'make' to not fail when this fails
+	-command -v clang-format && clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
 
 %.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@
