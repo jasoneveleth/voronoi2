@@ -50,15 +50,15 @@ copy_edges(struct edgelist *edgelist, point *dest)
 }
 
 // -------------------------- ploting stuff ----------------------------
-void
-monte_carlo(float *edges,
-            float *sites,
-            float *perimeter,
-            float jiggle,
-            int nsites,
-            int trials)
-{
-}
+// void
+// monte_carlo(float *edges,
+//             float *sites,
+//             float *perimeter,
+//             float jiggle,
+//             int nsites,
+//             int trials)
+// {
+// }
 
 static void
 update_sites(point *src, point *dest, point *grad, int nsites)
@@ -69,7 +69,9 @@ update_sites(point *src, point *dest, point *grad, int nsites)
     }
 }
 
-void verify_nsites(int nsites_found, int nsites) {
+static void
+verify_nsites(int nsites_found, int nsites)
+{
     if (nsites_found > nsites) {
         fprintf(stderr,
                 "error: nsites found %d, nsites expected %d\n",
@@ -101,21 +103,23 @@ gradient_descent(float *linesegs_to_be_cast,
     init_edgelist(&edgelist_first_perimeter);
     fortunes(sites_found, nsites_found, &edgelist_first_perimeter);
     copy_edges(&edgelist_first_perimeter, &linesegs[0 * points_per_trial]);
-    memcpy(sites, sites_found, nsites * sizeof(point));
+    memcpy(sites, sites_found, (size_t)nsites * sizeof(point));
     free(sites_found);
     perimeter[0] = calc_perimeter(&edgelist_first_perimeter);
     free_edgelist(&edgelist_first_perimeter);
 
-    point *gradient = malloc(nsites * sizeof(point));
-    for (int i = 1; i < trials; i++) { // start at 1, becuase there is no prev perimeter
-        memset(gradient, 0, sizeof(point) * nsites);
+    point *gradient = malloc((size_t)nsites * sizeof(point));
+    for (int i = 1; i < trials;
+         i++) { // start at 1, becuase there is no prev perimeter
+        memset(gradient, 0, (size_t)nsites * sizeof(point));
         float prev_perimeter = perimeter[i - 1];
         // PARALLEL
         for (int j = 0; j < nsites; j++) {
             printf("site: %d\n", j);
-            point *local_sites = malloc(nsites * sizeof(point));
-            memcpy(
-                local_sites, &sites[(i - 1) * nsites], nsites * sizeof(point));
+            point *local_sites = malloc((size_t)nsites * sizeof(point));
+            memcpy(local_sites,
+                   &sites[(i - 1) * nsites],
+                   (size_t)nsites * sizeof(point));
             struct edgelist local_edgelist;
             // x
             local_sites[j].x += jiggle;
