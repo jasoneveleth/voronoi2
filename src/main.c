@@ -141,6 +141,7 @@ gradient_descent(float *linesegs_to_be_cast,
         update_sites(
             &sites[(i - 1) * nsites], &sites[i * nsites], gradient, nsites);
         struct edgelist edgelist;
+        init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * points_per_trial]);
         perimeter[i] = calc_perimeter(&edgelist);
