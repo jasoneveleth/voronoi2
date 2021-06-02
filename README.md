@@ -1,18 +1,19 @@
-### Notes
+# Voronoi Diagrams
 
-when I'm trying to make a pointer to an element in the heap, rather than make a 
-pointer to that place in memory (the place in the array), just take the pointer 
-to the value - if you need the place in memory, just use the index as an offset 
-from the heap's arr pointer.
+## Goals
 
-Need `clang-format` in PATH
+- inline edges
+- intersect parabolas handle edge cases
+- handle face information
+
+## Resources
 
 [code](https://www3.cs.stonybrook.edu/~algorith/implement/fortune/distrib/)
 [paper](https://www.math.cmu.edu/users/slepcev/voronoi_curvature_flow.pdf)
 [valgrind](https://www.cprogramming.com/debugging/valgrind.html)
 [embedding python in c](https://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I)
 
-# Updates
+## Updates
 
 So I realized that I invented a lot of complexity when I wrote this the last 
 time. After looking at [this 
@@ -37,7 +38,7 @@ That caused undefined jumping behavior if that memory wasn't right. I also
 forgot to reset the children of the parent's '-\>parent' which was leading to a 
 weird tree.
 
-# Debug
+## Debug
 
 - I had the wrong criteria for being an internal node, I said both children 
 need to be null, when what I meant was that one of them needs to be null but 
@@ -48,3 +49,13 @@ not necessarily. Also didn't null check.
 
 - was always returning biggest then smallest, when I thought it was smallest
   then biggest
+
+- I didn't initialize a lot of fields in structs to NULL, like bnodes and hnodes. 
+  That caused undefined jumping behavior if that memory wasn't right. 
+
+- I also forgot to reset the children of the parent's '-\>parent' which was 
+  leading to a weird tree.
+
+- didn't initialize pointer to struct
+
+- didn't go from half edges to edges by multiplying by 2
