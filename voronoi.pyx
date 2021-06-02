@@ -31,4 +31,4 @@ def gradient_descent_func(
         float[:,:,::1] sites not None,
         float[::1] perimeter not None, 
         float jiggle):
-    gradient_descent(&linesegs[0,0,0,0], &sites[0,0,0], &perimeter[0], jiggle, sites.shape[0], linesegs.shape[1]*linesegs.shape[2], perimeter.shape[0])
+    gradient_descent(&linesegs[0,0,0,0], &sites[0,0,0], &perimeter[0], jiggle, sites.shape[1], linesegs.shape[1]*linesegs.shape[2], perimeter.shape[0])

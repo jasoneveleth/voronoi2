@@ -55,12 +55,15 @@ def plot_diagram(edges, sites):
 # voronoi.simple_diagram_func(edges, sites)
 # plot_diagram(edges, sites)
 
-ntrials = 100
+ntrials = 3
 nsites = 100
-# NOTE: 3n - 6 is baked into the library -- don't change it
 linesegs = np.zeros((ntrials, 3*nsites - 6, 2, 2), 'float32') # trials, linesegs/trial, pts/seg, floats/pt
 sites = np.zeros((ntrials, nsites, 2), 'float32') # 31 sites of 1 point (2 coordinates)
 perimeter = np.zeros((ntrials), 'float32')
 voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-5)
+# np.set_printoptions(threshold=np.inf)
+# print(perimeter)
+# print(sites)
+# print(linesegs)
 plot_animation(linesegs, sites, perimeter)
 

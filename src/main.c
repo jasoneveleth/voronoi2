@@ -97,14 +97,14 @@ gradient_descent(float *linesegs_to_be_cast,
     read_sites_from_file("input", &sites_found, &nsites_found);
     verify_nsites(nsites_found, nsites);
 
-    struct edgelist e;
-    init_edgelist(&e);
-    fortunes(sites_found, nsites_found, &e);
-    copy_edges(&e, &linesegs[0 * points_per_trial]);
+    struct edgelist edgelist_first_perimeter;
+    init_edgelist(&edgelist_first_perimeter);
+    fortunes(sites_found, nsites_found, &edgelist_first_perimeter);
+    copy_edges(&edgelist_first_perimeter, &linesegs[0 * points_per_trial]);
     memcpy(sites, sites_found, nsites * sizeof(point));
     free(sites_found);
-    perimeter[0] = calc_perimeter(&e);
-    free_edgelist(&e);
+    perimeter[0] = calc_perimeter(&edgelist_first_perimeter);
+    free_edgelist(&edgelist_first_perimeter);
 
     point *gradient = malloc(nsites * sizeof(point));
     for (int i = 1; i < trials; i++) { // start at 1, becuase there is no prev perimeter
@@ -112,6 +112,7 @@ gradient_descent(float *linesegs_to_be_cast,
         float prev_perimeter = perimeter[i - 1];
         // PARALLEL
         for (int j = 0; j < nsites; j++) {
+            printf("site: %d\n", j);
             point *local_sites = malloc(nsites * sizeof(point));
             memcpy(
                 local_sites, &sites[(i - 1) * nsites], nsites * sizeof(point));
