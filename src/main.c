@@ -54,8 +54,8 @@ static void
 update_sites(point *src, point *dest, point *grad, int nsites)
 {
     for (int i = 0; i < nsites; i++) {
-        dest[i].x = src[i].x + grad[i].x;
-        dest[i].y = src[i].y + grad[i].y;
+        dest[i].x = src[i].x - grad[i].x;
+        dest[i].y = src[i].y - grad[i].y;
     }
 }
 
@@ -72,18 +72,13 @@ verify_nsites(int nsites_found, int nsites)
     }
 }
 
-void
-gradient_descent(float *linesegs_to_be_cast,
-                 float *sites_to_be_cast,
-                 float *perimeter,
-                 float jiggle,
-                 int nsites,
-                 int points_per_trial,
-                 int trials)
+static void
+read_file_setup_arrays(point **sites,
+                       point **linesegs,
+                       const int nsites,
+                       const int points_per_trial,
+                       float *initial_perimeter)
 {
-    point *linesegs = (point *)linesegs_to_be_cast;
-    point *sites = (point *)sites_to_be_cast;
-
     point *sites_found;
     int32_t nsites_found;
     read_sites_from_file("input", &sites_found, &nsites_found);
@@ -92,11 +87,27 @@ gradient_descent(float *linesegs_to_be_cast,
     struct edgelist edgelist_first_perimeter;
     init_edgelist(&edgelist_first_perimeter);
     fortunes(sites_found, nsites_found, &edgelist_first_perimeter);
-    copy_edges(&edgelist_first_perimeter, &linesegs[0 * points_per_trial]);
-    memcpy(sites, sites_found, (size_t)nsites * sizeof(point));
+    copy_edges(&edgelist_first_perimeter, &(*linesegs)[0 * points_per_trial]);
+    memcpy(*sites, sites_found, (size_t)nsites * sizeof(point));
     free(sites_found);
-    perimeter[0] = calc_perimeter(&edgelist_first_perimeter);
+    *initial_perimeter = calc_perimeter(&edgelist_first_perimeter);
     free_edgelist(&edgelist_first_perimeter);
+}
+
+void
+gradient_descent(float *linesegs_to_be_cast,
+                 float *sites_to_be_cast,
+                 float *perimeter,
+                 const float jiggle,
+                 const int nsites,
+                 const int points_per_trial,
+                 const int trials)
+{
+    point *linesegs = (point *)linesegs_to_be_cast;
+    point *sites = (point *)sites_to_be_cast;
+
+    read_file_setup_arrays(
+        &sites, &linesegs, nsites, points_per_trial, &perimeter[0]);
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
     for (int i = 1; i < trials; i++) { // start at 1: there is no prev perimeter

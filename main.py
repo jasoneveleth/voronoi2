@@ -3,9 +3,14 @@ import numpy as np
 import matplotlib.collections
 import matplotlib.animation
 import matplotlib.pyplot as plt
-import time
+from sys import argv
+from time import time
+from random import random
 
-def plot_animation(edges, sites, perimeters):
+suppress_output = 0
+output_tests = 0 
+
+def render_animation(edges, sites, perimeters):
     """ perimeters : numpy arr (n, 1)
         sites : numpy arr (n, m, 2)
         edges : numpy arr (n, 3*m-6, 2, 2)
@@ -37,8 +42,6 @@ def plot_animation(edges, sites, perimeters):
         return perimeter_line,edge_line_coll,sites_line,
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=20, blit=True)
-    # animation.writers.list()
-    # https://stackoverflow.com/questions/4092927/generating-movie-from-python-without-saving-individual-frames-to-files
     anim.save('newest.gif') # writer='ffmpeg'
 
 def plot_diagram(edges, sites):
@@ -50,24 +53,48 @@ def plot_diagram(edges, sites):
     plt.gca().add_collection(line_coll)
     plt.show()
 
-# edges = np.zeros((1000, 2, 2), 'float32') # edges each with two points (2 coordinates)
-# sites = np.zeros((100, 2), 'float32') # 31 sites of 1 point (2 coordinates)
-# voronoi.simple_diagram_func(edges, sites)
-# plot_diagram(edges, sites)
+def default():
+    edges = np.zeros((1000, 2, 2), 'float32') # edges each with two points (2 coordinates)
+    sites = np.zeros((100, 2), 'float32') # 31 sites of 1 point (2 coordinates)
+    voronoi.simple_diagram_func(edges, sites)
+    plot_diagram(edges, sites)
 
-start = time.time()
-ntrials = 100
-nsites = 100
-# trials, linesegs(halfedges)/trial, pts/seg, floats/pt
-linesegs = np.zeros((ntrials, 2*(3*nsites - 6), 2, 2), 'float32') 
-sites = np.zeros((ntrials, nsites, 2), 'float32') # 31 sites of 1 point (2 coordinates)
-perimeter = np.zeros((ntrials), 'float32')
-print("\ndescending . . .")
-voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-4)
-# np.set_printoptions(threshold=np.inf)
-# print(perimeter)
-# print(sites)
-# print(linesegs)
-print("plotting . . .")
-plot_animation(linesegs, sites, perimeter)
-print(f"elapsed: {(((time.time() - start)*1000)//1) / 1000} secs")
+def descent():
+    start = time()
+    ntrials = 100
+    nsites = 100
+    # trials, linesegs(halfedges)/trial, pts/seg, floats/pt
+    linesegs = np.zeros((ntrials, 2*(3*nsites - 6), 2, 2), 'float32') 
+    sites = np.zeros((ntrials, nsites, 2), 'float32')
+    perimeter = np.zeros((ntrials), 'float32')
+    if not suppress_output: print("\ndescending . . .")
+    voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-4)
+    np.set_printoptions(threshold=np.inf)
+    if output_tests: print(perimeter)
+    if output_tests: print(sites)
+    if output_tests: print(linesegs)
+    if not suppress_output: print("plotting . . .")
+    render_animation(linesegs, sites, perimeter)
+    if not suppress_output: print(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs")
+
+
+def generate_sites(num):
+    f = open('input', 'w')
+    for _ in range(num):
+        rand = ((random()*1000)//1) * 1000
+        rand2 = ((random()*1000)//1) * 1000
+        f.write(str(rand) + ' ' + str(rand2) + '\n')
+    f.close()
+
+# ================================ MAIN ====================================== #
+
+if '-s' in argv:
+    suppress_output = 1
+if '-t' in argv:
+    output_tests = 1
+
+if '-g' in argv:
+    generate_sites(int(argv[argv.index('-g')+1]))
+else:
+    descent()
+
