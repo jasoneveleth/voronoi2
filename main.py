@@ -7,6 +7,7 @@ from sys import argv
 from time import time
 from random import random
 
+# commandline flags
 suppress_output = 0
 output_tests = 0 
 
@@ -18,12 +19,14 @@ def render_animation(edges, sites, perimeters):
     nframes = sites.shape[0]
 
     fig = plt.figure()
-    fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    fig.set_figwidth(8)
+    fig.set_figheight(8)
+    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
     ax1 = fig.add_subplot(2, 1, 1)
     ax1.set_xlim(0, nframes)
     ax1.set_ylim(0, 4*np.max(perimeters)/3)
-    ax1.set_title('gamma function (perimeter)')
+    ax1.set_title('perimeter (objective function)')
     perimeter_line, = ax1.plot([], [], lw=3) # the comma unpacks the tuple
 
     ax2 = fig.add_subplot(2, 1, 2, aspect='equal')
@@ -59,11 +62,10 @@ def default():
     voronoi.simple_diagram_func(edges, sites)
     plot_diagram(edges, sites)
 
-def descent():
+def descent(ntrials):
     start = time()
-    ntrials = 100
-    nsites = 100
-    # trials, linesegs(halfedges)/trial, pts/seg, floats/pt
+    nsites = len(open('input').readlines())
+                        # trials, linesegs(== halfedges)/trial, pts/lineseg, floats/pt
     linesegs = np.zeros((ntrials, 2*(3*nsites - 6), 2, 2), 'float32') 
     sites = np.zeros((ntrials, nsites, 2), 'float32')
     perimeter = np.zeros((ntrials), 'float32')
@@ -81,9 +83,9 @@ def descent():
 def generate_sites(num):
     f = open('input', 'w')
     for _ in range(num):
-        rand = ((random()*1000)//1) * 1000
-        rand2 = ((random()*1000)//1) * 1000
-        f.write(str(rand) + ' ' + str(rand2) + '\n')
+        rand = ((random()*1e6)//1) / 1e6
+        rand2 = ((random()*1e6)//1) / 1e6
+        f.write(str(rand) + '\t' + str(rand2) + '\n')
     f.close()
 
 # ================================ MAIN ====================================== #
@@ -96,5 +98,5 @@ if '-t' in argv:
 if '-g' in argv:
     generate_sites(int(argv[argv.index('-g')+1]))
 else:
-    descent()
+    descent(100)
 

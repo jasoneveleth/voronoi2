@@ -6,6 +6,7 @@ RED='\033[0;31m'
 GRN='\033[0;32m'
 CLR='\033[0m'
 
+# ./voronoi <file>
 for file in tests/sites/*.in; do
     file_no_extension="$(echo "$file" | cut -f1 -d'.')"
     printf "testing $file_no_extension: "
@@ -18,5 +19,15 @@ for file in tests/sites/*.in; do
         printf "${RED}FAILED${CLR}\n"
     fi
 done
+
+# gradient descent
+printf "testing hundred_points gradient: "
+cp tests/sites/hundred_point.grad input
+python main.py -s -t > tests/tmp_file
+if cmp --silent "tests/sites/hundred_point.gradout" tests/tmp_file; then
+    printf "${GRN}PASSED${CLR}\n"
+else
+    printf "${RED}FAILED${CLR}\n"
+fi
 
 rm -f tests/tmp_file

@@ -9,9 +9,11 @@ calc_perimeter(struct edgelist *edgelist)
 {
     float length = 0;
     for (int i = 0; i < edgelist->nedges; i++) {
-        float x = edgelist->edges[i]->origin.x;
-        float y = edgelist->edges[i]->origin.y;
-        length += fsqrt(x * x + y * y);
+        float dx =
+            edgelist->edges[i]->origin.x - edgelist->edges[i]->twin->origin.x;
+        float dy =
+            edgelist->edges[i]->origin.y - edgelist->edges[i]->twin->origin.y;
+        length += fsqrt(dx * dx + dy * dy);
     }
     return length / 2;
 }
