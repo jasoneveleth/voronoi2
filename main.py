@@ -89,7 +89,8 @@ def descent(ntrials):
     if output_tests: print(sites)
     if output_tests: print(linesegs)
     if not suppress_output: print("plotting . . .")
-    render_animation(linesegs, sites, perimeter)
+    if not output_tests:
+        render_animation(linesegs, sites, perimeter)
     if not suppress_output: print(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs")
 
 

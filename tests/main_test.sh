@@ -22,8 +22,8 @@ done
 
 # gradient descent
 printf "testing hundred_points gradient: "
-cp tests/sites/hundred_point.grad input
-python main.py -s -t > tests/tmp_file
+cp tests/sites/hundred_point.gradin input
+.env/bin/python main.py -s -t -n 50 > tests/tmp_file
 if cmp --silent "tests/sites/hundred_point.gradout" tests/tmp_file; then
     printf "${GRN}PASSED${CLR}\n"
 else
