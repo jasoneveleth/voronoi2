@@ -103,6 +103,13 @@ def generate_sites(num):
 
 # ================================ MAIN ====================================== #
 
+if '-h' in argv:
+    print('usage: python {argv[0]} [-n num] [-s] [-t] [-g num_points]')
+    print('\t-n\tgradient descent on "num" number of trials')
+    print('\t-s\tsilent mode')
+    print('\t-t\toutput stuff for testing')
+    print('\t-g\tgenerate "num" number of points, NOTE overrides -n')
+    exit()
 if '-s' in argv:
     suppress_output = 1
 if '-t' in argv:

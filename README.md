@@ -1,17 +1,33 @@
 # Voronoi Diagrams
 
-## Goals
+## Install
 
-- inline edges
-- intersect parabolas handle edge cases
-- handle face information
+```bash
+$ git clone https://github.com/jasoneveleth/voronoi2
+$ cd voronoi2
+$ python3 -m venv .env
+$ . .env/bin/activate
+$ python -m pip install Cython matplotlib numpy
+$ make
+```
 
-## Resources
+This will make 'newest.gif' in the current directory. Look at it with `open
+newest.gif`
 
-[code](https://www3.cs.stonybrook.edu/~algorith/implement/fortune/distrib/)
-[paper](https://www.math.cmu.edu/users/slepcev/voronoi_curvature_flow.pdf)
-[valgrind](https://www.cprogramming.com/debugging/valgrind.html)
-[embedding python in c](https://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I)
+To run it with your own points, add them to 'input' file. And rerun the main.py
+file with the correct options:
+
+```bash
+$ vi input
+$ python main.py -n 50
+```
+
+Check options with `$ python main.py -h`
+
+## Notes
+
+- a '+' at the end of git messages means this commit could be split into
+  multiple parts
 
 ## Updates
 
