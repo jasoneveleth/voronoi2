@@ -59,3 +59,4 @@ not necessarily. Also didn't null check.
 - didn't initialize pointer to struct
 
 - didn't go from half edges to edges by multiplying by 2
+
