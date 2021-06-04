@@ -1,4 +1,5 @@
 CC = clang
+PYTHON = .env/bin/python
 
 FLAGS = -std=c11 -Werror -Weverything
 # FLAGS += -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function
@@ -22,9 +23,9 @@ SRC := $(wildcard src/*.c)
 OBJ := $(SRC:.c=.o)
 ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
 
-.PHONY: all format clean test python dirs
+.PHONY: all format clean test setup_lib dirs run
 
-all: format dirs build/voronoi
+all: format run
 
 format:
 	# the leading - cause 'make' to not fail when this fails
@@ -39,7 +40,7 @@ build/voronoi: $(OBJ)
 build/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-test: format dirs build/voronoi build/heap_test python
+test: format dirs build/voronoi build/heap_test setup_lib
 	build/heap_test
 	sh tests/main_test.sh
 
@@ -48,9 +49,13 @@ dirs:
 
 clean:
 	rm -rf build/
-	rm -f voronoi.cpython* $(OBJ)
+	rm -f voronoi.cpython* $(OBJ) *.gif
 
-python:
-	. ./.env/bin/activate
-	env VIRTUAL_ENV="$$PWD/.env" .env/bin/python setup.py build_ext -i
+setup_lib: $(OBJ)
+	$(PYTHON) setup.py build_ext -i
 	# env PYTHONMALLOC=malloc valgrind python main.py
+
+run: setup_lib
+	$(PYTHON) main.py -g 100
+	$(PYTHON) main.py -n 100
+
