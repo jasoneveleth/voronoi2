@@ -10,6 +10,7 @@ from random import random
 # commandline flags
 suppress_output = 0
 output_tests = 0 
+global_ntrials = 50
 
 def render_animation(edges, sites, perimeters):
     """ perimeters : numpy arr (n, 1)
@@ -94,9 +95,11 @@ if '-s' in argv:
     suppress_output = 1
 if '-t' in argv:
     output_tests = 1
+if '-n' in argv:
+    global_ntrials = int(argv[argv.index('-n')+1])
 
 if '-g' in argv:
     generate_sites(int(argv[argv.index('-g')+1]))
 else:
-    descent(100)
+    descent(global_ntrials)
 
