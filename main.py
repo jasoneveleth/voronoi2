@@ -19,25 +19,37 @@ def render_animation(edges, sites, perimeters):
     """
     nframes = sites.shape[0]
 
-    fig = plt.figure()
-    fig.set_figwidth(8)
-    fig.set_figheight(8)
-    # fig.subplots_adjust(hspace=0.4, wspace=0.4)
+    fig = plt.figure(figsize=(16, 10))
+    # The position of the <edge> of the subplots, as a fraction of the figure width.
+    # The width/height of the padding between subplots, as a fraction of the average Axes width/height
+    fig.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97, wspace=0.3, hspace=0.3)
+    # (nrows, ncols, start_end_indices)
+    perimeter_ax = fig.add_subplot(4, 2, 1)
+    char_len_ax = fig.add_subplot(4, 2, 2)
+    earth_mover_ax = fig.add_subplot(4, 2, 3)
+    qr_rates_ax = fig.add_subplot(4, 2, 4)
+    diagram_ax = fig.add_subplot(4, 2, (5, 8), aspect='equal')
 
-    ax1 = fig.add_subplot(2, 1, 1)
-    ax1.set_xlim(0, nframes)
-    ax1.set_ylim(0, 4*np.max(perimeters)/3)
-    ax1.set_title('perimeter (objective function)')
-    perimeter_line, = ax1.plot([], [], lw=3) # the comma unpacks the tuple
+    perimeter_ax.set_title('perimeter (objective function)')
+    perimeter_ax.set_xlim(0, nframes)
+    perimeter_ax.set_ylim(0, (4/3)*np.max(perimeters))
+    perimeter_line, = perimeter_ax.plot([], [], lw=3) # the comma unpacks the tuple
 
-    ax2 = fig.add_subplot(2, 1, 2, aspect='equal')
-    ax2.set_xlim(0, 1)
-    ax2.set_ylim(0, 1)
-    ax2.set_title('voronoi diagram')
-    sites_line, = ax2.plot([], [], 'ro')
-
+    diagram_ax.set_title('voronoi diagram')
+    diagram_ax.set_xlim(0, 1)
+    diagram_ax.set_ylim(0, 1)
     edge_line_coll = matplotlib.collections.LineCollection(())
-    ax2.add_collection(edge_line_coll)
+    diagram_ax.add_collection(edge_line_coll)
+    sites_line, = diagram_ax.plot([], [], 'ro')
+
+    char_len_ax.set_title('longest edge/shortest edge (characteristic length)')
+    char_len_ax.set_xlim(0, nframes)
+
+    earth_mover_ax.set_title('earth mover distance')
+    earth_mover_ax.set_xlim(0, nframes)
+
+    qr_rates_ax.set_title('q and r rates')
+    qr_rates_ax.set_xlim(0, nframes)
 
     def animate(trial_num):
         edge_line_coll.set_segments(edges[trial_num])
