@@ -25,7 +25,7 @@ ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
 
 .PHONY: all format clean test setup_lib dirs run
 
-all: format run
+all: format setup_lib
 
 format:
 	# the leading - cause 'make' to not fail when this fails
