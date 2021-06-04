@@ -298,7 +298,7 @@ handle_circle_event(struct event *event,
     check_new_circle(heap, prevleaf, nextleaf, bnextleaf(nextleaf));
 }
 
-static void
+static inline void
 intersect_lines(point *dest, point p1, point p2, point p3, point p4)
 {
     // https://en.wikipedia.org/wiki/Line–line_intersection
@@ -313,7 +313,26 @@ intersect_lines(point *dest, point p1, point p2, point p3, point p4)
     dest->y = (subexpr * (y3 - y4) - subexpr2 * (y1 - y2)) / D;
 }
 
-static void
+static inline void
+bound_edges(struct halfedge *edge)
+{
+    point *dest = &edge->origin;
+    point *twin = &edge->twin->origin;
+    point bot_left = {0, 0};
+    point top_left = {0, 1};
+    point bot_right = {1, 0};
+    point top_right = {1, 1};
+    if (edge->origin.x < 0)
+        intersect_lines(dest, bot_left, top_left, *dest, *twin);
+    if (edge->origin.x > 1)
+        intersect_lines(dest, bot_right, top_right, *dest, *twin);
+    if (edge->origin.y < 0)
+        intersect_lines(dest, bot_left, bot_right, *dest, *twin);
+    if (edge->origin.y > 1)
+        intersect_lines(dest, top_left, top_right, *dest, *twin);
+}
+
+static inline void
 compute_bounding_box(struct bnode *root, struct edgelist *edgelist)
 {
     float l = (float)-1.4143; // hard coded -sqrt(2), (diagonal of bounding box)
@@ -323,32 +342,11 @@ compute_bounding_box(struct bnode *root, struct edgelist *edgelist)
         point intersection = intersect_parabolas(l, node->bp->sites);
         node->bp->edge->origin = intersection;
     }
-    for (int i = 0; i < edgelist->nedges; i++) { // bound edges
+    for (int i = 0; i < edgelist->nedges; i++) {
         struct halfedge *edge = edgelist->edges[i];
-        if (edge->origin.x < 0) {
-            point bottom = {0, 0};
-            point top = {0, 1};
-            intersect_lines(
-                &edge->origin, bottom, top, edge->origin, edge->twin->origin);
-        }
-        if (edge->origin.y < 0) {
-            point left = {0, 0};
-            point right = {1, 0};
-            intersect_lines(
-                &edge->origin, left, right, edge->origin, edge->twin->origin);
-        }
-        if (edge->origin.x > 1) {
-            point bottom = {1, 0};
-            point top = {1, 1};
-            intersect_lines(
-                &edge->origin, bottom, top, edge->origin, edge->twin->origin);
-        }
-        if (edge->origin.y > 1) {
-            point left = {0, 1};
-            point right = {1, 1};
-            intersect_lines(
-                &edge->origin, left, right, edge->origin, edge->twin->origin);
-        }
+        point origin = edge->origin;
+        if (origin.x < 0 || origin.x > 1 || origin.y < 0 || origin.x > 0)
+            bound_edges(edge);
     }
 }
 
@@ -377,7 +375,7 @@ fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
     free_tree(root);
 }
 
-void
+inline void
 init_edgelist(struct edgelist *e)
 {
     e->nedges = 0;

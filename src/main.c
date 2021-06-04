@@ -85,11 +85,11 @@ verify_nsites(int nsites_found, int nsites)
 }
 
 static void
-read_file_setup_arrays(point **sites,
-                       point **linesegs,
-                       const int nsites,
-                       const int points_per_trial,
-                       float *initial_perimeter)
+setup_arrays(point **sites,
+             point **linesegs,
+             const int nsites,
+             const int points_per_trial,
+             float *initial_perimeter)
 {
     point *sites_found;
     int32_t nsites_found;
@@ -143,21 +143,20 @@ gradient_descent(float *linesegs_to_be_cast,
                  float *perimeter,
                  const float jiggle,
                  const int nsites,
-                 const int points_per_trial,
+                 const int pts_per_trial,
                  const int trials)
 {
     point *linesegs = (point *)linesegs_to_be_cast;
     point *sites = (point *)sites_to_be_cast;
 
-    read_file_setup_arrays(
-        &sites, &linesegs, nsites, points_per_trial, &perimeter[0]);
+    setup_arrays(&sites, &linesegs, nsites, pts_per_trial, &perimeter[0]);
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
     for (int i = 1; i < trials; i++) { // start at 1: there is no prev perimeter
         memset(gradient, 0, (size_t)nsites * sizeof(point));
         float prev_perimeter = perimeter[i - 1];
-        // PARALLEL
         point *old_sites_ptr = &sites[(i - 1) * nsites];
+        // PARALLEL
         for (int j = 0; j < nsites; j++)
             calc_gradient_for_site(
                 j, nsites, old_sites_ptr, gradient, jiggle, prev_perimeter);
@@ -165,10 +164,11 @@ gradient_descent(float *linesegs_to_be_cast,
         struct edgelist edgelist;
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
-        copy_edges(&edgelist, &linesegs[i * points_per_trial]);
+        copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
         perimeter[i] = calc_perimeter(&edgelist);
         free_edgelist(&edgelist);
     }
+    free(gradient);
 }
 
 void
