@@ -200,7 +200,7 @@ simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
         numpy_arr[i * 4 + 3] = e.edges[i]->twin->origin.y;
     }
 
-    // TODO make this memcpy
+    // this could be memcpy
     for (int i = 0; i < nsites_found; i++) {
         // multiply by 2 because: 1 site = 1 points = 2 floats
         sites[2 * i] = sites_found[i].x;
