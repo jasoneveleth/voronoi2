@@ -59,14 +59,14 @@ print_edge(halfedge *e)
 }
 #endif
 
-void
+inline void
 free_edgelist(struct edgelist *e)
 {
     for (int i = 0; i < e->nedges; i++) { free(e->edges[i]); }
     free(e->edges);
 }
 
-static void
+static inline void
 fill_queue(struct heap *heap, point *sites, int32_t nsites)
 {
     for (int i = 0; i < nsites; i++) {
@@ -77,7 +77,7 @@ fill_queue(struct heap *heap, point *sites, int32_t nsites)
     }
 }
 
-static struct bp *
+static inline struct bp *
 new_bp(struct halfedge *edge, point lparabola, point rparabola)
 {
     struct bp *breakpoint = malloc(sizeof(struct bp));
@@ -87,7 +87,7 @@ new_bp(struct halfedge *edge, point lparabola, point rparabola)
     return breakpoint;
 }
 
-static struct arc *
+static inline struct arc *
 new_arc(point site, struct hnode *event)
 {
     struct arc *arc = malloc(sizeof(struct arc));
@@ -96,7 +96,7 @@ new_arc(point site, struct hnode *event)
     return arc;
 }
 
-static int
+static inline int
 converge(struct bp *b1, struct bp *b2)
 {
     // check if determinant of vectors from site1 -> site2, <x1,y1>
@@ -123,7 +123,7 @@ converge(struct bp *b1, struct bp *b2)
     return x1 * y2 - y1 * x2 < 0;
 }
 
-static point
+static inline point
 circle_center(point a, point b, point c)
 {
     float ONE = (float)1;
@@ -140,7 +140,7 @@ circle_center(point a, point b, point c)
     return p;
 }
 
-static point
+static inline point
 circleBottom(point a, point b, point c)
 {
     point p = circle_center(a, b, c);
@@ -149,7 +149,7 @@ circleBottom(point a, point b, point c)
     return p;
 }
 
-static void
+static inline void
 check_new_circle(struct heap *heap,
                  struct bnode *lnode,
                  struct bnode *mnode,
@@ -168,7 +168,7 @@ check_new_circle(struct heap *heap,
     }
 }
 
-static void
+static inline void
 new_edge(struct edgelist *edgelist, struct halfedge **h1, struct halfedge **h2)
 {
     struct halfedge *e1 = malloc(sizeof(struct halfedge));
@@ -206,7 +206,7 @@ remove_false_alarm(struct heap *heap, struct arc *arc)
     }
 }
 
-static void
+static inline void
 handle_site_event(struct event *event,
                   struct bnode *root,
                   struct heap *heap,
@@ -241,7 +241,7 @@ handle_site_event(struct event *event,
     check_new_circle(heap, marc, rarc, bnextleaf(rarc));
 }
 
-static void
+static inline void
 handle_circle_event(struct event *event,
                     // struct bnode *root,
                     struct heap *heap,
