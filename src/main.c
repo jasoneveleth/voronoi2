@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "bintree.h"
 #include "fortunes.h"
 #include "heap.h"
@@ -8,6 +9,8 @@
 
 // length of lines when reading file
 #define LINELEN 80
+
+static const float alpha = (float)3e-3;
 
 static inline void
 read_sites_from_file(const char *path, point **arr_ptr, int32_t *length)
@@ -37,6 +40,13 @@ read_sites_from_file(const char *path, point **arr_ptr, int32_t *length)
     *arr_ptr = arr;
 }
 
+static float
+frac(float x)
+{
+    float useless_required_ptr;
+    return modff(x, &useless_required_ptr);
+}
+
 static void
 copy_edges(struct edgelist *edgelist, point *dest)
 {
@@ -54,8 +64,10 @@ static void
 update_sites(point *src, point *dest, point *grad, int nsites)
 {
     for (int i = 0; i < nsites; i++) {
-        dest[i].x = src[i].x - grad[i].x;
-        dest[i].y = src[i].y - grad[i].y;
+        dest[i].x = frac(src[i].x - alpha * grad[i].x);
+        if (dest[i].x < 0) dest[i].x = 1 + dest[i].x;
+        dest[i].y = frac(src[i].y - alpha * grad[i].y);
+        if (dest[i].y < 0) dest[i].y = 1 + dest[i].y;
     }
 }
 
@@ -94,6 +106,37 @@ read_file_setup_arrays(point **sites,
     free_edgelist(&edgelist_first_perimeter);
 }
 
+static inline void
+calc_gradient_for_site(const int j,
+                       const int nsites,
+                       const point *const old_sites,
+                       point *gradient,
+                       const float jiggle,
+                       const float prev_perimeter)
+{
+    point *local_sites = malloc((size_t)nsites * sizeof(point));
+    memcpy(local_sites, old_sites, (size_t)nsites * sizeof(point));
+    struct edgelist local_edgelist;
+    // x
+    local_sites[j].x = frac(local_sites[j].x + jiggle);
+    init_edgelist(&local_edgelist);
+    fortunes(local_sites, nsites, &local_edgelist);
+    gradient[j].x = calc_perimeter(&local_edgelist) - prev_perimeter;
+    gradient[j].x /= jiggle;
+
+    local_sites[j].x = old_sites[j].x;
+    free_edgelist(&local_edgelist);
+    // y
+    local_sites[j].y = frac(local_sites[j].y + jiggle);
+    init_edgelist(&local_edgelist);
+    fortunes(local_sites, nsites, &local_edgelist);
+    gradient[j].y = calc_perimeter(&local_edgelist) - prev_perimeter;
+    gradient[j].y /= jiggle;
+
+    free(local_sites);
+    free_edgelist(&local_edgelist);
+}
+
 void
 gradient_descent(float *linesegs_to_be_cast,
                  float *sites_to_be_cast,
@@ -114,31 +157,11 @@ gradient_descent(float *linesegs_to_be_cast,
         memset(gradient, 0, (size_t)nsites * sizeof(point));
         float prev_perimeter = perimeter[i - 1];
         // PARALLEL
-        for (int j = 0; j < nsites; j++) {
-            point *local_sites = malloc((size_t)nsites * sizeof(point));
-            memcpy(local_sites,
-                   &sites[(i - 1) * nsites],
-                   (size_t)nsites * sizeof(point));
-            struct edgelist local_edgelist;
-            // x
-            local_sites[j].x += jiggle;
-            init_edgelist(&local_edgelist);
-            fortunes(local_sites, nsites, &local_edgelist);
-            gradient[j].x = calc_perimeter(&local_edgelist) - prev_perimeter;
-
-            local_sites[j].x = sites[(i - 1) * nsites + j].x;
-            free_edgelist(&local_edgelist);
-            // y
-            local_sites[j].y += jiggle;
-            init_edgelist(&local_edgelist);
-            fortunes(local_sites, nsites, &local_edgelist);
-            gradient[j].y = calc_perimeter(&local_edgelist) - prev_perimeter;
-
-            free(local_sites);
-            free_edgelist(&local_edgelist);
-        }
-        update_sites(
-            &sites[(i - 1) * nsites], &sites[i * nsites], gradient, nsites);
+        point *old_sites_ptr = &sites[(i - 1) * nsites];
+        for (int j = 0; j < nsites; j++)
+            calc_gradient_for_site(
+                j, nsites, old_sites_ptr, gradient, jiggle, prev_perimeter);
+        update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
         struct edgelist edgelist;
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
