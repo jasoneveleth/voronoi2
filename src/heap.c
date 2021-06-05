@@ -12,11 +12,8 @@ print_heap(heap *H)
         // fprintf(stderr, "key: %.0f, val: %d, index: %d\n",
         // (double)H->arr[i]->key,
         // *(int *)H->arr[i]->attr, H->arr[i]->index);
-        fprintf(stderr,
-                "key: %f, val: %d, index: %d\n",
-                (double)H->arr[i]->key,
-                *(int *)H->arr[i]->attr,
-                H->arr[i]->index);
+        fprintf(stderr, "key: %f, val: %d, index: %d\n", (double)H->arr[i]->key,
+                *(int *)H->arr[i]->attr, H->arr[i]->index);
     }
 }
 #endif

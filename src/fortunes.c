@@ -22,8 +22,7 @@ void
 print_edgelist(struct edgelist *edgelist)
 {
     for (int i = 0; i < edgelist->nedges; i += 2) {
-        printf("(%f,%f),(%f,%f),\t",
-               (double)edgelist->edges[i]->origin.x,
+        printf("(%f,%f),(%f,%f),\t", (double)edgelist->edges[i]->origin.x,
                (double)edgelist->edges[i]->origin.y,
                (double)edgelist->edges[i + 1]->origin.x,
                (double)edgelist->edges[i + 1]->origin.y);
@@ -106,17 +105,11 @@ converge(struct bp *b1, struct bp *b2)
     float x2 = b2->sites[1].x - b2->sites[0].x;
     float y2 = b2->sites[1].y - b2->sites[0].y;
 #ifdef DEBUG
-    printf("sites: (%f, %f), (%f, %f), (%f, %f)\n",
-           (double)b1->sites[0].x,
-           (double)b1->sites[0].y,
-           (double)b1->sites[1].x,
-           (double)b1->sites[1].y,
-           (double)b2->sites[1].x,
+    printf("sites: (%f, %f), (%f, %f), (%f, %f)\n", (double)b1->sites[0].x,
+           (double)b1->sites[0].y, (double)b1->sites[1].x,
+           (double)b1->sites[1].y, (double)b2->sites[1].x,
            (double)b2->sites[1].y);
-    printf("vectors: <%f, %f>, <%f, %f>\n",
-           (double)x1,
-           (double)y1,
-           (double)x2,
+    printf("vectors: <%f, %f>, <%f, %f>\n", (double)x1, (double)y1, (double)x2,
            (double)y2);
     printf("det: %f\n", (double)(x1 * y2 - y1 * x2));
 #endif
@@ -183,7 +176,8 @@ new_edge(struct edgelist *edgelist, struct halfedge **h1, struct halfedge **h2)
 
     if (edgelist->nedges >= edgelist->allocated) {
         edgelist->allocated *= 2;
-        size_t new_size = sizeof(struct halfedge *) * (size_t)(edgelist->allocated);
+        size_t new_size =
+            sizeof(struct halfedge *) * (size_t)(edgelist->allocated);
         edgelist->edges = realloc(edgelist->edges, new_size);
     }
     edgelist->edges[edgelist->nedges] = (*h1);
@@ -204,15 +198,36 @@ remove_false_alarm(struct heap *heap, struct arc *arc)
 }
 
 static inline void
+add_subtree(struct bnode **lnode,
+            struct bnode **bp,
+            struct bnode **mnode,
+            struct bnode **rnode,
+            struct bnode **old_node,
+            point old_site,
+            struct halfedge *edge,
+            struct halfedge *edgetwin,
+            point event_site)
+{
+    struct arc *larc = new_arc(old_site, NULL);
+    struct bp *lbp = new_bp(edgetwin, event_site, old_site);
+    struct arc *marc = new_arc(event_site, NULL);
+    struct bp *rbp = new_bp(edge, old_site, event_site);
+    struct arc *rarc = new_arc(old_site, NULL);
+    (*old_node)->bp = rbp;
+    *lnode = baddleft(*old_node, larc);
+    *bp = baddright(*old_node, lbp);
+    *mnode = baddleft(*bp, marc);
+    *rnode = baddright(*bp, rarc);
+}
+
+static inline void
 handle_site_event(struct event *event,
                   struct bnode *root,
                   struct heap *heap,
                   struct edgelist *edgelist)
 {
-    point new_site = event->site;
-
     if (root->arc == NULL) {
-        root->arc = new_arc(new_site, NULL);
+        root->arc = new_arc(event->site, NULL);
         return;
     }
 
@@ -226,13 +241,9 @@ handle_site_event(struct event *event,
     struct halfedge *edge, *edgetwin;
     new_edge(edgelist, &edge, &edgetwin);
 
-    // add subtree (ordered here by preorder traversal)
-    old_node->bp = new_bp(edge, old_site, new_site);
-    struct bnode *larc = baddleft(old_node, new_arc(old_site, NULL));
-    struct bnode *bp =
-        baddright(old_node, new_bp(edgetwin, new_site, old_site));
-    struct bnode *marc = baddleft(bp, new_arc(new_site, NULL));
-    struct bnode *rarc = baddright(bp, new_arc(old_site, NULL));
+    struct bnode *larc, *bp, *marc, *rarc;
+    add_subtree(&larc, &bp, &marc, &rarc, &old_node, old_site, edge, edgetwin,
+                event->site);
 
     check_new_circle(heap, bprevleaf(larc), larc, marc);
     check_new_circle(heap, marc, rarc, bnextleaf(rarc));
@@ -248,8 +259,8 @@ handle_circle_event(struct event *event,
     struct bnode *parent = leaf->parent;
     struct bnode *nextleaf = bnextleaf(leaf);
     struct bnode *prevleaf = bprevleaf(leaf);
-    point center = circle_center(
-        prevleaf->arc->site, leaf->arc->site, nextleaf->arc->site);
+    point center = circle_center(prevleaf->arc->site, leaf->arc->site,
+                                 nextleaf->arc->site);
     int leaf_is_left_child = parent->left == leaf;
     struct bnode *other_child =
         leaf_is_left_child ? parent->right : parent->left;
@@ -272,7 +283,7 @@ handle_circle_event(struct event *event,
     parent->right = other_child->right;
     if (parent->left) parent->left->parent = parent;
     if (parent->right) parent->right->parent = parent;
-    // refresh the leaves in case they were the other child
+    // refresh the leave pointers in case they were the other child
     if (nextleaf == other_child) nextleaf = parent;
     if (prevleaf == other_child) prevleaf = parent;
     free(other_child);

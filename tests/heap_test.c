@@ -94,9 +94,7 @@ simple_heap_inserts_file(void)
     for (int i = 0; i < 6; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[6];
     int correct_vals[6];
-    load("tests/heap/simple_heap_inserts.output",
-         correct_keys,
-         correct_vals,
+    load("tests/heap/simple_heap_inserts.output", correct_keys, correct_vals,
          6); // CHANGED
 
     int goodsofar = 1;
@@ -121,10 +119,8 @@ twofiveseven_heap_inserts(void)
     for (int i = 0; i < 257; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[257];
     int correct_vals[257];
-    load("tests/heap/twofiveseven_heap_inserts.output",
-         correct_keys,
-         correct_vals,
-         257);
+    load("tests/heap/twofiveseven_heap_inserts.output", correct_keys,
+         correct_vals, 257);
 
     int goodsofar = 1;
     for (int i = 0; i < 257 && goodsofar; i++) {
@@ -148,10 +144,8 @@ large_heap_inserts_with_dups(void)
     for (int i = 0; i < 1047; i++) { hinsert(H, &(vals[i]), keys[i]); }
     key correct_keys[1047];
     int correct_vals[1047];
-    load("tests/heap/large_heap_inserts_with_dups.output",
-         correct_keys,
-         correct_vals,
-         1047);
+    load("tests/heap/large_heap_inserts_with_dups.output", correct_keys,
+         correct_vals, 1047);
 
     int goodsofar = 1;
     for (int i = 0; i < 1047 && goodsofar; i++) {

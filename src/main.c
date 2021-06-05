@@ -9,18 +9,14 @@
 
 // length of lines when reading file
 #define LINELEN 80
-#define FATAL(test, fmt, ...)                              \
-    do {                                                   \
-        if (test) {                                        \
-            fprintf(stderr,                                \
-                    "%s:%d:%s(): " fmt,                    \
-                    __FILE__,                              \
-                    __LINE__,                              \
-                    __func__,                              \
-                    __VA_ARGS__);                          \
-            fprintf(stderr, "exiting from fatal error\n"); \
-            exit(1);                                       \
-        }                                                  \
+#define FATAL(test, fmt, ...)                                                 \
+    do {                                                                      \
+        if (test) {                                                           \
+            fprintf(stderr, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __func__, \
+                    __VA_ARGS__);                                             \
+            fprintf(stderr, "exiting from fatal error\n");                    \
+            exit(1);                                                          \
+        }                                                                     \
     } while (0)
 
 static const float alpha = (float)3e-3;
@@ -82,10 +78,8 @@ update_sites(point *src, point *dest, point *grad, int nsites)
 static inline void
 verify_nsites(int nsites_found, int nsites)
 {
-    FATAL(nsites_found > nsites,
-          "error: nsites found %d, nsites expected %d\n",
-          nsites_found,
-          nsites);
+    FATAL(nsites_found > nsites, "error: nsites found %d, nsites expected %d\n",
+          nsites_found, nsites);
 }
 
 static inline void
@@ -162,8 +156,8 @@ gradient_descent(float *linesegs_to_be_cast,
         point *old_sites_ptr = &sites[(i - 1) * nsites];
         // PARALLEL
         for (int j = 0; j < nsites; j++)
-            calc_gradient_for_site(
-                j, nsites, old_sites_ptr, gradient, jiggle, prev_perimeter);
+            calc_gradient_for_site(j, nsites, old_sites_ptr, gradient, jiggle,
+                                   prev_perimeter);
         update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
         struct edgelist edgelist;
         init_edgelist(&edgelist);
@@ -187,10 +181,8 @@ simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
     verify_nsites(nsites_found, nsites_expected);
 
     fortunes(sites_found, nsites_found, &e);
-    FATAL(e.nedges > size,
-          "error: size of numpy arr %d, num of edges %d\n",
-          size,
-          e.nedges);
+    FATAL(e.nedges > size, "error: size of numpy arr %d, num of edges %d\n",
+          size, e.nedges);
 
     copy_edges(&e, (point *)numpy_arr);
     memcpy(sites, sites_found, (size_t)nsites_found * sizeof(point));

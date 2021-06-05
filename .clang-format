@@ -6,7 +6,7 @@ AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: false
 AlignEscapedNewlines: Left
 AlignTrailingComments: true
-# AllowAllArgumentsOnNextLine
+AllowAllArgumentsOnNextLine: false
 # AllowAllConstructorInitializersOnNextLine
 # AllowAllParametersOfDeclarationOnNextLine
 AllowShortBlocksOnASingleLine: true
@@ -20,7 +20,7 @@ AlwaysBreakAfterReturnType: AllDefinitions
 # AlwaysBreakBeforeMultilineStrings: 
 # AlwaysBreakTemplateDeclarations
 # AttributeMacros
-BinPackArguments: false
+BinPackArguments: true
 BinPackParameters: false
 # BitFieldColonSpacing
 # BreakBeforeBraces: Custom
