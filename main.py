@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.collections
 import matplotlib.animation
 import matplotlib.pyplot as plt
-from sys import argv
+import sys
 from time import time
 from random import random
 
@@ -11,6 +11,15 @@ from random import random
 suppress_output = 0
 output_tests = 0 
 global_ntrials = 50
+
+start = time()
+np.set_printoptions(threshold=np.inf)
+
+def log_time(string):
+    global start
+    myprint(string)
+    myprint(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs\n")
+    start = time()
 
 def render_animation(edges, sites, perimeters):
     """ perimeters : numpy arr (n, 1)
@@ -75,23 +84,37 @@ def default():
     voronoi.simple_diagram_func(edges, sites)
     plot_diagram(edges, sites)
 
+def myprint(string):
+    if not suppress_output:
+        sys.stdout.write(string)
+        sys.stdout.flush()
+
 def descent(ntrials):
-    start = time()
+    # init vars
     nsites = len(open('input').readlines())
-                        # trials, linesegs(== halfedges)/trial, pts/lineseg, floats/pt
-    linesegs = np.zeros((ntrials, 2*(3*nsites - 6), 2, 2), 'float32') 
+    linesegs_per_trial = 2*(3*nsites - 6)
+    pts_per_lineseg = 2
+    floats_per_pt = 2
+
+    # allocate arrs
+    linesegs = np.zeros((ntrials, linesegs_per_trial, pts_per_lineseg, floats_per_pt), 'float32') 
     sites = np.zeros((ntrials, nsites, 2), 'float32')
     perimeter = np.zeros((ntrials), 'float32')
-    if not suppress_output: print("\ndescending . . .")
+
+    # descend
+    myprint('descending . . .')
     voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-4)
-    np.set_printoptions(threshold=np.inf)
-    if output_tests: print(perimeter)
-    if output_tests: print(sites)
-    if output_tests: print(linesegs)
-    if not suppress_output: print("plotting . . .")
-    if not output_tests:
+    log_time('\rfinished descent\n')
+    myprint('rendering . . .')
+
+    # render
+    if output_tests: 
+        print(perimeter)
+        print(sites)
+        print(linesegs)
+    else:
         render_animation(linesegs, sites, perimeter)
-    if not suppress_output: print(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs")
+    log_time('\rfinished render\n')
 
 
 def generate_sites(num):
@@ -104,22 +127,22 @@ def generate_sites(num):
 
 # ================================ MAIN ====================================== #
 
-if '-h' in argv:
-    print(f'usage: python {argv[0]} [-n num] [-s] [-t] [-g num_points]')
+if '-h' in sys.argv:
+    print(f'usage: python {sys.argv[0]} [-n num] [-s] [-t] [-g num_points]')
     print('\t-n\tgradient descent on "num" number of trials')
     print('\t-s\tsilent mode')
     print('\t-t\toutput stuff for testing')
     print('\t-g\tgenerate "num" number of points, NOTE overrides -n')
     exit()
-if '-s' in argv:
+if '-s' in sys.argv:
     suppress_output = 1
-if '-t' in argv:
+if '-t' in sys.argv:
     output_tests = 1
-if '-n' in argv:
-    global_ntrials = int(argv[argv.index('-n')+1])
+if '-n' in sys.argv:
+    global_ntrials = int(sys.argv[sys.argv.index('-n')+1])
 
-if '-g' in argv:
-    generate_sites(int(argv[argv.index('-g')+1]))
+if '-g' in sys.argv:
+    generate_sites(int(sys.argv[sys.argv.index('-g')+1]))
 else:
     descent(global_ntrials)
 
