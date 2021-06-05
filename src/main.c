@@ -9,15 +9,19 @@
 
 // length of lines when reading file
 #define LINELEN 80
-// #define print(fmt, ...)             \
-//     do {                            \
-//         fprintf(stderr,             \
-//                 "%s:%d:%s(): " fmt, \
-//                 __FILE__,           \
-//                 __LINE__,           \
-//                 __func__,           \
-//                 __VA_ARGS__);       \
-//     } while (0)
+#define FATAL(test, fmt, ...)                              \
+    do {                                                   \
+        if (test) {                                        \
+            fprintf(stderr,                                \
+                    "%s:%d:%s(): " fmt,                    \
+                    __FILE__,                              \
+                    __LINE__,                              \
+                    __func__,                              \
+                    __VA_ARGS__);                          \
+            fprintf(stderr, "exiting from fatal error\n"); \
+            exit(1);                                       \
+        }                                                  \
+    } while (0)
 
 static const float alpha = (float)3e-3;
 
@@ -25,10 +29,8 @@ static inline void
 read_sites_from_file(const char *path, point **arr_ptr, int32_t *nsites)
 {
     FILE *file = fopen(path, "r");
-    if (file == NULL) {
-        fprintf(stderr, "path not valid: '%s'\n", path);
-        exit(1);
-    }
+    FATAL(file == NULL, "path not valid: '%s'\n", path);
+
     char line[LINELEN];
     (*arr_ptr) = malloc(2 * sizeof(point));
     int32_t allocated = 2;
@@ -77,17 +79,13 @@ update_sites(point *src, point *dest, point *grad, int nsites)
     }
 }
 
-static void
+static inline void
 verify_nsites(int nsites_found, int nsites)
 {
-    if (nsites_found > nsites) {
-        fprintf(stderr,
-                "error: nsites found %d, nsites expected %d\n",
-                nsites_found,
-                nsites);
-        fprintf(stderr, "exiting from fatal error\n");
-        exit(1);
-    }
+    FATAL(nsites_found > nsites,
+          "error: nsites found %d, nsites expected %d\n",
+          nsites_found,
+          nsites);
 }
 
 static void
@@ -189,30 +187,13 @@ simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
     verify_nsites(nsites_found, nsites_expected);
 
     fortunes(sites_found, nsites_found, &e);
-    if (e.nedges > size) {
-        fprintf(stderr,
-                "error: size of numpy arr %d, num of edges %d\n",
-                size,
-                e.nedges);
-        fprintf(stderr, "exiting from fatal error\n");
-        exit(1);
-    }
+    FATAL(e.nedges > size,
+          "error: size of numpy arr %d, num of edges %d\n",
+          size,
+          e.nedges);
 
-    for (int i = 0; i < e.nedges; i++) {
-        // multiply by 4 because: 1 edge = 2 points = 4 floats
-        numpy_arr[i * 4] = e.edges[i]->origin.x;
-        numpy_arr[i * 4 + 1] = e.edges[i]->origin.y;
-        numpy_arr[i * 4 + 2] = e.edges[i]->twin->origin.x;
-        numpy_arr[i * 4 + 3] = e.edges[i]->twin->origin.y;
-    }
-
-    // this could be memcpy
-    for (int i = 0; i < nsites_found; i++) {
-        // multiply by 2 because: 1 site = 1 points = 2 floats
-        sites[2 * i] = sites_found[i].x;
-        sites[2 * i + 1] = sites_found[i].y;
-    }
-
+    copy_edges(&e, (point *)numpy_arr);
+    memcpy(sites, sites_found, (size_t)nsites_found * sizeof(point));
     free(sites_found);
     free_edgelist(&e);
 }
