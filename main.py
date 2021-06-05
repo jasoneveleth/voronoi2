@@ -9,7 +9,7 @@ from random import random
 
 # commandline flags
 suppress_output = 0
-output_tests = 0 
+testing_mode = 0 
 global_ntrials = 50
 
 start = time()
@@ -108,7 +108,7 @@ def descent(ntrials):
     myprint('rendering . . .')
 
     # render
-    if output_tests: 
+    if testing_mode: 
         print(perimeter)
         print(sites)
         print(linesegs)
@@ -137,7 +137,7 @@ if '-h' in sys.argv:
 if '-s' in sys.argv:
     suppress_output = 1
 if '-t' in sys.argv:
-    output_tests = 1
+    testing_mode = 1
 if '-n' in sys.argv:
     global_ntrials = int(sys.argv[sys.argv.index('-n')+1])
 
