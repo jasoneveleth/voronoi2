@@ -9,9 +9,15 @@
 
 // length of lines when reading file
 #define LINELEN 80
-#define print(fmt, ...) \
-        do { fprintf(stderr, "%s:%d:%s(): " fmt, __FILE__, \
-                                __LINE__, __func__, __VA_ARGS__); } while (0)
+// #define print(fmt, ...)             \
+//     do {                            \
+//         fprintf(stderr,             \
+//                 "%s:%d:%s(): " fmt, \
+//                 __FILE__,           \
+//                 __LINE__,           \
+//                 __func__,           \
+//                 __VA_ARGS__);       \
+//     } while (0)
 
 static const float alpha = (float)3e-3;
 
