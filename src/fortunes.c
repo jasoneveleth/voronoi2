@@ -32,7 +32,7 @@ print_edgelist(struct edgelist *edgelist)
 }
 
 #ifdef DEBUG
-static void
+static inline void
 print_tree(struct bnode *root)
 {
     if (root == NULL) return;
@@ -52,7 +52,7 @@ print_tree(struct bnode *root)
 #endif
 
 #ifdef DEBUG
-static void
+static inline void
 print_edge(halfedge *e)
 {
     printf("new edges: edge: %p, twin: %p\n", (void *)e, (void *)e->twin);

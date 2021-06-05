@@ -48,14 +48,14 @@ read_sites_from_file(const char *path, point **arr_ptr, int32_t *nsites)
     (*arr_ptr) = realloc((*arr_ptr), (size_t)(*nsites) * sizeof(point));
 }
 
-static float
+static inline float
 frac(float x)
 {
     float useless_required_ptr;
     return modff(x, &useless_required_ptr);
 }
 
-static void
+static inline void
 copy_edges(struct edgelist *edgelist, point *dest)
 {
     for (int i = 0; i < edgelist->nedges; i++) {
@@ -68,7 +68,7 @@ copy_edges(struct edgelist *edgelist, point *dest)
 }
 
 // -------------------------- ploting stuff ----------------------------
-static void
+static inline void
 update_sites(point *src, point *dest, point *grad, int nsites)
 {
     for (int i = 0; i < nsites; i++) {
@@ -88,7 +88,7 @@ verify_nsites(int nsites_found, int nsites)
           nsites);
 }
 
-static void
+static inline void
 setup_arrays(point **sites,
              point **linesegs,
              const int nsites,
@@ -200,7 +200,7 @@ simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
 // ------------------------- end of plot methods -------------------
 
 #ifndef NMAIN
-static void
+static inline void
 print_sites(point *sites, int32_t length)
 {
     for (int i = 0; i < length; i++)

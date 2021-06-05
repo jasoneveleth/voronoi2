@@ -177,7 +177,7 @@ bsuccessor(struct bnode *node)
     }
 }
 
-static struct bnode *
+static inline struct bnode *
 blowestleaf(struct bnode *node)
 {
     while (1) {
@@ -191,7 +191,7 @@ blowestleaf(struct bnode *node)
     }
 }
 
-static struct bnode *
+static inline struct bnode *
 bhighestleaf(struct bnode *node)
 {
     while (1) {
