@@ -353,7 +353,7 @@ compute_bounding_box(struct bnode *root, struct edgelist *edgelist)
     for (int i = 0; i < edgelist->nedges; i++) {
         struct halfedge *edge = edgelist->edges[i];
         point origin = edge->origin;
-        if (origin.x < 0 || origin.x > 1 || origin.y < 0 || origin.x > 0)
+        if (origin.x < 0 || origin.x > 1 || origin.y < 0 || origin.y > 1)
             bound_edges(edge);
     }
 }
