@@ -15,7 +15,38 @@ calc_perimeter(struct edgelist *edgelist)
             edgelist->edges[i]->origin.y - edgelist->edges[i]->twin->origin.y;
         length += fsqrt(dx * dx + dy * dy);
     }
-    return length / 2;
+    return (length / 2) + 4;
+}
+
+float
+obj_perimeter(__attribute__((unused)) point *sites,
+              struct edgelist *edgelist,
+              __attribute__((unused)) int nsites)
+{
+    return calc_perimeter(edgelist);
+}
+
+static inline float 
+repel_formula(const float x) {
+    const float coeff = (float)1e-5; // INTERFACE
+    const float adjustment = (float)0.005;
+    return coeff * 1/((x + adjustment)*(x + adjustment));
+}
+
+float
+obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
+{
+    float obj_function = calc_perimeter(edgelist);
+    for (int i = 0; i < nsites; i++) {
+        for (int j = 0; j < nsites; j++) {
+            if (i == j) continue;
+            float dx = sites[i].x - sites[j].x;
+            float dy = sites[i].y - sites[j].y;
+            float dist_squared = dx * dx + dy * dy;
+            obj_function += repel_formula(dist_squared);
+        }
+    }
+    return obj_function;
 }
 
 void

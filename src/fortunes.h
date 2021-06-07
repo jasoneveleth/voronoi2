@@ -55,4 +55,7 @@ void free_edgelist(struct edgelist *);
 void print_edgelist(struct edgelist *);
 float calc_perimeter(struct edgelist *);
 
+float obj_perimeter(point *, struct edgelist *, int);
+float obj_perimeter_and_repel(point *, struct edgelist *, int);
+
 #endif
