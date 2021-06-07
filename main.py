@@ -21,7 +21,7 @@ def log_time(string):
     myprint(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs\n")
     start = time()
 
-def render_animation(edges, sites, perimeters):
+def render_animation(edges, sites, perimeters, objectivefunctions):
     """ perimeters : numpy arr (n, 1)
         sites : numpy arr (n, m, 2)
         edges : numpy arr (n, 3*m-6, 2, 2)
@@ -37,9 +37,10 @@ def render_animation(edges, sites, perimeters):
     char_len_ax = fig.add_subplot(4, 2, 2)
     earth_mover_ax = fig.add_subplot(4, 2, 3)
     qr_rates_ax = fig.add_subplot(4, 2, 4)
-    diagram_ax = fig.add_subplot(4, 2, (5, 8), aspect='equal')
+    objectivefunction_ax = fig.add_subplot(4, 2, 5)
+    diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
 
-    perimeter_ax.set_title('perimeter (objective function)')
+    perimeter_ax.set_title('perimeter')
     perimeter_ax.set_xlim(0, nframes)
     perimeter_ax.set_ylim(0, (4/3)*np.max(perimeters))
     perimeter_line, = perimeter_ax.plot([], [], lw=3) # the comma unpacks the tuple
@@ -60,10 +61,16 @@ def render_animation(edges, sites, perimeters):
     qr_rates_ax.set_title('q and r rates')
     qr_rates_ax.set_xlim(0, nframes)
 
+    objectivefunction_ax.set_title('objective function')
+    objectivefunction_ax.set_xlim(0, nframes)
+    objectivefunction_ax.set_ylim(0, (4/3)*np.max(objectivefunctions))
+    objectivefunction_line, = objectivefunction_ax.plot([], [], lw=3)
+
     def animate(trial_num):
         edge_line_coll.set_segments(edges[trial_num])
         sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
         perimeter_line.set_data(np.arange(trial_num), perimeters[:trial_num])
+        objectivefunction_line.set_data(np.arange(trial_num), objectivefunctions[:trial_num])
         return perimeter_line,edge_line_coll,sites_line,
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=20, blit=True)
@@ -89,7 +96,7 @@ def myprint(string):
         sys.stdout.write(string)
         sys.stdout.flush()
 
-def descent(ntrials):
+def descent(ntrials, jiggle):
     # init vars
     nsites = len(open('input').readlines())
     linesegs_per_trial = 2*(3*nsites - 6)
@@ -100,10 +107,11 @@ def descent(ntrials):
     linesegs = np.zeros((ntrials, linesegs_per_trial, pts_per_lineseg, floats_per_pt), 'float32') 
     sites = np.zeros((ntrials, nsites, 2), 'float32')
     perimeter = np.zeros((ntrials), 'float32')
+    objectivefunctions = np.zeros((ntrials), 'float32')
 
     # descend
     myprint('descending . . .')
-    voronoi.gradient_descent_func(linesegs, sites, perimeter, 1e-4)
+    voronoi.gradient_descent_func(linesegs, sites, perimeter, objectivefunctions, jiggle)
     log_time('\rfinished descent\n')
     myprint('rendering . . .')
 
@@ -113,7 +121,7 @@ def descent(ntrials):
         print(sites)
         print(linesegs)
     else:
-        render_animation(linesegs, sites, perimeter)
+        render_animation(linesegs, sites, perimeter, objectivefunctions)
     log_time('\rfinished render\n')
 
 
@@ -143,6 +151,8 @@ if '-n' in sys.argv:
 
 if '-g' in sys.argv:
     generate_sites(int(sys.argv[sys.argv.index('-g')+1]))
+elif '-b' in sys.argv:
+    descent(global_ntrials, 1e-4)
 else:
-    descent(global_ntrials)
+    descent(global_ntrials, 1e-4)
 

@@ -9,13 +9,12 @@ np.import_array()
 # cdefine the signature of our c function
 cdef extern from "src/cython_stuff.h":
     void simple_diagram(float *edges, int size, float *sites, int nsites)
-
-cdef extern from "src/cython_stuff.h":
-    void gradient_descent(float *edges, float *sites, float *perimeter, float jiggle, int sites, int pts_per_trial, int trials)
-
-cdef struct point:
-    float x
-    float y
+    cdef struct arrays:
+        float *linesegs_to_be_cast
+        float *sites_to_be_cast
+        float *perimeter
+        float *objective_function
+    void gradient_descent(arrays arrs, float jiggle, int sites, int pts_per_trial, int trials)
 
 # wrapper function. 
 # ::1 in the last axis makes 'arr' contiguous in memory, and the rest of the type
@@ -30,5 +29,11 @@ def gradient_descent_func(
         float[:,:,:,::1] linesegs not None, 
         float[:,:,::1] sites not None,
         float[::1] perimeter not None, 
+        float[::1] objective_functions not None, 
         float jiggle):
-    gradient_descent(&linesegs[0,0,0,0], &sites[0,0,0], &perimeter[0], jiggle, sites.shape[1], linesegs.shape[1]*linesegs.shape[2], perimeter.shape[0])
+    cdef arrays arrs
+    arrs.linesegs_to_be_cast = &linesegs[0,0,0,0]
+    arrs.sites_to_be_cast = &sites[0,0,0]
+    arrs.perimeter = &perimeter[0]
+    arrs.objective_function = &objective_functions[0]
+    gradient_descent(arrs, jiggle, sites.shape[1], linesegs.shape[1]*linesegs.shape[2], perimeter.shape[0])

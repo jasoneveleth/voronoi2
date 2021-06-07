@@ -7,6 +7,16 @@
 #include "heap.h"
 #include "cython_stuff.h"
 
+typedef void (*grad_func)(const int,
+                          const int,
+                          const point *const,
+                          point *,
+                          const float,
+                          const float);
+typedef float (*obj_func)(struct edgelist *);
+
+static const float alpha = (float)3e-3; // INTERFACE
+
 // length of lines when reading file
 #define LINELEN 80
 #define FATAL(test, fmt, ...)                                                 \
@@ -18,8 +28,6 @@
             exit(1);                                                          \
         }                                                                     \
     } while (0)
-
-static const float alpha = (float)3e-3;
 
 static inline void
 read_sites_from_file(const char *path, point **arr_ptr, int32_t *nsites)
@@ -83,11 +91,12 @@ verify_nsites(int nsites_found, int nsites)
 }
 
 static inline void
-setup_arrays(point **sites,
-             point **linesegs,
-             const int nsites,
-             const int points_per_trial,
-             float *initial_perimeter)
+first_step(point **sites,
+           point **linesegs,
+           const int nsites,
+           const int points_per_trial,
+           float *initial_perimeter,
+           float *initial_objectivefunction)
 {
     point *sites_found;
     int32_t nsites_found;
@@ -101,6 +110,7 @@ setup_arrays(point **sites,
     memcpy(*sites, sites_found, (size_t)nsites * sizeof(point));
     free(sites_found);
     *initial_perimeter = calc_perimeter(&edgelist_first_perimeter);
+    *initial_objectivefunction = obj_function(&edgelist_first_perimeter);
     free_edgelist(&edgelist_first_perimeter);
 }
 
@@ -119,35 +129,48 @@ calc_gradient_for_site(const int j,
     local_sites[j].x = frac(local_sites[j].x + jiggle);
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
-    gradient[j].x = calc_perimeter(&local_edgelist) - prev_perimeter;
+    gradient[j].x = obj_function(&local_edgelist) - prev_perimeter;
     gradient[j].x /= jiggle;
-
-    local_sites[j].x = old_sites[j].x;
-    free_edgelist(&local_edgelist);
+    local_sites[j].x = old_sites[j].x; // reset for y
+    free_edgelist(&local_edgelist);    // reset for y
     // y
     local_sites[j].y = frac(local_sites[j].y + jiggle);
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
-    gradient[j].y = calc_perimeter(&local_edgelist) - prev_perimeter;
+    gradient[j].y = obj_function(&local_edgelist) - prev_perimeter;
     gradient[j].y /= jiggle;
 
     free(local_sites);
     free_edgelist(&local_edgelist);
 }
 
+static inline void
+calc_stats(struct edgelist *edgelist,
+                float *perimeter,
+                float *objective_function,
+                obj_func obj_function)
+{
+    *perimeter = calc_perimeter(edgelist);
+    *objective_function = obj_function(edgelist);
+}
+
 void
-gradient_descent(float *linesegs_to_be_cast,
-                 float *sites_to_be_cast,
-                 float *perimeter,
+gradient_descent(struct arrays arrs,
                  const float jiggle,
                  const int nsites,
                  const int pts_per_trial,
                  const int trials)
 {
-    point *linesegs = (point *)linesegs_to_be_cast;
-    point *sites = (point *)sites_to_be_cast;
+    grad_func method = calc_gradient_for_site; // INTERFACE
+    obj_func obj_function = calc_perimeter;    // INTERFACE
 
-    setup_arrays(&sites, &linesegs, nsites, pts_per_trial, &perimeter[0]);
+    point *linesegs = (point *)arrs.linesegs_to_be_cast;
+    point *sites = (point *)arrs.sites_to_be_cast;
+    float *perimeter = arrs.perimeter;
+    float *obj_func_vals = arrs.objective_function;
+
+    first_step(&sites, &linesegs, nsites, pts_per_trial, &perimeter[0],
+               &obj_func_vals[0]);
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
     for (int i = 1; i < trials; i++) { // start at 1: there is no prev perimeter
@@ -156,14 +179,14 @@ gradient_descent(float *linesegs_to_be_cast,
         point *old_sites_ptr = &sites[(i - 1) * nsites];
         // PARALLEL
         for (int j = 0; j < nsites; j++)
-            calc_gradient_for_site(j, nsites, old_sites_ptr, gradient, jiggle,
-                                   prev_perimeter);
+            method(j, nsites, old_sites_ptr, gradient, jiggle, prev_perimeter);
         update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
+
         struct edgelist edgelist;
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        perimeter[i] = calc_perimeter(&edgelist);
+        calc_stats(&edgelist, &perimeter[i], &obj_func_vals[i], obj_function);
         free_edgelist(&edgelist);
     }
     free(gradient);
