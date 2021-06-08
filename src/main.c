@@ -60,36 +60,6 @@ calc_stats(struct edgelist *edgelist,
     *objective_function = obj_function(sites, edgelist, nsites);
 }
 
-static inline void
-finite_difference(const int j,
-                  const int nsites,
-                  const point *const old_sites,
-                  point *gradient,
-                  const float jiggle,
-                  const float prev_objective)
-{
-    point *local_sites = malloc((size_t)nsites * sizeof(point));
-    memcpy(local_sites, old_sites, (size_t)nsites * sizeof(point));
-    struct edgelist local_edgelist;
-    // x
-    local_sites[j].x = frac(local_sites[j].x + jiggle);
-    init_edgelist(&local_edgelist);
-    fortunes(local_sites, nsites, &local_edgelist);
-    float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
-    gradient[j].x = (curr_obj - prev_objective) / jiggle;
-    local_sites[j].x = old_sites[j].x; // reset for y
-    free_edgelist(&local_edgelist);    // reset for y
-    // y
-    local_sites[j].y = frac(local_sites[j].y + jiggle);
-    init_edgelist(&local_edgelist);
-    fortunes(local_sites, nsites, &local_edgelist);
-    curr_obj = obj_function(local_sites, &local_edgelist, nsites);
-    gradient[j].y = (curr_obj - prev_objective) / jiggle;
-
-    free(local_sites);
-    free_edgelist(&local_edgelist);
-}
-
 void
 gradient_descent(struct arrays arrs,
                  const float jiggle,
@@ -120,7 +90,7 @@ gradient_descent(struct arrays arrs,
         point *old_sites_ptr = &sites[(i - 1) * nsites];
         // PARALLEL
         for (int j = 0; j < nsites; j++)
-            finite_difference(j, nsites, old_sites_ptr, gradient, jiggle,
+            gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
                               prev_objective);
         update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
 
