@@ -85,7 +85,6 @@ gradient_descent(struct arrays arrs,
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
     for (int i = 1; i < trials; i++) { // start at 1: there is no prev perimeter
-        memset(gradient, 0, (size_t)nsites * sizeof(point));
         float prev_objective = obj_func_vals[i - 1];
         point *old_sites_ptr = &sites[(i - 1) * nsites];
         // PARALLEL
