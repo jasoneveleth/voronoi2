@@ -3,7 +3,6 @@
 
 #define INIT_SIZE 1024
 #include <stdint.h>
-#include <stdlib.h>
 #include "geometry.h"
 
 struct bnode {

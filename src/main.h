@@ -1,10 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include "fortunes.h"
 #include "cython_stuff.h"
 #include "gradient.h"
@@ -17,7 +13,6 @@ typedef void (*grad_func)(const int,
                           const float,
                           const float,
                           obj_func);
-
 
 // length of lines when reading file
 #define LINELEN 80

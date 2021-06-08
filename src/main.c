@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include "main.h"
 
 static inline void
@@ -87,8 +91,8 @@ calc_gradient_for_site(const int j,
     fortunes(local_sites, nsites, &local_edgelist);
     gradient[j].x =
         obj_function(local_sites, &local_edgelist, nsites) - prev_objective;
-    printf("%f %f %f\n", (double)gradient[j].x, (double)(gradient[j].x + prev_objective),
-           (double)prev_objective);
+    printf("%f %f %f\n", (double)gradient[j].x,
+           (double)(gradient[j].x + prev_objective), (double)prev_objective);
     gradient[j].x /= jiggle;
     local_sites[j].x = old_sites[j].x; // reset for y
     free_edgelist(&local_edgelist);    // reset for y
@@ -111,8 +115,8 @@ gradient_descent(struct arrays arrs,
                  const int pts_per_trial,
                  const int trials)
 {
-    grad_func method = calc_gradient_for_site;       // INTERFACE
-    obj_func obj_function = obj_perimeter_and_repel; // INTERFACE
+    grad_func method = calc_gradient_for_site; // INTERFACE
+    obj_func obj_function = obj_perimeter;     // INTERFACE
 
     point *linesegs = (point *)arrs.linesegs_to_be_cast;
     point *sites = (point *)arrs.sites_to_be_cast;

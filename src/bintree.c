@@ -1,9 +1,10 @@
 #include <stdio.h>
-#include "bintree.h"
-#include "fortunes.h"
+#include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include <math.h>
+#include "bintree.h"
+#include "fortunes.h"
 
 int
 bisinternal(struct bnode *node)

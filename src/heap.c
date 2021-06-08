@@ -1,6 +1,7 @@
-#include "heap.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include "heap.h"
 
 #ifdef DEBUG
 static inline void

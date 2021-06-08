@@ -1,8 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include "bintree.h"
 #include "fortunes.h"
-#include "heap.h"
 
 void
 print_edgelist(struct edgelist *edgelist)

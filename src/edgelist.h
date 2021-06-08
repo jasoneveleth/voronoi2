@@ -4,9 +4,6 @@
 #include <stdint.h>
 #include "geometry.h"
 
-// These two structs depend on each other, so I have to declare them both before
-// I can define them
-
 struct halfedge {
     point origin;
     struct halfedge *twin;
