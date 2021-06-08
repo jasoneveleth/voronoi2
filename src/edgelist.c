@@ -26,3 +26,12 @@ copy_edges(struct edgelist *edgelist, point *dest)
         dest[i * 2 + 1].y = edgelist->edges[i]->twin->origin.y;
     }
 }
+
+void
+init_edgelist(struct edgelist *e)
+{
+    e->nedges = 0;
+    e->allocated = 1024;
+    // maybe make it an array of structs rather than pointers
+    e->edges = malloc((size_t)e->allocated * sizeof(struct halfedge *));
+}

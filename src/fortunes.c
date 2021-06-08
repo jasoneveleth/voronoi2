@@ -342,13 +342,4 @@ fortunes(point *sites, int32_t nsites, struct edgelist *edgelist)
     free_tree(root);
 }
 
-inline void
-init_edgelist(struct edgelist *e)
-{
-    e->nedges = 0;
-    e->allocated = 1024;
-    // maybe make it an array of structs rather than pointers
-    e->edges = malloc((size_t)e->allocated * sizeof(struct halfedge *));
-}
-
 /* vim: set ft=c.makemaps: */
