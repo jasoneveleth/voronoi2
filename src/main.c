@@ -5,35 +5,47 @@
 #include "main.h"
 
 static inline void
-read_sites_from_file(const char *path, point **arr_ptr, int32_t *nsites)
-{
-    FILE *file = fopen(path, "r");
-    FATAL(file == NULL, "path not valid: '%s'\n", path);
-
-    char line[LINELEN];
-    (*arr_ptr) = malloc(2 * sizeof(point));
-    int32_t allocated = 2;
-    for ((*nsites) = 0; fgets(line, LINELEN, file) != NULL; (*nsites)++) {
-        if ((*nsites) >= allocated) {
-            allocated *= 2;
-            *arr_ptr = realloc((*arr_ptr), sizeof(point) * (size_t)(allocated));
-        }
-        char *first = strtok(line, ", \t");
-        char *second = strtok(NULL, ", \t");
-        (*arr_ptr)[(*nsites)].x = strtof(first, NULL);
-        (*arr_ptr)[(*nsites)].y = strtof(second, NULL);
-    }
-    fclose(file);
-    (*arr_ptr) = realloc((*arr_ptr), (size_t)(*nsites) * sizeof(point));
-}
-
-// -------------------------- ploting stuff ----------------------------
-
-static inline void
 verify_nsites(int nsites_found, int nsites)
 {
     FATAL(nsites_found > nsites, "error: nsites found %d, nsites expected %d\n",
           nsites_found, nsites);
+}
+
+static inline void
+read_sites_from_file(const char *path, point **sites, int32_t *nsites)
+{
+    point *sites_found;
+    int32_t nsites_found;
+    FILE *file = fopen(path, "r");
+    FATAL(file == NULL, "path not valid: '%s'\n", path);
+
+    char line[LINELEN];
+    sites_found = malloc(2 * sizeof(point));
+    int32_t allocated = 2;
+    for (nsites_found = 0; fgets(line, LINELEN, file) != NULL; nsites_found++) {
+        if (nsites_found >= allocated) {
+            allocated *= 2;
+            sites_found =
+                realloc(sites_found, sizeof(point) * (size_t)(allocated));
+        }
+        char *first = strtok(line, ", \t");
+        char *second = strtok(NULL, ", \t");
+        sites_found[nsites_found].x = strtof(first, NULL);
+        sites_found[nsites_found].y = strtof(second, NULL);
+    }
+    fclose(file);
+    sites_found = realloc(sites_found, (size_t)nsites_found * sizeof(point));
+    verify_nsites(nsites_found, *nsites);
+    if (*nsites != nsites_found) {
+        fprintf(stderr, "changing nsites from: %d to %d\n", *nsites, nsites_found);
+        *nsites = nsites_found;
+    }
+    if (*sites == NULL) {
+        *sites = sites_found;
+    } else {
+        memcpy(*sites, sites_found, (size_t)nsites_found * sizeof(point));
+        free(sites_found);
+    }
 }
 
 static inline void
@@ -51,23 +63,18 @@ calc_stats(struct edgelist *edgelist,
 static inline void
 first_step(point **sites,
            point **linesegs,
-           const int nsites,
+           int nsites,
            const int points_per_trial,
            float *initial_perimeter,
            float *initial_objectivefunction,
            obj_func obj_function)
 {
-    point *sites_found;
-    int32_t nsites_found;
-    read_sites_from_file("input", &sites_found, &nsites_found);
-    verify_nsites(nsites_found, nsites);
+    read_sites_from_file("input", sites, &nsites);
 
     struct edgelist edgelist_first_perimeter;
     init_edgelist(&edgelist_first_perimeter);
-    fortunes(sites_found, nsites_found, &edgelist_first_perimeter);
+    fortunes(*sites, nsites, &edgelist_first_perimeter);
     copy_edges(&edgelist_first_perimeter, &(*linesegs)[0 * points_per_trial]);
-    memcpy(*sites, sites_found, (size_t)nsites * sizeof(point));
-    free(sites_found);
     calc_stats(&edgelist_first_perimeter, *sites, initial_perimeter,
                initial_objectivefunction, obj_function, nsites);
     free_edgelist(&edgelist_first_perimeter);
@@ -149,26 +156,23 @@ gradient_descent(struct arrays arrs,
 }
 
 void
-simple_diagram(float *numpy_arr, int size, float *sites, int nsites_expected)
+simple_diagram(float *numpy_arr,
+               int size,
+               float *sites_numpy_arr,
+               int nsites_expected)
 {
+    point *sites = (point *)sites_numpy_arr;
+    read_sites_from_file("input", &sites, &nsites_expected);
     struct edgelist e;
     init_edgelist(&e);
-    point *sites_found;
-    int32_t nsites_found;
 
-    read_sites_from_file("input", &sites_found, &nsites_found);
-    verify_nsites(nsites_found, nsites_expected);
-
-    fortunes(sites_found, nsites_found, &e);
+    fortunes(sites, nsites_expected, &e);
     FATAL(e.nedges > size, "error: size of numpy arr %d, num of edges %d\n",
           size, e.nedges);
 
     copy_edges(&e, (point *)numpy_arr);
-    memcpy(sites, sites_found, (size_t)nsites_found * sizeof(point));
-    free(sites_found);
     free_edgelist(&e);
 }
-// ------------------------- end of plot methods -------------------
 
 #ifndef NMAIN
 static inline void
@@ -200,8 +204,8 @@ graph_file(const char *path)
 {
     struct edgelist e;
     init_edgelist(&e);
-    int32_t nsites = 0;
-    point *sites;
+    int32_t nsites = 1000; // limmit to 1000
+    point *sites = NULL;
     read_sites_from_file(path, &sites, &nsites);
     print_sites(sites, nsites);
     fortunes(sites, nsites, &e);
