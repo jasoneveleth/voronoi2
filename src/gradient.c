@@ -31,3 +31,14 @@ obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
     }
     return obj_function;
 }
+
+void
+update_sites(point *src, point *dest, point *grad, int nsites)
+{
+    for (int i = 0; i < nsites; i++) {
+        dest[i].x = frac(src[i].x - alpha * grad[i].x);
+        if (dest[i].x < 0) dest[i].x = 1 + dest[i].x;
+        dest[i].y = frac(src[i].y - alpha * grad[i].y);
+        if (dest[i].y < 0) dest[i].y = 1 + dest[i].y;
+    }
+}

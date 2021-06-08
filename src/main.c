@@ -23,36 +23,7 @@ read_sites_from_file(const char *path, point **arr_ptr, int32_t *nsites)
     (*arr_ptr) = realloc((*arr_ptr), (size_t)(*nsites) * sizeof(point));
 }
 
-static inline float
-frac(float x)
-{
-    float useless_required_ptr;
-    return modff(x, &useless_required_ptr);
-}
-
-static inline void
-copy_edges(struct edgelist *edgelist, point *dest)
-{
-    for (int i = 0; i < edgelist->nedges; i++) {
-        // multiply by 2 because: 1 edge = 2 points
-        dest[i * 2].x = edgelist->edges[i]->origin.x;
-        dest[i * 2].y = edgelist->edges[i]->origin.y;
-        dest[i * 2 + 1].x = edgelist->edges[i]->twin->origin.x;
-        dest[i * 2 + 1].y = edgelist->edges[i]->twin->origin.y;
-    }
-}
-
 // -------------------------- ploting stuff ----------------------------
-static inline void
-update_sites(point *src, point *dest, point *grad, int nsites)
-{
-    for (int i = 0; i < nsites; i++) {
-        dest[i].x = frac(src[i].x - alpha * grad[i].x);
-        if (dest[i].x < 0) dest[i].x = 1 + dest[i].x;
-        dest[i].y = frac(src[i].y - alpha * grad[i].y);
-        if (dest[i].y < 0) dest[i].y = 1 + dest[i].y;
-    }
-}
 
 static inline void
 verify_nsites(int nsites_found, int nsites)
@@ -116,7 +87,7 @@ calc_gradient_for_site(const int j,
     fortunes(local_sites, nsites, &local_edgelist);
     gradient[j].x =
         obj_function(local_sites, &local_edgelist, nsites) - prev_objective;
-    printf("%f %f\n", (double)(gradient[j].x + prev_objective),
+    printf("%f %f %f\n", (double)gradient[j].x, (double)(gradient[j].x + prev_objective),
            (double)prev_objective);
     gradient[j].x /= jiggle;
     local_sites[j].x = old_sites[j].x; // reset for y

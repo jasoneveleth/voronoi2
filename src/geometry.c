@@ -2,6 +2,13 @@
 #include <math.h>
 
 float
+frac(float x)
+{
+    float useless_required_ptr;
+    return modff(x, &useless_required_ptr);
+}
+
+float
 fsqrt(float x)
 {
     return (float)sqrt((double)x);

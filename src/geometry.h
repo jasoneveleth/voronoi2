@@ -11,5 +11,6 @@ point intersect_parabolas(float, point *);
 float fsqrt(float);
 point circleBottom(point, point, point);
 point circle_center(point, point, point);
+float frac(float x);
 
 #endif

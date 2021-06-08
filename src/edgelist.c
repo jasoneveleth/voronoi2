@@ -13,3 +13,15 @@ calc_perimeter(struct edgelist *edgelist)
     }
     return (length / 2) + 4;
 }
+
+void
+copy_edges(struct edgelist *edgelist, point *dest)
+{
+    for (int i = 0; i < edgelist->nedges; i++) {
+        // multiply by 2 because: 1 edge = 2 points
+        dest[i * 2].x = edgelist->edges[i]->origin.x;
+        dest[i * 2].y = edgelist->edges[i]->origin.y;
+        dest[i * 2 + 1].x = edgelist->edges[i]->twin->origin.x;
+        dest[i * 2 + 1].y = edgelist->edges[i]->twin->origin.y;
+    }
+}

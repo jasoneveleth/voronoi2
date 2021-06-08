@@ -18,8 +18,6 @@ typedef void (*grad_func)(const int,
                           const float,
                           obj_func);
 
-// static const float alpha = (float)3e-3; // INTERFACE
-static const float alpha = (float)1e-5; // INTERFACE
 
 // length of lines when reading file
 #define LINELEN 80
