@@ -91,7 +91,7 @@ gradient_descent(struct arrays arrs,
         // PARALLEL
         for (int j = 0; j < nsites; j++)
             gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
-                              prev_objective);
+                            prev_objective);
         update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
 
         struct edgelist edgelist;
