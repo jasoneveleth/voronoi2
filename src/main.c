@@ -54,7 +54,6 @@ calc_stats(struct edgelist *edgelist,
            point *sites,
            float *perimeter,
            float *objective_function,
-           obj_func obj_function,
            int nsites)
 {
     *perimeter = calc_perimeter(edgelist);
@@ -62,13 +61,12 @@ calc_stats(struct edgelist *edgelist,
 }
 
 static inline void
-calc_gradient_for_site(const int j,
-                       const int nsites,
-                       const point *const old_sites,
-                       point *gradient,
-                       const float jiggle,
-                       const float prev_objective,
-                       obj_func obj_function)
+finite_difference(const int j,
+                  const int nsites,
+                  const point *const old_sites,
+                  point *gradient,
+                  const float jiggle,
+                  const float prev_objective)
 {
     point *local_sites = malloc((size_t)nsites * sizeof(point));
     memcpy(local_sites, old_sites, (size_t)nsites * sizeof(point));
@@ -112,7 +110,7 @@ gradient_descent(struct arrays arrs,
     fortunes(sites, nsites, &edgelist_first_perimeter);
     copy_edges(&edgelist_first_perimeter, &linesegs[0 * pts_per_trial]);
     calc_stats(&edgelist_first_perimeter, sites, &perimeter[0],
-               &obj_func_vals[0], obj_function, nsites);
+               &obj_func_vals[0], nsites);
     free_edgelist(&edgelist_first_perimeter);
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
@@ -122,16 +120,15 @@ gradient_descent(struct arrays arrs,
         point *old_sites_ptr = &sites[(i - 1) * nsites];
         // PARALLEL
         for (int j = 0; j < nsites; j++)
-            calc_gradient_for_site(j, nsites, old_sites_ptr, gradient, jiggle,
-                                   prev_objective, obj_function);
+            finite_difference(j, nsites, old_sites_ptr, gradient, jiggle,
+                              prev_objective);
         update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
 
         struct edgelist edgelist;
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i],
-                   obj_function, nsites);
+        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i], nsites);
         free_edgelist(&edgelist);
     }
     free(gradient);

@@ -5,15 +5,6 @@
 #include "cython_stuff.h"
 #include "gradient.h"
 
-typedef float (*obj_func)(point *sites, struct edgelist *, int);
-typedef void (*grad_func)(const int,
-                          const int,
-                          const point *const,
-                          point *,
-                          const float,
-                          const float,
-                          obj_func);
-
 // length of lines when reading file
 #define LINELEN 80
 #define FATAL(test, fmt, ...)                                                 \
