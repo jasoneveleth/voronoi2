@@ -99,8 +99,6 @@ calc_gradient_for_site(const int j,
     fortunes(local_sites, nsites, &local_edgelist);
     gradient[j].x =
         obj_function(local_sites, &local_edgelist, nsites) - prev_objective;
-    printf("%f %f %f\n", (double)gradient[j].x,
-           (double)(gradient[j].x + prev_objective), (double)prev_objective);
     gradient[j].x /= jiggle;
     local_sites[j].x = old_sites[j].x; // reset for y
     free_edgelist(&local_edgelist);    // reset for y
