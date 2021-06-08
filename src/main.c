@@ -36,11 +36,17 @@ read_sites_from_file(const char *path, point **sites, int32_t *nsites)
     fclose(file);
     sites_found = realloc(sites_found, (size_t)nsites_found * sizeof(point));
     verify_nsites(nsites_found, *nsites);
+
+    // if the array 'sites' is too large, I change the int in nsites, (this
+    // doesn't apply when (*sites == NULL), but it's still nice to know I guess
     if (*nsites != nsites_found) {
         fprintf(stderr, "changing nsites from: %d to %d\n", *nsites,
                 nsites_found);
         *nsites = nsites_found;
     }
+    // this is the case when we didn't know how big the file was poing to turn
+    // out to be, so we don't destroy the array we've been reading into, rather
+    // reassign
     if (*sites == NULL) {
         *sites = sites_found;
     } else {
