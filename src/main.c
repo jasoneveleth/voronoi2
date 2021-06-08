@@ -97,18 +97,16 @@ calc_gradient_for_site(const int j,
     local_sites[j].x = frac(local_sites[j].x + jiggle);
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
-    gradient[j].x =
-        obj_function(local_sites, &local_edgelist, nsites) - prev_objective;
-    gradient[j].x /= jiggle;
+    float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+    gradient[j].x = (curr_obj - prev_objective) / jiggle;
     local_sites[j].x = old_sites[j].x; // reset for y
     free_edgelist(&local_edgelist);    // reset for y
     // y
     local_sites[j].y = frac(local_sites[j].y + jiggle);
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
-    gradient[j].y =
-        obj_function(local_sites, &local_edgelist, nsites) - prev_objective;
-    gradient[j].y /= jiggle;
+    curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+    gradient[j].y = (curr_obj - prev_objective) / jiggle;
 
     free(local_sites);
     free_edgelist(&local_edgelist);
