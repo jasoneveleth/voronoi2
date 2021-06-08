@@ -99,9 +99,6 @@ gradient_descent(struct arrays arrs,
                  const int pts_per_trial,
                  const int trials)
 {
-    grad_func method = calc_gradient_for_site; // INTERFACE
-    obj_func obj_function = obj_perimeter;     // INTERFACE
-
     // unpack numpy arrays
     point *linesegs = (point *)arrs.linesegs_to_be_cast;
     point *sites = (point *)arrs.sites_to_be_cast;
@@ -125,8 +122,8 @@ gradient_descent(struct arrays arrs,
         point *old_sites_ptr = &sites[(i - 1) * nsites];
         // PARALLEL
         for (int j = 0; j < nsites; j++)
-            method(j, nsites, old_sites_ptr, gradient, jiggle, prev_objective,
-                   obj_function);
+            calc_gradient_for_site(j, nsites, old_sites_ptr, gradient, jiggle,
+                                   prev_objective, obj_function);
         update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
 
         struct edgelist edgelist;
