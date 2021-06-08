@@ -37,7 +37,8 @@ read_sites_from_file(const char *path, point **sites, int32_t *nsites)
     sites_found = realloc(sites_found, (size_t)nsites_found * sizeof(point));
     verify_nsites(nsites_found, *nsites);
     if (*nsites != nsites_found) {
-        fprintf(stderr, "changing nsites from: %d to %d\n", *nsites, nsites_found);
+        fprintf(stderr, "changing nsites from: %d to %d\n", *nsites,
+                nsites_found);
         *nsites = nsites_found;
     }
     if (*sites == NULL) {
@@ -204,7 +205,7 @@ graph_file(const char *path)
 {
     struct edgelist e;
     init_edgelist(&e);
-    int32_t nsites = 1000; // limmit to 1000
+    int32_t nsites = 1000000; // limmit to 1_000_000
     point *sites = NULL;
     read_sites_from_file(path, &sites, &nsites);
     print_sites(sites, nsites);
