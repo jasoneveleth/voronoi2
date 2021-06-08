@@ -62,26 +62,6 @@ calc_stats(struct edgelist *edgelist,
 }
 
 static inline void
-first_step(point **sites,
-           point **linesegs,
-           int nsites,
-           const int points_per_trial,
-           float *initial_perimeter,
-           float *initial_objectivefunction,
-           obj_func obj_function)
-{
-    read_sites_from_file("input", sites, &nsites);
-
-    struct edgelist edgelist_first_perimeter;
-    init_edgelist(&edgelist_first_perimeter);
-    fortunes(*sites, nsites, &edgelist_first_perimeter);
-    copy_edges(&edgelist_first_perimeter, &(*linesegs)[0 * points_per_trial]);
-    calc_stats(&edgelist_first_perimeter, *sites, initial_perimeter,
-               initial_objectivefunction, obj_function, nsites);
-    free_edgelist(&edgelist_first_perimeter);
-}
-
-static inline void
 calc_gradient_for_site(const int j,
                        const int nsites,
                        const point *const old_sites,
@@ -115,20 +95,28 @@ calc_gradient_for_site(const int j,
 void
 gradient_descent(struct arrays arrs,
                  const float jiggle,
-                 const int nsites,
+                 int nsites,
                  const int pts_per_trial,
                  const int trials)
 {
     grad_func method = calc_gradient_for_site; // INTERFACE
     obj_func obj_function = obj_perimeter;     // INTERFACE
 
+    // unpack numpy arrays
     point *linesegs = (point *)arrs.linesegs_to_be_cast;
     point *sites = (point *)arrs.sites_to_be_cast;
     float *perimeter = arrs.perimeter;
     float *obj_func_vals = arrs.objective_function;
 
-    first_step(&sites, &linesegs, nsites, pts_per_trial, &perimeter[0],
-               &obj_func_vals[0], obj_function);
+    read_sites_from_file("input", &sites, &nsites);
+
+    struct edgelist edgelist_first_perimeter;
+    init_edgelist(&edgelist_first_perimeter);
+    fortunes(sites, nsites, &edgelist_first_perimeter);
+    copy_edges(&edgelist_first_perimeter, &linesegs[0 * pts_per_trial]);
+    calc_stats(&edgelist_first_perimeter, sites, &perimeter[0],
+               &obj_func_vals[0], obj_function, nsites);
+    free_edgelist(&edgelist_first_perimeter);
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
     for (int i = 1; i < trials; i++) { // start at 1: there is no prev perimeter
