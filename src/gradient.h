@@ -7,5 +7,11 @@ static const float alpha = (float)3e-3;
 
 float obj_function(point *, struct edgelist *, int);
 void update_sites(point *, point *, point *, int);
+void gradient_method(const int,
+                     const int,
+                     const point *const,
+                     point *,
+                     const float,
+                     const float);
 
 #endif
