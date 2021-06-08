@@ -240,6 +240,8 @@ main(int argc, char **argv)
 {
     if (argc == 1) {
         default_graph();
+    } else if (argv[1][1] == 'p') {
+        graph_file(argv[argc - 1]);
     } else {
         graph_file(argv[argc - 1]);
     }
