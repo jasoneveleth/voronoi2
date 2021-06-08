@@ -4,12 +4,7 @@
 #define INIT_SIZE 1024
 #include <stdint.h>
 #include <stdlib.h>
-
-typedef struct point point;
-struct point {
-    float x;
-    float y;
-};
+#include "geometry.h"
 
 struct bnode {
     struct bnode *left;
@@ -20,6 +15,7 @@ struct bnode {
         struct arc *arc;
     };
 };
+// typedef int (*comparison)(struct bnode *, struct bnode *);
 
 struct bnode *baddleft(struct bnode *, void *);
 struct bnode *baddright(struct bnode *, void *);

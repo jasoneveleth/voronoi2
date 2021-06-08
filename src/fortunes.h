@@ -3,29 +3,7 @@
 
 #include "heap.h"
 #include "bintree.h"
-
-// These two structs depend on each other, so I have to declare them both before
-// I can define them
-
-struct halfedge {
-    point origin;
-    struct halfedge *twin;
-    struct halfedge *next;
-    struct halfedge *prev;
-    struct face *face;
-};
-
-struct face {
-    struct halfedge *outercompnent;
-    point site;
-};
-
-struct edgelist {
-    struct face *face;
-    struct halfedge **edges;
-    int32_t allocated;
-    int32_t nedges;
-};
+#include "edgelist.h"
 
 struct bp {
     point sites[2];
@@ -53,9 +31,5 @@ void fortunes(point *, int32_t, struct edgelist *);
 void init_edgelist(struct edgelist *);
 void free_edgelist(struct edgelist *);
 void print_edgelist(struct edgelist *);
-float calc_perimeter(struct edgelist *);
-
-float obj_perimeter(point *, struct edgelist *, int);
-float obj_perimeter_and_repel(point *, struct edgelist *, int);
 
 #endif

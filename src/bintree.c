@@ -49,67 +49,6 @@ bremove(struct bnode *node)
     return attr;
 }
 
-float
-fsqrt(float x)
-{
-    return (float)sqrt((double)x);
-}
-
-static inline void
-quadraticFormula(float a, float b, float c, float *smaller, float *larger)
-{
-    float x1 = (-b - fsqrt(b * b - 4 * a * c)) / (2 * a);
-    float x2 = (-b + fsqrt(b * b - 4 * a * c)) / (2 * a);
-    *smaller = x1 > x2 ? x2 : x1;
-    *larger = x1 > x2 ? x1 : x2;
-}
-
-point
-intersect_parabolas(float sweepline, point *parabolas)
-{
-    /* printf("intersecting: (%f, %f), (%f, %f) at %f\n", */
-    /*        (double)parabolas[0].x, */
-    /*        (double)parabolas[0].y, */
-    /*        (double)parabolas[1].x, */
-    /*        (double)parabolas[1].y, */
-    /*        (double)sweepline); */
-    point p1 = parabolas[0]; // parabola on the left of bp
-    point p2 = parabolas[1]; // parabola on the right of bp
-    float l = sweepline;
-
-    // TODO sweep line and points are smae height
-
-    float TWO = (float)2; // avoid double promotion
-    float ONE = (float)1; // avoid double promotion
-    float b = (p2.x) / (p2.y - l) - (p1.x) / (p1.y - l);
-    float c = (p1.x * p1.x + p1.y * p1.y - l * l) / (TWO * (p1.y - l))
-              - (p2.x * p2.x + p2.y * p2.y - l * l) / (TWO * (p2.y - l));
-
-    // TODO mutliple points have same y value
-
-    float a = ONE / (TWO * (p1.y - l)) - ONE / (TWO * (p2.y - l));
-
-    float x1, x2;
-    quadraticFormula(a, b, c, &x1, &x2); // we know x1 < x2
-    float y1 =
-        (ONE / (TWO * (p1.y - l)))
-        * (x1 * x1 - TWO * p1.x * x1 + p1.x * p1.x + p1.y * p1.y - l * l);
-    float y2 =
-        (ONE / (TWO * (p1.y - l)))
-        * (x2 * x2 - TWO * p1.x * x2 + p1.x * p1.x + p1.y * p1.y - l * l);
-    point left = {x1, y1};
-    point right = {x2, y2};
-
-    int parabola_order_is_old_then_new = p1.y > p2.y;
-    if (parabola_order_is_old_then_new) {
-        /* printf("got: (%f, %f)\n", (double)left.x, (double)left.y); */
-        return left;
-    } else {
-        /* printf("got: (%f, %f)\n", (double)right.x, (double)right.y); */
-        return right;
-    }
-}
-
 struct bnode *
 bfindarc(struct bnode *root, point site)
 {

@@ -4,51 +4,6 @@
 #include "fortunes.h"
 #include "heap.h"
 
-float
-calc_perimeter(struct edgelist *edgelist)
-{
-    float length = 0;
-    for (int i = 0; i < edgelist->nedges; i++) {
-        float dx =
-            edgelist->edges[i]->origin.x - edgelist->edges[i]->twin->origin.x;
-        float dy =
-            edgelist->edges[i]->origin.y - edgelist->edges[i]->twin->origin.y;
-        length += fsqrt(dx * dx + dy * dy);
-    }
-    return (length / 2) + 4;
-}
-
-float
-obj_perimeter(__attribute__((unused)) point *sites,
-              struct edgelist *edgelist,
-              __attribute__((unused)) int nsites)
-{
-    return calc_perimeter(edgelist);
-}
-
-static inline float 
-repel_formula(const float x) {
-    const float coeff = (float)1e-5; // INTERFACE
-    const float adjustment = (float)0.005;
-    return coeff * 1/((x + adjustment)*(x + adjustment));
-}
-
-float
-obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
-{
-    float obj_function = calc_perimeter(edgelist);
-    for (int i = 0; i < nsites; i++) {
-        for (int j = 0; j < nsites; j++) {
-            if (i == j) continue;
-            float dx = sites[i].x - sites[j].x;
-            float dy = sites[i].y - sites[j].y;
-            float dist_squared = dx * dx + dy * dy;
-            obj_function += repel_formula(dist_squared);
-        }
-    }
-    return obj_function;
-}
-
 void
 print_edgelist(struct edgelist *edgelist)
 {
@@ -145,32 +100,6 @@ converge(struct bp *b1, struct bp *b2)
     printf("det: %f\n", (double)(x1 * y2 - y1 * x2));
 #endif
     return x1 * y2 - y1 * x2 < 0;
-}
-
-static inline point
-circle_center(point a, point b, point c)
-{
-    float ONE = (float)1;
-    float d = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
-    float x = (ONE / d)
-              * ((a.x * a.x + a.y * a.y) * (b.y - c.y)
-                 + (b.x * b.x + b.y * b.y) * (c.y - a.y)
-                 + (c.x * c.x + c.y * c.y) * (a.y - b.y));
-    float y = (ONE / d)
-              * ((a.x * a.x + a.y * a.y) * (c.x - b.x)
-                 + (b.x * b.x + b.y * b.y) * (a.x - c.x)
-                 + (c.x * c.x + c.y * c.y) * (b.x - a.x));
-    point p = {x, y};
-    return p;
-}
-
-static inline point
-circleBottom(point a, point b, point c)
-{
-    point p = circle_center(a, b, c);
-    float r = fsqrt((a.x - p.x) * (a.x - p.x) + (a.y - p.y) * (a.y - p.y));
-    p.y -= r;
-    return p;
 }
 
 static inline void
@@ -422,3 +351,5 @@ init_edgelist(struct edgelist *e)
     // maybe make it an array of structs rather than pointers
     e->edges = malloc((size_t)e->allocated * sizeof(struct halfedge *));
 }
+
+/* vim: set ft=c.makemaps: */
