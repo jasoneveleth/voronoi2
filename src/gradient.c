@@ -8,28 +8,31 @@
 static inline float
 obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
 {
-    float obj_function = calc_perimeter(edgelist);
+    float perimeter = calc_perimeter(edgelist);
+    float repulsion_term = 0;
     for (int i = 0; i < nsites; i++) {
         for (int j = 0; j < nsites; j++) {
             if (i == j) continue;
             float dx = sites[i].x - sites[j].x;
             float dy = sites[i].y - sites[j].y;
-            float dist_squared = dx * dx + dy * dy;
+            float dist = fsqrt((dx * dx) + (dy * dy));
 
-            const float coeff = 5e-4f;
-            obj_function += coeff * logf(1 / dist_squared);
+            // const float coeff = 1e-5f;
+            // repulsion_term += coeff * logf(1 / dist);
+            const float coeff = 1e-7f; // MMM
+            repulsion_term += coeff * (1 / dist);
         }
     }
-    return obj_function;
+    return perimeter + repulsion_term;
 }
 
 float
 obj_function(point *sites, struct edgelist *edgelist, int nsites)
 {
-    (void)sites;  // unused
-    (void)nsites; // unused
-    return calc_perimeter(edgelist);
-    // return obj_perimeter_and_repel(sites, edgelist, nsites);
+    // (void)sites;  // unused
+    // (void)nsites; // unused
+    // return calc_perimeter(edgelist);
+    return obj_perimeter_and_repel(sites, edgelist, nsites);
 }
 
 void
