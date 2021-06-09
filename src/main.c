@@ -75,17 +75,17 @@ calc_stats(struct edgelist *edgelist,
 }
 
 void
-gradient_descent(struct arrays arrs,
+gradient_descent(struct arrays numpy_arrs,
                  const float jiggle,
                  int nsites,
                  const int pts_per_trial,
                  const int trials)
 {
     // unpack numpy arrays
-    point *linesegs = (point *)arrs.linesegs_to_be_cast;
-    point *sites = (point *)arrs.sites_to_be_cast;
-    float *perimeter = arrs.perimeter;
-    float *obj_func_vals = arrs.objective_function;
+    point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
+    point *sites = (point *)numpy_arrs.sites_to_be_cast;
+    float *perimeter = numpy_arrs.perimeter;
+    float *obj_func_vals = numpy_arrs.objective_function;
 
     read_sites_from_file("input", &sites, &nsites);
 
