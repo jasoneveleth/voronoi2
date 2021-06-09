@@ -11,29 +11,37 @@ verify_nsites(int nsites_found, int nsites)
           nsites_found, nsites);
 }
 
+static void
+read_lines_from_file(FILE *file, point **sites_found, int *nsites_found)
+{
+    char line[LINELEN];
+    (*sites_found) = malloc(2 * sizeof(point));
+    int32_t allocated = 2;
+    for ((*nsites_found) = 0; fgets(line, LINELEN, file) != NULL;
+         (*nsites_found)++) {
+        if ((*nsites_found) >= allocated) {
+            allocated *= 2;
+            (*sites_found) =
+                realloc((*sites_found), sizeof(point) * (size_t)(allocated));
+        }
+        char *first = strtok(line, ", \t");
+        char *second = strtok(NULL, ", \t");
+        (*sites_found)[(*nsites_found)].x = strtof(first, NULL);
+        (*sites_found)[(*nsites_found)].y = strtof(second, NULL);
+    }
+}
+
 static inline void
 read_sites_from_file(const char *path, point **sites, int32_t *nsites)
 {
     point *sites_found;
     int32_t nsites_found;
+
     FILE *file = fopen(path, "r");
     FATAL(file == NULL, "path not valid: '%s'\n", path);
-
-    char line[LINELEN];
-    sites_found = malloc(2 * sizeof(point));
-    int32_t allocated = 2;
-    for (nsites_found = 0; fgets(line, LINELEN, file) != NULL; nsites_found++) {
-        if (nsites_found >= allocated) {
-            allocated *= 2;
-            sites_found =
-                realloc(sites_found, sizeof(point) * (size_t)(allocated));
-        }
-        char *first = strtok(line, ", \t");
-        char *second = strtok(NULL, ", \t");
-        sites_found[nsites_found].x = strtof(first, NULL);
-        sites_found[nsites_found].y = strtof(second, NULL);
-    }
+    read_lines_from_file(file, &sites_found, &nsites_found);
     fclose(file);
+
     sites_found = realloc(sites_found, (size_t)nsites_found * sizeof(point));
     verify_nsites(nsites_found, *nsites);
 
