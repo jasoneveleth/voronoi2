@@ -98,6 +98,7 @@ simple_descent(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
                                 prev_objective);
+#ifdef REPEL
             // --------- PROCESS GRAD
             float sumx = 0;
             float sumy = 0;
@@ -112,6 +113,7 @@ simple_descent(struct arrays numpy_arrs,
                 gradient[j].y -= avgy;
             }
             // --------- END PROCESS
+#endif
 
             update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
         }

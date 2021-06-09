@@ -27,10 +27,13 @@ obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
 float
 obj_function(point *sites, struct edgelist *edgelist, int nsites)
 {
-    // (void)sites;  // unused
-    // (void)nsites; // unused
-    // return calc_perimeter(edgelist);
+#ifdef REPEL
     return obj_perimeter_and_repel(sites, edgelist, nsites);
+#else
+    (void)sites;  // unused
+    (void)nsites; // unused
+    return calc_perimeter(edgelist);
+#endif
 }
 
 void
