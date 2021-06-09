@@ -2,39 +2,37 @@
 #include <string.h>
 #include <math.h>
 #include "gradient.h"
+#include <stdio.h>
 #include "fortunes.h"
 
-float
-obj_function(__attribute__((unused)) point *sites,
-             struct edgelist *edgelist,
-             __attribute__((unused)) int nsites)
+static inline float
+obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
 {
-    return calc_perimeter(edgelist);
+    float obj_function = calc_perimeter(edgelist);
+    printf("perimeter, %f\t", (double)obj_function);
+    for (int i = 0; i < nsites; i++) {
+        for (int j = 0; j < nsites; j++) {
+            if (i == j) continue;
+            float dx = sites[i].x - sites[j].x;
+            float dy = sites[i].y - sites[j].y;
+            float dist_squared = dx * dx + dy * dy;
+
+            const float coeff = 5e-4f;
+            obj_function += coeff * logf(1 / dist_squared);
+        }
+    }
+    printf("objective function, %f\n", (double)obj_function);
+    return obj_function;
 }
 
-// static inline float
-// repel_formula(const float x)
-// {
-//     const float coeff = (float)2e-9; // INTERFACE
-//     const float adjusted = (float)0.01 + x;
-//     return coeff * (1 / (adjusted * adjusted * adjusted * adjusted));
-// }
-
-// static inline float
-// obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
-// {
-//     float obj_function = calc_perimeter(edgelist);
-//     for (int i = 0; i < nsites; i++) {
-//         for (int j = 0; j < nsites; j++) {
-//             if (i == j) continue;
-//             float dx = sites[i].x - sites[j].x;
-//             float dy = sites[i].y - sites[j].y;
-//             float dist_squared = dx * dx + dy * dy;
-//             obj_function += repel_formula(dist_squared);
-//         }
-//     }
-//     return obj_function;
-// }
+float
+obj_function(point *sites, struct edgelist *edgelist, int nsites)
+{
+    (void)sites;  // unused
+    (void)nsites; // unused
+    return calc_perimeter(edgelist);
+    // return obj_perimeter_and_repel(sites, edgelist, nsites);
+}
 
 void
 update_sites(point *src, point *dest, point *grad, int nsites)
