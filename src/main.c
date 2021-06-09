@@ -81,23 +81,17 @@ gradient_descent(struct arrays arrs,
 
     read_sites_from_file("input", &sites, &nsites);
 
-    struct edgelist edgelist_first_perimeter;
-    init_edgelist(&edgelist_first_perimeter);
-    fortunes(sites, nsites, &edgelist_first_perimeter);
-    copy_edges(&edgelist_first_perimeter, &linesegs[0 * pts_per_trial]);
-    calc_stats(&edgelist_first_perimeter, sites, &perimeter[0],
-               &obj_func_vals[0], nsites);
-    free_edgelist(&edgelist_first_perimeter);
-
     point *gradient = malloc((size_t)nsites * sizeof(point));
-    for (int i = 1; i < trials; i++) { // start at 1: there is no prev perimeter
-        float prev_objective = obj_func_vals[i - 1];
-        point *old_sites_ptr = &sites[(i - 1) * nsites];
-        // PARALLEL
-        for (int j = 0; j < nsites; j++)
-            gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
-                            prev_objective);
-        update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
+    for (int i = 0; i < trials; i++) {
+        if (i > 0) { // skip this the first time
+            float prev_objective = obj_func_vals[i - 1];
+            point *old_sites_ptr = &sites[(i - 1) * nsites];
+            // PARALLEL
+            for (int j = 0; j < nsites; j++)
+                gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
+                                prev_objective);
+            update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites);
+        }
 
         struct edgelist edgelist;
         init_edgelist(&edgelist);
