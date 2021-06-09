@@ -74,12 +74,12 @@ calc_stats(struct edgelist *edgelist,
     *objective_function = obj_function(sites, edgelist, nsites);
 }
 
-void
-gradient_descent(struct arrays numpy_arrs,
-                 const float jiggle,
-                 int nsites,
-                 const int pts_per_trial,
-                 const int trials)
+static inline void
+simple_descent(struct arrays numpy_arrs,
+               const float jiggle,
+               int nsites,
+               const int pts_per_trial,
+               const int trials)
 {
     // unpack numpy arrays
     point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
@@ -109,6 +109,16 @@ gradient_descent(struct arrays numpy_arrs,
         free_edgelist(&edgelist);
     }
     free(gradient);
+}
+
+void
+gradient_descent(struct arrays numpy_arrs,
+                 const float jiggle,
+                 int nsites,
+                 const int pts_per_trial,
+                 const int trials)
+{
+    simple_descent(numpy_arrs, jiggle, nsites, pts_per_trial, trials);
 }
 
 void
