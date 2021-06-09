@@ -9,7 +9,6 @@ static inline float
 obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
 {
     float obj_function = calc_perimeter(edgelist);
-    printf("perimeter, %f\t", (double)obj_function);
     for (int i = 0; i < nsites; i++) {
         for (int j = 0; j < nsites; j++) {
             if (i == j) continue;
@@ -21,7 +20,6 @@ obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
             obj_function += coeff * logf(1 / dist_squared);
         }
     }
-    printf("objective function, %f\n", (double)obj_function);
     return obj_function;
 }
 
@@ -61,18 +59,19 @@ finite_difference(const int j,
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
     float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+    free_edgelist(&local_edgelist);
     gradient[j].x = (curr_obj - prev_objective) / jiggle;
-    local_sites[j].x = old_sites[j].x; // reset for y
-    free_edgelist(&local_edgelist);    // reset for y
+    // reset for y
+    local_sites[j].x = old_sites[j].x;
     // y
     local_sites[j].y = frac(local_sites[j].y + jiggle);
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
     curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+    free_edgelist(&local_edgelist);
     gradient[j].y = (curr_obj - prev_objective) / jiggle;
 
     free(local_sites);
-    free_edgelist(&local_edgelist);
 }
 
 void
