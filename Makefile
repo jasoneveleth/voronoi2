@@ -53,7 +53,7 @@ clean:
 	rm -f voronoi.cpython* $(OBJ) *.gif
 
 setup_lib: $(OBJ)
-	$(PYTHON) setup.py build_ext -i
+	env REPEL=1 $(PYTHON) setup.py build_ext -i
 	# env PYTHONMALLOC=malloc valgrind python main.py
 
 run: setup_lib

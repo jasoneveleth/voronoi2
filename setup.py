@@ -2,8 +2,13 @@ from distutils.core import setup, Extension
 import numpy
 from Cython.Distutils import build_ext
 from Cython.Build import cythonize
+import os
 
 macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),('NMAIN',)]
+
+if os.getenv('REPEL'):
+    macros.append(('REPEL',1))
+print(macros)
 
 files = ["voronoi.pyx", "src/bintree.c", "src/edgelist.c", "src/fortunes.c", "src/geometry.c", "src/gradient.c", "src/heap.c", "src/main.c"]
 extensions = [Extension("voronoi",
