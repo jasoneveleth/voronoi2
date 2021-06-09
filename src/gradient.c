@@ -59,8 +59,8 @@ finite_difference(const int j,
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
     float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
-    free_edgelist(&local_edgelist);
     gradient[j].x = (curr_obj - prev_objective) / jiggle;
+    free_edgelist(&local_edgelist);
     // reset for y
     local_sites[j].x = old_sites[j].x;
     // y
@@ -68,8 +68,8 @@ finite_difference(const int j,
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
     curr_obj = obj_function(local_sites, &local_edgelist, nsites);
-    free_edgelist(&local_edgelist);
     gradient[j].y = (curr_obj - prev_objective) / jiggle;
+    free_edgelist(&local_edgelist);
 
     free(local_sites);
 }
