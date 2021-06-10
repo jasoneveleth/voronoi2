@@ -6,7 +6,8 @@ struct arrays {
     float *sites_to_be_cast;
     float *perimeter;
     float *objective_function;
-    float *char_length;
+    float *char_max_length;
+    float *char_min_length;
 };
 
 void simple_diagram(float *, int, float *, int);

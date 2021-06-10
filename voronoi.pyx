@@ -14,7 +14,8 @@ cdef extern from "src/cython_stuff.h":
         float *sites_to_be_cast
         float *perimeter
         float *objective_function
-        float *char_length
+        float *char_max_length
+        float *char_min_length
     void gradient_descent(arrays arrs, float jiggle, int sites, int pts_per_trial, int trials)
 
 # wrapper function. 
@@ -31,12 +32,14 @@ def gradient_descent_func(
         float[:,:,::1] sites not None,
         float[::1] perimeter not None, 
         float[::1] objective_functions not None, 
-        float[::1] char_length not None, 
+        float[::1] char_max_length not None, 
+        float[::1] char_min_length not None, 
         float jiggle):
     cdef arrays arrs
     arrs.linesegs_to_be_cast = &linesegs[0,0,0,0]
     arrs.sites_to_be_cast = &sites[0,0,0]
     arrs.perimeter = &perimeter[0]
     arrs.objective_function = &objective_functions[0]
-    arrs.char_length = &char_length[0]
+    arrs.char_max_length = &char_max_length[0]
+    arrs.char_min_length = &char_min_length[0]
     gradient_descent(arrs, jiggle, sites.shape[1], linesegs.shape[1]*linesegs.shape[2], perimeter.shape[0])

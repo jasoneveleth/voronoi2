@@ -21,7 +21,7 @@ def log_time(string):
     myprint(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs\n")
     start = time()
 
-def render_animation(edges, sites, perimeters, objectivefunctions, char_length):
+def render_animation(edges, sites, perimeters, objectivefunctions, char_max_length, char_min_length):
     """ perimeters : numpy arr (n, 1)
         sites : numpy arr (n, m, 2)
         edges : numpy arr (n, 3*m-6, 2, 2)
@@ -52,10 +52,11 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_length):
     diagram_ax.add_collection(edge_line_coll)
     sites_line, = diagram_ax.plot([], [], 'ro')
 
-    char_len_ax.set_title('longest edge/shortest edge (characteristic length)')
+    char_len_ax.set_title('longest edge and shortest edge (characteristic length)')
     char_len_ax.set_xlim(0, nframes)
-    char_len_ax.set_ylim(0, (4/3)*np.max(char_length))
-    char_len_line, = char_len_ax.plot([], [], lw=3)
+    char_len_ax.set_ylim(0, (4/3)*np.max(char_max_length))
+    char_len_max_line, = char_len_ax.plot([], [], lw=3)
+    char_len_min_line, = char_len_ax.plot([], [], lw=3)
 
     earth_mover_ax.set_title('earth mover distance')
     earth_mover_ax.set_xlim(0, nframes)
@@ -73,7 +74,8 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_length):
         sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
         perimeter_line.set_data(np.arange(trial_num), perimeters[:trial_num])
         objectivefunction_line.set_data(np.arange(trial_num), objectivefunctions[:trial_num])
-        char_len_line.set_data(np.arange(trial_num), char_length[:trial_num])
+        char_len_max_line.set_data(np.arange(trial_num), char_max_length[:trial_num])
+        char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
         return perimeter_line,edge_line_coll,sites_line,
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=20, blit=True)
@@ -110,12 +112,13 @@ def descent(ntrials, jiggle):
     linesegs = np.zeros((ntrials, linesegs_per_trial, pts_per_lineseg, floats_per_pt), 'float32') 
     sites = np.zeros((ntrials, nsites, 2), 'float32')
     perimeter = np.zeros((ntrials), 'float32')
-    char_length = np.zeros((ntrials), 'float32')
+    char_max_length = np.zeros((ntrials), 'float32')
+    char_min_length = np.zeros((ntrials), 'float32')
     objectivefunctions = np.zeros((ntrials), 'float32')
 
     # descend
     myprint('descending . . .')
-    voronoi.gradient_descent_func(linesegs, sites, perimeter, objectivefunctions, char_length, jiggle)
+    voronoi.gradient_descent_func(linesegs, sites, perimeter, objectivefunctions, char_max_length, char_min_length, jiggle)
     log_time('\rfinished descent\n')
     myprint('rendering . . .')
 
@@ -125,7 +128,7 @@ def descent(ntrials, jiggle):
         print(sites)
         print(linesegs)
     else:
-        render_animation(linesegs, sites, perimeter, objectivefunctions, char_length)
+        render_animation(linesegs, sites, perimeter, objectivefunctions, char_max_length, char_min_length)
     log_time('\rfinished render\n')
 
 

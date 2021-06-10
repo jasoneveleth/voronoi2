@@ -37,19 +37,18 @@ init_edgelist(struct edgelist *e)
     e->edges = malloc((size_t)e->allocated * sizeof(struct halfedge *));
 }
 
-float
-calc_char_length(struct edgelist *edgelist)
+void
+calc_char_length(struct edgelist *edgelist, float *max, float *min)
 {
-    float max = 0.0f;
-    float min = 1.0f / 0.0f;
+    *max = 0.0f;
+    *min = 1.0f / 0.0f;
     for (int i = 0; i < edgelist->nedges; i++) {
         float x1 = edgelist->edges[i]->origin.x;
         float y1 = edgelist->edges[i]->origin.y;
         float x2 = edgelist->edges[i]->twin->origin.x;
         float y2 = edgelist->edges[i]->twin->origin.y;
         float dist = fsqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-        if (dist > max) max = dist;
-        if (dist < min) min = dist;
+        if (dist > *max) *max = dist;
+        if (dist < *min) *min = dist;
     }
-    return (max + min) / 2;
 }
