@@ -147,7 +147,7 @@ if '-h' in sys.argv:
     print('\t-n\tgradient descent on "num" number of trials')
     print('\t-s\tsilent mode')
     print('\t-t\toutput stuff for testing')
-    print('\t-g\tgenerate "num" number of points, NOTE overrides -n')
+    print('\t-g\tgenerate "num_points" number of points, NOTE overrides -n')
     exit()
 if '-s' in sys.argv:
     suppress_output = 1
