@@ -28,20 +28,47 @@ for file in tests/sites/*.in; do
 done
 
 # gradient descent
-# python main.py -s -t -n 50 > tests/sites/hundredpoint_obj=perimeter.gradout
-printf "only one of the following descents should pass:\n"
 cp tests/sites/hundred_point.gradin input
-for file in tests/sites/*.gradout; do
-    file_no_extension="$(echo "$file" | cut -f1 -d'.')"
-    printf "testing $file_no_extension: "
 
-    .env/bin/python main.py -s -t -n 50 | md5sum > tests/tmp_file
+rm -rf build/
+#-----
+file_no_extension='tests/sites/hundredpoint_obj=perimeter'
+printf "testing ${file_no_extension} "
+.env/bin/python setup.py build_ext -i >/dev/null # DIFF
+#-----
+.env/bin/python main.py -s -t -n 50 | md5sum > tests/tmp_file
+if cmp "${file_no_extension}.gradout" tests/tmp_file; then
+    printf "${GRN}PASSED${CLR}\n"
+else
+    printf "${RED}FAILED${CLR}\n"
+fi
 
-    if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
-        printf "${GRN}PASSED${CLR}\n"
-    else
-        printf "${RED}FAILED${CLR}\n"
-    fi
-done
+
+
+rm -rf build/
+#----
+file_no_extension='tests/sites/hundredpoint_obj=perimeter_repel'
+printf "testing ${file_no_extension} "
+env REPEL=1 .env/bin/python setup.py build_ext -i >/dev/null # DIFF
+#----
+.env/bin/python main.py -s -t -n 50 | md5sum > tests/tmp_file
+if cmp "${file_no_extension}.gradout" tests/tmp_file; then
+    printf "${GRN}PASSED${CLR}\n"
+else
+    printf "${RED}FAILED${CLR}\n"
+fi
+
+# for file in tests/sites/*.gradout; do
+#     file_no_extension="$(echo "$file" | cut -f1 -d'.')"
+#     printf "testing $file_no_extension: "
+
+#     .env/bin/python main.py -s -t -n 50 | md5sum > tests/tmp_file
+
+#     if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
+#         printf "${GRN}PASSED${CLR}\n"
+#     else
+#         printf "${RED}FAILED${CLR}\n"
+#     fi
+# done
 
 rm -f tests/tmp_file

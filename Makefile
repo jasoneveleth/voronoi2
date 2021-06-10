@@ -30,7 +30,7 @@ all: format setup_lib
 
 format:
 	# the leading - cause 'make' to not fail when this fails
-	-command -v clang-format && clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
+	-command -v clang-format >/dev/null 2>&1 && clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
 
 %.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@
@@ -41,7 +41,7 @@ build/voronoi: $(OBJ)
 build/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-test: format dirs build/voronoi build/heap_test setup_lib
+test: format dirs build/voronoi build/heap_test
 	build/heap_test
 	sh tests/main_test.sh
 
@@ -53,7 +53,8 @@ clean:
 	rm -f voronoi.cpython* $(OBJ) *.gif
 
 setup_lib: $(OBJ)
-	env REPEL=1 $(PYTHON) setup.py build_ext -i
+	$(PYTHON) setup.py build_ext -i
+	# env REPEL=1 $(PYTHON) setup.py build_ext -i
 	# env PYTHONMALLOC=malloc valgrind python main.py
 
 run: setup_lib
