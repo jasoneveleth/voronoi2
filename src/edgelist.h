@@ -27,5 +27,6 @@ struct edgelist {
 float calc_perimeter(struct edgelist *);
 void copy_edges(struct edgelist *, point *);
 void init_edgelist(struct edgelist *);
+float calc_char_length(struct edgelist *);
 
 #endif

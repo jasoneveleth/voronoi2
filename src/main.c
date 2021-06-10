@@ -68,10 +68,12 @@ calc_stats(struct edgelist *edgelist,
            point *sites,
            float *perimeter,
            float *objective_function,
+           float *char_length,
            int nsites)
 {
     *perimeter = calc_perimeter(edgelist);
     *objective_function = obj_function(sites, edgelist, nsites);
+    *char_length = calc_char_length(edgelist);
 }
 
 static inline void
@@ -86,6 +88,7 @@ simple_descent(struct arrays numpy_arrs,
     point *sites = (point *)numpy_arrs.sites_to_be_cast;
     float *perimeter = numpy_arrs.perimeter;
     float *obj_func_vals = numpy_arrs.objective_function;
+    float *char_length = numpy_arrs.char_length;
 
     read_sites_from_file("input", &sites, &nsites);
 
@@ -122,7 +125,8 @@ simple_descent(struct arrays numpy_arrs,
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i], nsites);
+        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i],
+                   &char_length[i], nsites);
         free_edgelist(&edgelist);
     }
     free(gradient);
