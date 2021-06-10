@@ -8,7 +8,7 @@ $ cd voronoi2
 $ python3 -m venv .env
 $ . .env/bin/activate
 $ python -m pip install Cython matplotlib numpy
-$ make
+$ make run
 ```
 
 This will make 'newest.gif' in the current directory. Look at it with `open
