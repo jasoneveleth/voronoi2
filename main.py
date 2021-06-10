@@ -158,8 +158,6 @@ if '-n' in sys.argv:
 
 if '-g' in sys.argv:
     generate_sites(int(sys.argv[sys.argv.index('-g')+1]))
-elif '-b' in sys.argv:
-    descent(global_ntrials, 1e-4)
 else:
     descent(global_ntrials, 1e-4)
 
