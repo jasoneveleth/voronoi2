@@ -37,7 +37,7 @@ obj_function(point *sites, struct edgelist *edgelist, int nsites)
 }
 
 void
-update_sites(point *src, point *dest, point *grad, int nsites)
+update_sites(point *src, point *dest, point *grad, int nsites, float alpha)
 {
     for (int i = 0; i < nsites; i++) {
         dest[i].x = frac(src[i].x - alpha * grad[i].x);
@@ -87,4 +87,37 @@ gradient_method(const int j,
                 const float prev_objective)
 {
     finite_difference(j, nsites, old_sites, gradient, jiggle, prev_objective);
+}
+
+float
+bb_formula(
+    point *x_k1_pt, point *x_k_pt, point *g_k1_pt, point *g_k_pt, int nsites)
+{
+    // we tree site.x and site.y as separate variables (x_k is a vector,
+    // unrelated to that, the name x_k for the vector is just to remain
+    // consistent with the website detailing the formula (linked below)).
+    float *x_k1 = (float *)x_k1_pt;
+    float *x_k = (float *)x_k_pt;
+    float *g_k1 = (float *)g_k1_pt;
+    float *g_k = (float *)g_k_pt;
+    // https://bicmr.pku.edu.cn/~wenzw/courses/WenyuSun_YaxiangYuan_BB.pdf
+    //       (x_k - x_{k-1}) dot (x_k - x_{k-1})
+    // res = -----------------------------------
+    //       (x_k - x_{k-1}) dot (g_k - g_{k-1})
+    //
+    // AKA
+    //
+    //       s_{k-1} dot s_{k-1}
+    // res = -------------------
+    //       s_{k-1} dot y_{k-1}
+
+    float numerator = 0;
+    float denominator = 0;
+    for (int i = 0; i < 2 * nsites; i++) {
+        float s_k1 = x_k[i] - x_k1[i];
+        float y_k1 = g_k[i] - g_k1[i];
+        numerator += s_k1 * s_k1;
+        denominator += s_k1 * y_k1;
+    }
+    return numerator / denominator;
 }
