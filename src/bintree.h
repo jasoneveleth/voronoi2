@@ -30,6 +30,5 @@ struct bnode *bgetmax(struct bnode *);
 void free_tree(struct bnode *);
 int bisinternal(struct bnode *);
 point intersect_parabolas(float, point *);
-float fsqrt(float);
 
 #endif
