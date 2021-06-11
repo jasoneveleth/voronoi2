@@ -121,3 +121,137 @@ bb_formula(
     }
     return numerator / denominator;
 }
+
+static inline void
+calc_stats(struct edgelist *edgelist,
+           point *sites,
+           float *perimeter,
+           float *objective_function,
+           float *char_max_length,
+           float *char_min_length,
+           int nsites)
+{
+    *perimeter = calc_perimeter(edgelist);
+    *objective_function = obj_function(sites, edgelist, nsites);
+    calc_char_length(edgelist, char_max_length, char_min_length);
+}
+
+void
+simple_descent(struct arrays numpy_arrs,
+               const float jiggle,
+               int nsites,
+               const int pts_per_trial,
+               const int trials)
+{
+    // unpack numpy arrays
+    point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
+    point *sites = (point *)numpy_arrs.sites_to_be_cast;
+    float *perimeter = numpy_arrs.perimeter;
+    float *obj_func_vals = numpy_arrs.objective_function;
+    float *char_max_length = numpy_arrs.char_max_length;
+    float *char_min_length = numpy_arrs.char_min_length;
+
+    point *gradient = malloc((size_t)nsites * sizeof(point));
+    for (int i = 0; i < trials; i++) {
+        if (i > 0) { // skip this the first time
+            float prev_objective = obj_func_vals[i - 1];
+            point *old_sites_ptr = &sites[(i - 1) * nsites];
+            // PARALLEL
+            for (int j = 0; j < nsites; j++)
+                gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
+                                prev_objective);
+#ifdef REPEL
+            float sumx = 0;
+            float sumy = 0;
+            for (int j = 0; j < nsites; j++) {
+                sumx += gradient[j].x;
+                sumy += gradient[j].y;
+            }
+            float avgx = sumx / (float)nsites;
+            float avgy = sumy / (float)nsites;
+            for (int j = 0; j < nsites; j++) {
+                gradient[j].x -= avgx;
+                gradient[j].y -= avgy;
+            }
+#endif
+            static const float alpha = (float)3e-3; // MMM
+            update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites,
+                         alpha);
+        }
+
+        struct edgelist edgelist;
+        init_edgelist(&edgelist);
+        fortunes(&sites[i * nsites], nsites, &edgelist);
+        copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
+        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i],
+                   &char_max_length[i], &char_min_length[0], nsites);
+        free_edgelist(&edgelist);
+    }
+    free(gradient);
+}
+
+void
+barziilai_borwein(struct arrays numpy_arrs,
+                  const float jiggle,
+                  int nsites,
+                  const int pts_per_trial,
+                  const int trials)
+{
+    // unpack numpy arrays
+    point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
+    point *sites = (point *)numpy_arrs.sites_to_be_cast;
+    float *perimeter = numpy_arrs.perimeter;
+    float *obj_func_vals = numpy_arrs.objective_function;
+    float *char_max_length = numpy_arrs.char_max_length;
+    float *char_min_length = numpy_arrs.char_min_length;
+
+    point *g_k = malloc((size_t)nsites * sizeof(point));
+    point *g_k1 = malloc((size_t)nsites * sizeof(point));
+    for (int i = 0; i < trials; i++) {
+        if (i > 0) { // skip this the first time
+            float prev_objective = obj_func_vals[i - 1];
+            point *old_sites_ptr = &sites[(i - 1) * nsites];
+            // PARALLEL
+            for (int j = 0; j < nsites; j++)
+                gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
+                                prev_objective);
+#ifdef REPEL
+            float sumx = 0;
+            float sumy = 0;
+            for (int j = 0; j < nsites; j++) {
+                sumx += g_k[j].x;
+                sumy += g_k[j].y;
+            }
+            float avgx = sumx / (float)nsites;
+            float avgy = sumy / (float)nsites;
+            for (int j = 0; j < nsites; j++) {
+                g_k[j].x -= avgx;
+                g_k[j].y -= avgy;
+            }
+#endif
+            float alpha;
+            if (i == 1) {
+                alpha = 3e-3f; // MMM
+            } else {
+                point *x_k1 = &sites[(i - 2) * nsites];
+                point *x_k = &sites[(i - 1) * nsites];
+                alpha = bb_formula(x_k1, x_k, g_k1, g_k, nsites);
+            }
+
+            update_sites(old_sites_ptr, &sites[i * nsites], g_k, nsites, alpha);
+            point *tmp = g_k1;
+            g_k1 = g_k;
+            g_k = tmp;
+        } // <- skipped the first time
+
+        struct edgelist edgelist;
+        init_edgelist(&edgelist);
+        fortunes(&sites[i * nsites], nsites, &edgelist);
+        copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
+        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i],
+                   &char_max_length[i], &char_min_length[0], nsites);
+        free_edgelist(&edgelist);
+    }
+    free(g_k);
+    free(g_k1);
+}

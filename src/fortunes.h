@@ -4,6 +4,7 @@
 #include "heap.h"
 #include "bintree.h"
 #include "edgelist.h"
+#include "cython_stuff.h"
 
 struct bp {
     point sites[2];
@@ -31,5 +32,7 @@ void fortunes(point *, int32_t, struct edgelist *);
 void init_edgelist(struct edgelist *);
 void free_edgelist(struct edgelist *);
 void print_edgelist(struct edgelist *);
+void simple_descent(struct arrays, const float, int, const int, const int);
+void barziilai_borwein(struct arrays, const float, int, const int, const int);
 
 #endif
