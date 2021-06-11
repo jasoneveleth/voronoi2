@@ -32,17 +32,11 @@ frac(float x)
     return modff(x, &useless_required_ptr);
 }
 
-float
-fsqrt(float x)
-{
-    return (float)sqrt((double)x);
-}
-
 static inline void
 quadraticFormula(float a, float b, float c, float *smaller, float *larger)
 {
-    float x1 = (-b - fsqrt(b * b - 4 * a * c)) / (2 * a);
-    float x2 = (-b + fsqrt(b * b - 4 * a * c)) / (2 * a);
+    float x1 = (-b - sqrtf(b * b - 4 * a * c)) / (2 * a);
+    float x2 = (-b + sqrtf(b * b - 4 * a * c)) / (2 * a);
     *smaller = x1 > x2 ? x2 : x1;
     *larger = x1 > x2 ? x1 : x2;
 }
@@ -68,7 +62,7 @@ point
 circleBottom(point a, point b, point c)
 {
     point p = circle_center(a, b, c);
-    float r = fsqrt((a.x - p.x) * (a.x - p.x) + (a.y - p.y) * (a.y - p.y));
+    float r = sqrtf((a.x - p.x) * (a.x - p.x) + (a.y - p.y) * (a.y - p.y));
     p.y -= r;
     return p;
 }
