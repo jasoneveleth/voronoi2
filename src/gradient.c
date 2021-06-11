@@ -15,7 +15,7 @@ obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
             if (i == j) continue;
             float dx = sites[i].x - sites[j].x;
             float dy = sites[i].y - sites[j].y;
-            float dist = fsqrt((dx * dx) + (dy * dy));
+            float dist = sqrtf((dx * dx) + (dy * dy));
 
             const float coeff = 1e-4f; // MMM
             repulsion_term += coeff * (1 / dist);

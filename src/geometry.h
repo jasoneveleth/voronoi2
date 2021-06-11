@@ -8,7 +8,6 @@ struct point {
 };
 
 point intersect_parabolas(float, point *);
-float fsqrt(float);
 point circleBottom(point, point, point);
 point circle_center(point, point, point);
 point boundary_cond(point, point);

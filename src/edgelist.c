@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #include <stdio.h>
 #include "edgelist.h"
 
@@ -11,7 +12,7 @@ calc_perimeter(struct edgelist *edgelist)
             edgelist->edges[i]->origin.x - edgelist->edges[i]->twin->origin.x;
         float dy =
             edgelist->edges[i]->origin.y - edgelist->edges[i]->twin->origin.y;
-        length += fsqrt(dx * dx + dy * dy);
+        length += sqrtf(dx * dx + dy * dy);
     }
     return (length / 2) + 4;
 }
@@ -47,7 +48,7 @@ calc_char_length(struct edgelist *edgelist, float *max, float *min)
         float y1 = edgelist->edges[i]->origin.y;
         float x2 = edgelist->edges[i]->twin->origin.x;
         float y2 = edgelist->edges[i]->twin->origin.y;
-        float dist = fsqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        float dist = sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
         if (dist > *max) *max = dist;
         if (dist < *min) *min = dist;
     }
