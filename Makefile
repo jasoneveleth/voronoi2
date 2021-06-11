@@ -5,7 +5,7 @@ FLAGS = -std=c11 -Werror -Weverything
 # FLAGS += -Wno-unused-parameter -Wno-unused-variable 
 FLAGS += -Wno-error=unused-function
 FLAGS += -Wno-error=double-promotion
-# FLAGS += -Ofast
+# FLAGS += -Ofast -march=native
 FLAGS += -g -O0 
 # FLAGS += -DDEBUG
 
@@ -54,8 +54,8 @@ clean:
 	rm -f voronoi.cpython* $(OBJ) *.gif
 
 setup_lib: $(OBJ)
-	$(PYTHON) setup.py build_ext -i
-	# env REPEL=1 $(PYTHON) setup.py build_ext -i
+	# $(PYTHON) setup.py build_ext -i
+	env REPEL=1 $(PYTHON) setup.py build_ext -i
 	# env PYTHONMALLOC=malloc valgrind python main.py
 
 run: setup_lib
