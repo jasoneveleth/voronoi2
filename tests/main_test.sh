@@ -37,7 +37,7 @@ printf "testing ${file_no_extension} "
 .env/bin/python setup.py build_ext -i >/dev/null # DIFF
 #-----
 .env/bin/python main.py -s -t -n 50 | md5sum > tests/tmp_file
-if cmp "${file_no_extension}.gradout" tests/tmp_file; then
+if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
     printf "${GRN}PASSED${CLR}\n"
 else
     printf "${RED}FAILED${CLR}\n"
@@ -52,7 +52,7 @@ printf "testing ${file_no_extension} "
 env REPEL=1 .env/bin/python setup.py build_ext -i >/dev/null # DIFF
 #----
 .env/bin/python main.py -s -t -n 50 | md5sum > tests/tmp_file
-if cmp "${file_no_extension}.gradout" tests/tmp_file; then
+if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
     printf "${GRN}PASSED${CLR}\n"
 else
     printf "${RED}FAILED${CLR}\n"
