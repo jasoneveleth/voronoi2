@@ -3,7 +3,8 @@ PYTHON = .env/bin/python
 
 FLAGS = -std=c11 -Werror -Weverything
 # FLAGS += -Wno-unused-parameter -Wno-unused-variable 
-FLAGS += -Wno-unused-function
+FLAGS += -Wno-error=unused-function
+FLAGS += -Wno-error=double-promotion
 # FLAGS += -Ofast
 FLAGS += -g -O0 
 # FLAGS += -DDEBUG
