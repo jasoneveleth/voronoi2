@@ -29,8 +29,8 @@ ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
 
 all: format setup_lib
 
+# the leading '-' keeps make from aborting if this fails
 format:
-	# the leading - cause 'make' to not fail when this fails
 	-command -v clang-format >/dev/null 2>&1 && clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
 
 %.o: %.c
@@ -55,9 +55,8 @@ clean:
 
 setup_lib: $(OBJ)
 	$(PYTHON) setup.py build_ext -i
-	# env REPEL=1 $(PYTHON) setup.py build_ext -i
-	# env PYTHONMALLOC=malloc valgrind python main.py
 
+# env PYTHONMALLOC=malloc valgrind python main.py
 run: setup_lib
 	$(PYTHON) main.py -g 100
 	$(PYTHON) main.py -n 100
