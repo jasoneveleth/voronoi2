@@ -1,6 +1,16 @@
 #include "geometry.h"
 #include <math.h>
 
+point
+boundary_cond(point p)
+{
+    p.x = frac(p.x);
+    if (p.x < 0) p.x = 1 + p.x;
+    p.y = frac(p.y);
+    if (p.y < 0) p.y = 1 + p.y;
+    return p;
+}
+
 float
 frac(float x)
 {
