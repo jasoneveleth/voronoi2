@@ -40,9 +40,8 @@ void
 update_sites(point *src, point *dest, point *grad, int nsites, float alpha)
 {
     for (int i = 0; i < nsites; i++) {
-        dest[i].x = src[i].x - alpha * grad[i].x;
-        dest[i].y = src[i].y - alpha * grad[i].y;
-        dest[i] = boundary_cond(dest[i]);
+        point delta = {-(alpha * grad[i].x), -(alpha * grad[i].y)};
+        dest[i] = boundary_cond(src[i], delta);
     }
 }
 
@@ -54,12 +53,13 @@ finite_difference(const int j,
                   const float jiggle,
                   const float prev_objective)
 {
+    const point deltax = {jiggle, 0.0f};
+    const point deltay = {0.0f, jiggle};
     point *local_sites = malloc((size_t)nsites * sizeof(point));
     memcpy(local_sites, old_sites, (size_t)nsites * sizeof(point));
     struct edgelist local_edgelist;
     // x
-    local_sites[j].x += jiggle;
-    local_sites[j] = boundary_cond(local_sites[j]);
+    local_sites[j] = boundary_cond(local_sites[j], deltax);
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
     float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
@@ -68,8 +68,7 @@ finite_difference(const int j,
     // reset for y
     local_sites[j] = old_sites[j];
     // y
-    local_sites[j].y += jiggle;
-    local_sites[j] = boundary_cond(local_sites[j]);
+    local_sites[j] = boundary_cond(local_sites[j], deltay);
     init_edgelist(&local_edgelist);
     fortunes(local_sites, nsites, &local_edgelist);
     curr_obj = obj_function(local_sites, &local_edgelist, nsites);
