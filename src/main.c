@@ -4,6 +4,31 @@
 #include <math.h>
 #include "main.h"
 
+// *** NEVER MODIFY THIS EXCEPT IN init_options() ***
+struct options options;
+
+void
+init_options(const char *filepath,
+             unsigned char obj,
+             unsigned char descent,
+             unsigned char gradient,
+             unsigned char boundary,
+             float alpha,
+             float repel_coeff,
+             int ntrials,
+             float jiggle)
+{
+    options.filepath = filepath;
+    options.obj = obj;
+    options.descent = descent;
+    options.gradient = gradient;
+    options.boundary = boundary;
+    options.alpha = alpha;
+    options.repel_coeff = repel_coeff;
+    options.ntrials = ntrials;
+    options.jiggle = jiggle;
+}
+
 static inline void
 verify_nsites(int nsites_found, int nsites)
 {
@@ -64,15 +89,17 @@ read_sites_from_file(const char *path, point **sites, int32_t *nsites)
 }
 
 void
-gradient_descent(struct arrays numpy_arrs,
-                 const float jiggle,
-                 int nsites,
-                 const int pts_per_trial,
-                 const int trials)
+gradient_descent(struct arrays arrs, int nsites, const int pts_per_trial)
 {
-    read_sites_from_file("input", (point **)&numpy_arrs.sites_to_be_cast,
+    read_sites_from_file(options.filepath, (point **)&arrs.sites_to_be_cast,
                          &nsites);
-    simple_descent(numpy_arrs, jiggle, nsites, pts_per_trial, trials);
+    if (options.descent == CONSTANT_ALPHA) {
+        simple_descent(arrs, options.jiggle, nsites, pts_per_trial);
+    } else if (options.descent == BARZIILAI) {
+        barziilai_borwein(arrs, options.jiggle, nsites, pts_per_trial);
+    } else {
+        FATAL(1, "%s\n", "unreachable code");
+    }
 }
 
 void
@@ -137,6 +164,8 @@ graph_file(const char *path)
 int
 main(int argc, char **argv)
 {
+    init_options("input", PERIMETER, CONSTANT_ALPHA, FINITE_DIFFERENCE, TORUS,
+                 3e-3f, 1e-4f, 1, 1e-4f);
     if (argc == 1) {
         default_graph();
     } else if (argv[1][1] == 'p') {

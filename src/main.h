@@ -4,6 +4,7 @@
 #include "fortunes.h"
 #include "cython_stuff.h"
 #include "gradient.h"
+#include "config.h"
 
 // length of lines when reading file
 #define LINELEN 80

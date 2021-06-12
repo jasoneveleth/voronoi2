@@ -11,6 +11,15 @@ struct arrays {
 };
 
 void simple_diagram(float *, int, float *, int);
-void gradient_descent(struct arrays, float, int, int, int);
+void gradient_descent(struct arrays, int, int);
+void init_options(const char *filepath,
+                  unsigned char obj,
+                  unsigned char descent,
+                  unsigned char gradient,
+                  unsigned char boundary,
+                  float alpha,
+                  float repel_coeff,
+                  int ntrials,
+                  float jiggle);
 
 #endif

@@ -1,27 +1,32 @@
-#include "geometry.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
+#include "geometry.h"
 
 point
 boundary_cond(point p, point delta)
 {
-    // torus
-    p.x += delta.x;
-    p.y += delta.y;
-    p.x = frac(p.x);
-    if (p.x < 0) p.x = 1 + p.x;
-    p.y = frac(p.y);
-    if (p.y < 0) p.y = 1 + p.y;
-
-    // // bounce
-    // p.x += delta.x;
-    // p.y += delta.y;
-    // while (p.x > 1 || p.x < 0 || p.y > 1 || p.y < 0) {
-    //     if (p.y < 0) { p.y = -p.y; }
-    //     if (p.y > 1) { p.y = 1 - (p.y - 1); }
-    //     if (p.x < 0) { p.x = -p.x; }
-    //     if (p.x > 1) { p.x = 1 - (p.x - 1); }
-    // }
-
+    if (options.boundary == TORUS) {
+        p.x += delta.x;
+        p.y += delta.y;
+        p.x = frac(p.x);
+        if (p.x < 0) p.x = 1 + p.x;
+        p.y = frac(p.y);
+        if (p.y < 0) p.y = 1 + p.y;
+    } else if (options.boundary == BOUNCE) {
+        p.x += delta.x;
+        p.y += delta.y;
+        while (p.x > 1 || p.x < 0 || p.y > 1 || p.y < 0) {
+            if (p.y < 0) { p.y = -p.y; }
+            if (p.y > 1) { p.y = 1 - (p.y - 1); }
+            if (p.x < 0) { p.x = -p.x; }
+            if (p.x > 1) { p.x = 1 - (p.x - 1); }
+        }
+    } else {
+        fprintf(stderr, "\n%s:%d:%s: fatal error, options/logic wrong\n",
+                __FILE__, __LINE__, __func__);
+        exit(1);
+    }
     return p;
 }
 

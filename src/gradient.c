@@ -3,7 +3,6 @@
 #include <math.h>
 #include "gradient.h"
 #include <stdio.h>
-#include "fortunes.h"
 
 static inline float
 obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
@@ -17,8 +16,7 @@ obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
             float dy = sites[i].y - sites[j].y;
             float dist = sqrtf((dx * dx) + (dy * dy));
 
-            const float coeff = 1e-4f; // MMM
-            repulsion_term += coeff * (1 / dist);
+            repulsion_term += options.repel_coeff * (1 / dist);
         }
     }
     return perimeter + repulsion_term;
@@ -27,13 +25,17 @@ obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
 float
 obj_function(point *sites, struct edgelist *edgelist, int nsites)
 {
-#ifdef REPEL
-    return obj_perimeter_and_repel(sites, edgelist, nsites);
-#else
-    (void)sites;  // unused
-    (void)nsites; // unused
-    return calc_perimeter(edgelist);
-#endif
+    if ((options.obj & REPULSION) && (options.obj & PERIMETER))
+        return obj_perimeter_and_repel(sites, edgelist, nsites);
+    else if (options.obj & PERIMETER) {
+        (void)sites;  // unused
+        (void)nsites; // unused
+        return calc_perimeter(edgelist);
+    } else {
+        fprintf(stderr, "\n%s:%d:%s: fatal error, options/logic wrong\n",
+                __FILE__, __LINE__, __func__);
+        exit(1);
+    }
 }
 
 void
@@ -136,12 +138,28 @@ calc_stats(struct edgelist *edgelist,
     calc_char_length(edgelist, char_max_length, char_min_length);
 }
 
+static inline void
+subtract_avg(point *gradient, int nsites)
+{
+    float sumx = 0;
+    float sumy = 0;
+    for (int j = 0; j < nsites; j++) {
+        sumx += gradient[j].x;
+        sumy += gradient[j].y;
+    }
+    float avgx = sumx / (float)nsites;
+    float avgy = sumy / (float)nsites;
+    for (int j = 0; j < nsites; j++) {
+        gradient[j].x -= avgx;
+        gradient[j].y -= avgy;
+    }
+}
+
 void
 simple_descent(struct arrays numpy_arrs,
                const float jiggle,
                int nsites,
-               const int pts_per_trial,
-               const int trials)
+               const int pts_per_trial)
 {
     // unpack numpy arrays
     point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
@@ -152,7 +170,7 @@ simple_descent(struct arrays numpy_arrs,
     float *char_min_length = numpy_arrs.char_min_length;
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
-    for (int i = 0; i < trials; i++) {
+    for (int i = 0; i < options.ntrials; i++) {
         if (i > 0) { // skip this the first time
             float prev_objective = obj_func_vals[i - 1];
             point *old_sites_ptr = &sites[(i - 1) * nsites];
@@ -160,23 +178,9 @@ simple_descent(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
                                 prev_objective);
-#ifdef REPEL
-            float sumx = 0;
-            float sumy = 0;
-            for (int j = 0; j < nsites; j++) {
-                sumx += gradient[j].x;
-                sumy += gradient[j].y;
-            }
-            float avgx = sumx / (float)nsites;
-            float avgy = sumy / (float)nsites;
-            for (int j = 0; j < nsites; j++) {
-                gradient[j].x -= avgx;
-                gradient[j].y -= avgy;
-            }
-#endif
-            static const float alpha = (float)3e-3; // MMM
+            if (options.obj & REPULSION) { subtract_avg(gradient, nsites); }
             update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites,
-                         alpha);
+                         options.alpha);
         }
 
         struct edgelist edgelist;
@@ -194,8 +198,7 @@ void
 barziilai_borwein(struct arrays numpy_arrs,
                   const float jiggle,
                   int nsites,
-                  const int pts_per_trial,
-                  const int trials)
+                  const int pts_per_trial)
 {
     // unpack numpy arrays
     point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
@@ -207,7 +210,7 @@ barziilai_borwein(struct arrays numpy_arrs,
 
     point *g_k = malloc((size_t)nsites * sizeof(point));
     point *g_k1 = malloc((size_t)nsites * sizeof(point));
-    for (int i = 0; i < trials; i++) {
+    for (int i = 0; i < options.ntrials; i++) {
         if (i > 0) { // skip this the first time
             float prev_objective = obj_func_vals[i - 1];
             point *old_sites_ptr = &sites[(i - 1) * nsites];
@@ -215,23 +218,11 @@ barziilai_borwein(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
                                 prev_objective);
-#ifdef REPEL
-            float sumx = 0;
-            float sumy = 0;
-            for (int j = 0; j < nsites; j++) {
-                sumx += g_k[j].x;
-                sumy += g_k[j].y;
-            }
-            float avgx = sumx / (float)nsites;
-            float avgy = sumy / (float)nsites;
-            for (int j = 0; j < nsites; j++) {
-                g_k[j].x -= avgx;
-                g_k[j].y -= avgy;
-            }
-#endif
+            if (options.obj & REPULSION) { subtract_avg(g_k, nsites); }
+
             float alpha;
             if (i == 1) {
-                alpha = 3e-3f; // MMM
+                alpha = options.alpha;
             } else {
                 point *x_k1 = &sites[(i - 2) * nsites];
                 point *x_k = &sites[(i - 1) * nsites];

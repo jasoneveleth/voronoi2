@@ -1,5 +1,8 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
+#include "config.h"
+
+extern struct options options;
 
 typedef struct point point;
 struct point {
