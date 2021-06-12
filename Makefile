@@ -42,7 +42,7 @@ build/voronoi: $(OBJ)
 build/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-test: format dirs build/voronoi build/heap_test
+test: format dirs build/voronoi build/heap_test setup_lib
 	build/heap_test
 	sh tests/main_test.sh
 
