@@ -40,8 +40,11 @@ frac(float x)
 static inline void
 quadraticFormula(float a, float b, float c, float *smaller, float *larger)
 {
-    float x1 = (-b - sqrtf(b * b - 4 * a * c)) / (2 * a);
-    float x2 = (-b + sqrtf(b * b - 4 * a * c)) / (2 * a);
+    // https://en.wikipedia.org/wiki/Loss_of_significance#A_better_algorithm
+    float sgn_b = copysignf(1.0f, b);
+    float des = b * b - 4 * a * c;
+    float x1 = (-b - sgn_b * sqrtf(des)) / (2 * a);
+    float x2 = c / (a * x1);
     *smaller = x1 > x2 ? x2 : x1;
     *larger = x1 > x2 ? x1 : x2;
 }
