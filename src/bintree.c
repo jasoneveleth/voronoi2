@@ -178,3 +178,16 @@ free_tree(struct bnode *root)
     free(root->bp); // could be ->arc or ->bp
     free(root);
 }
+
+void
+print_tree(struct bnode *root)
+{
+    if (root == NULL) return;
+    printf("node: %lx, parent: %lx, left: %lx, right: %lx\n",
+           (long)root / 16 % (16 * 16 * 16),
+           (long)root->parent / 16 % (16 * 16 * 16),
+           (long)root->left / 16 % (16 * 16 * 16),
+           (long)root->right / 16 % (16 * 16 * 16));
+    print_tree(root->left);
+    print_tree(root->right);
+}

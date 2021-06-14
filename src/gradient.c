@@ -178,7 +178,7 @@ simple_descent(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
                                 prev_objective);
-            if (options.obj & REPULSION) { subtract_avg(gradient, nsites); }
+            if (options.obj & REPULSION) subtract_avg(gradient, nsites);
             update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites,
                          options.alpha);
         }
@@ -218,7 +218,7 @@ barziilai_borwein(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
                                 prev_objective);
-            if (options.obj & REPULSION) { subtract_avg(g_k, nsites); }
+            if (options.obj & REPULSION) subtract_avg(g_k, nsites);
 
             float alpha;
             if (i == 1) {

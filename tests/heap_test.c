@@ -6,10 +6,6 @@
 // length of max line in a test file
 #define LINELEN 256
 
-// static inline key fabs(key a) {
-//     return a > 0 ? a : -a;
-// }
-
 static inline int
 iabs(int a)
 {
@@ -150,9 +146,6 @@ large_heap_inserts_with_dups(void)
     int goodsofar = 1;
     for (int i = 0; i < 1047 && goodsofar; i++) {
         int next = *((int *)hremove_max(H));
-#ifdef DEBUG
-        printf("actual %d, correct: %d\n", next, correct_vals[i]);
-#endif
         int diff = iabs(next - correct_vals[i]);
         goodsofar = goodsofar && (diff == 0);
     }
@@ -177,9 +170,6 @@ simple_removes(void)
     hinsert(H, &c, 43);
 
     goodsofar = goodsofar && (10 == *(int *)hremove(H, a_node));
-#ifdef DEBUG
-    printf("goodsofar: %d\n", goodsofar);
-#endif
 
     int d = 39;
     // hnode *d_node = hinsert(H, &d, 4);
@@ -189,9 +179,6 @@ simple_removes(void)
     hinsert(H, &e, 39);
 
     goodsofar = goodsofar && (29 == *(int *)hremove(H, b_node));
-#ifdef DEBUG
-    printf("goodsofar: %d\n", goodsofar);
-#endif
 
     int f = 38;
     // hnode *f_node = hinsert(H, &f, 14);
@@ -201,9 +188,6 @@ simple_removes(void)
     for (int i = 0; i < 4; i++) {
         int next = *((int *)hremove_max(H));
         goodsofar = goodsofar && (next == correct[i]);
-#ifdef DEBUG
-        printf("goodsofar: %d\n", goodsofar);
-#endif
     }
 
     free_heap(H);

@@ -122,14 +122,6 @@ simple_diagram(float *numpy_arr,
 }
 
 #ifndef NMAIN
-static inline void
-print_sites(point *sites, int32_t length)
-{
-    for (int i = 0; i < length; i++)
-        printf("(%f,%f),\t", (double)sites[i].x, (double)sites[i].y);
-    printf("\n");
-}
-
 static void
 default_graph(void)
 {

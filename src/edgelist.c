@@ -53,3 +53,29 @@ calc_char_length(struct edgelist *edgelist, float *max, float *min)
         if (dist < *min) *min = dist;
     }
 }
+
+void
+print_edgelist(struct edgelist *edgelist)
+{
+    for (int i = 0; i < edgelist->nedges; i += 2) {
+        printf("(%f,%f),(%f,%f),\t", (double)edgelist->edges[i]->origin.x,
+               (double)edgelist->edges[i]->origin.y,
+               (double)edgelist->edges[i + 1]->origin.x,
+               (double)edgelist->edges[i + 1]->origin.y);
+    }
+    printf("\n");
+}
+
+void
+print_edge(struct halfedge *e)
+{
+    printf("new edges: edge: %p, twin: %p\n", (void *)e, (void *)e->twin);
+}
+
+void
+print_sites(point *sites, int32_t length)
+{
+    for (int i = 0; i < length; i++)
+        printf("(%f,%f),\t", (double)sites[i].x, (double)sites[i].y);
+    printf("\n");
+}

@@ -7,7 +7,6 @@ FLAGS += -Wno-error=unused-function
 FLAGS += -Wno-error=double-promotion
 # FLAGS += -Ofast -march=native
 FLAGS += -g -O0 
-# FLAGS += -DDEBUG
 
 UNAME := $(shell uname)
 

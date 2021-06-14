@@ -3,46 +3,6 @@
 #include <string.h>
 #include "fortunes.h"
 
-void
-print_edgelist(struct edgelist *edgelist)
-{
-    for (int i = 0; i < edgelist->nedges; i += 2) {
-        printf("(%f,%f),(%f,%f),\t", (double)edgelist->edges[i]->origin.x,
-               (double)edgelist->edges[i]->origin.y,
-               (double)edgelist->edges[i + 1]->origin.x,
-               (double)edgelist->edges[i + 1]->origin.y);
-    }
-    printf("\n");
-}
-
-#ifdef DEBUG
-static inline void
-print_tree(struct bnode *root)
-{
-    if (root == NULL) return;
-    // printf("node: %p, parent: %p, left: %p, right: %p\n",
-    // (void *)root,
-    // (void *)root->parent,
-    // (void *)root->left,
-    // (void *)root->right);
-    printf("node: %lx, parent: %lx, left: %lx, right: %lx\n",
-           (long)root / 16 % (16 * 16 * 16),
-           (long)root->parent / 16 % (16 * 16 * 16),
-           (long)root->left / 16 % (16 * 16 * 16),
-           (long)root->right / 16 % (16 * 16 * 16));
-    print_tree(root->left);
-    print_tree(root->right);
-}
-#endif
-
-#ifdef DEBUG
-static inline void
-print_edge(halfedge *e)
-{
-    printf("new edges: edge: %p, twin: %p\n", (void *)e, (void *)e->twin);
-}
-#endif
-
 inline void
 free_edgelist(struct edgelist *e)
 {
@@ -89,15 +49,6 @@ converge(struct bp *b1, struct bp *b2)
     float y1 = b1->sites[1].y - b1->sites[0].y;
     float x2 = b2->sites[1].x - b2->sites[0].x;
     float y2 = b2->sites[1].y - b2->sites[0].y;
-#ifdef DEBUG
-    printf("sites: (%f, %f), (%f, %f), (%f, %f)\n", (double)b1->sites[0].x,
-           (double)b1->sites[0].y, (double)b1->sites[1].x,
-           (double)b1->sites[1].y, (double)b2->sites[1].x,
-           (double)b2->sites[1].y);
-    printf("vectors: <%f, %f>, <%f, %f>\n", (double)x1, (double)y1, (double)x2,
-           (double)y2);
-    printf("det: %f\n", (double)(x1 * y2 - y1 * x2));
-#endif
     return x1 * y2 - y1 * x2 < 0;
 }
 

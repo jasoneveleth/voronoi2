@@ -3,21 +3,16 @@
 #include <assert.h>
 #include "heap.h"
 
-#ifdef DEBUG
-static inline void
-print_heap(heap *H)
+void
+print_heap(struct heap *H)
 {
     int32_t max = 5;
     int32_t end = max > H->last + 1 ? H->last + 1 : max;
     for (int i = 1; i < end; i++) {
-        // fprintf(stderr, "key: %.0f, val: %d, index: %d\n",
-        // (double)H->arr[i]->key,
-        // *(int *)H->arr[i]->attr, H->arr[i]->index);
         fprintf(stderr, "key: %f, val: %d, index: %d\n", (double)H->arr[i]->key,
                 *(int *)H->arr[i]->attr, H->arr[i]->index);
     }
 }
-#endif
 
 static inline struct hnode *
 maxchild(struct heap *H, struct hnode *node)

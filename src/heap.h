@@ -36,5 +36,6 @@ void *hremove_max(struct heap *);
 void *hremove(struct heap *, struct hnode *);
 int hempty(struct heap *);
 struct hnode *hinsert(struct heap *, void *, key);
+void print_heap(struct heap *);
 
 #endif
