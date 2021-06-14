@@ -4,7 +4,7 @@ from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 import os
 
-macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),('NMAIN',)]
+macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),('NMAIN',1)]
 
 if os.getenv('REPEL'):
     macros.append(('REPEL',1))
