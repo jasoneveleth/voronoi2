@@ -76,3 +76,8 @@ not necessarily. Also didn't null check.
 
 - didn't go from half edges to edges by multiplying by 2
 
+## Possible speed optimizations (test to make sure it is an issue)
+
+- multithread each trial
+- rebalance tree
+- inline edges array
