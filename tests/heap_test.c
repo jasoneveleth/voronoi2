@@ -5,6 +5,7 @@
 
 // length of max line in a test file
 #define LINELEN 256
+#define UNUSED(var) (void)var
 
 static inline int
 iabs(int a)
@@ -166,23 +167,23 @@ simple_removes(void)
     int b = 29;
     struct hnode *b_node = hinsert(H, &b, 23);
     int c = 21;
-    // hnode *c_node = hinsert(H, &c, 43);
-    hinsert(H, &c, 43);
+    struct hnode *c_node = hinsert(H, &c, 43);
+    UNUSED(c_node);
 
     goodsofar = goodsofar && (10 == *(int *)hremove(H, a_node));
 
     int d = 39;
-    // hnode *d_node = hinsert(H, &d, 4);
-    hinsert(H, &d, 4);
+    struct hnode *d_node = hinsert(H, &d, 4);
+    UNUSED(d_node);
     int e = 7;
-    // hnode *e_node = hinsert(H, &e, 39);
-    hinsert(H, &e, 39);
+    struct hnode *e_node = hinsert(H, &e, 39);
+    UNUSED(e_node);
 
     goodsofar = goodsofar && (29 == *(int *)hremove(H, b_node));
 
     int f = 38;
-    // hnode *f_node = hinsert(H, &f, 14);
-    hinsert(H, &f, 14);
+    struct hnode *f_node = hinsert(H, &f, 14);
+    UNUSED(f_node);
     int correct[] = {21, 7, 38, 39};
 
     for (int i = 0; i < 4; i++) {
