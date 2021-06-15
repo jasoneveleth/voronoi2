@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
+#include <stdbool.h>
 #include "geometry.h"
 
 point
@@ -78,26 +80,46 @@ circleBottom(point a, point b, point c)
 point
 intersect_parabolas(float sweepline, point *parabolas)
 {
-    point p1 = parabolas[0]; // parabola on the left of bp
-    point p2 = parabolas[1]; // parabola on the right of bp
-    float l = sweepline;
+    const point p1 = parabolas[0]; // parabola on the left of bp
+    const point p2 = parabolas[1]; // parabola on the right of bp
+    const float l = sweepline;
 
-    // TODO sweep line and points are smae height
+    bool sweepline_and_point_same_y = p1.y - l < 1e-6f || p2.y - l < 1e-6f;
+    if (sweepline_and_point_same_y) {
+        point lower = p1.y < p2.y ? p1 : p2;
+        point higher = p1.y < p2.y ? p2 : p1;
+        // (x-h)^2 = 4p(y-k)
+        const float x = lower.x;
+        const float h = higher.x;
+        const float k = (higher.y + l) / 2.0f;
+        const float p = 2.0f * (higher.y - l);
+        const float y = (x - h) * (x - h) / (4 * p) + k;
+        point intersection = {x, y};
+        return intersection;
+    }
 
-    float b = (p2.x) / (p2.y - l) - (p1.x) / (p1.y - l);
-    float c = (p1.x * p1.x + p1.y * p1.y - l * l) / (2.0f * (p1.y - l))
-              - (p2.x * p2.x + p2.y * p2.y - l * l) / (2.0f * (p2.y - l));
+    const float a = 1.0f / (2.0f * (p1.y - l)) - 1.0f / (2.0f * (p2.y - l));
+    const float b = (p2.x) / (p2.y - l) - (p1.x) / (p1.y - l);
+    const float c = (p1.x * p1.x + p1.y * p1.y - l * l) / (2.0f * (p1.y - l))
+                    - (p2.x * p2.x + p2.y * p2.y - l * l) / (2.0f * (p2.y - l));
 
-    // TODO mutliple points have same y value
-
-    float a = 1.0f / (2.0f * (p1.y - l)) - 1.0f / (2.0f * (p2.y - l));
+    bool mutliple_points_have_same_y_value = fabsf(p1.y - p2.y) < 1e-6f;
+    if (mutliple_points_have_same_y_value) {
+        const float x = -c / b;
+        const float y =
+            (1.0f / (2.0f * (p1.y - l))
+             * (x * x - 2.0f * p1.x * x + p1.x * p1.x + p1.y * p1.y - l * l));
+        point p = {x, y};
+        return p;
+    }
 
     float x1, x2;
-    quadraticFormula(a, b, c, &x1, &x2); // we know x1 < x2
-    float y1 =
+    quadraticFormula(a, b, c, &x1, &x2);
+    assert(x1 < x2);
+    const float y1 =
         (1.0f / (2.0f * (p1.y - l)))
         * (x1 * x1 - 2.0f * p1.x * x1 + p1.x * p1.x + p1.y * p1.y - l * l);
-    float y2 =
+    const float y2 =
         (1.0f / (2.0f * (p1.y - l)))
         * (x2 * x2 - 2.0f * p1.x * x2 + p1.x * p1.x + p1.y * p1.y - l * l);
     point left = {x1, y1};
