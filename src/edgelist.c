@@ -18,6 +18,31 @@ calc_perimeter(struct edgelist *edgelist)
 }
 
 void
+new_edge(struct edgelist *edgelist, struct halfedge **h1, struct halfedge **h2)
+{
+    (*h1) = malloc(sizeof(struct halfedge));
+    (*h2) = malloc(sizeof(struct halfedge));
+    (*h1)->twin = (*h2);
+    (*h2)->twin = (*h1);
+
+    (*h1)->origin.x = 69;
+    (*h1)->origin.y = 69;
+    (*h2)->origin.x = 69;
+    (*h2)->origin.y = 69;
+
+    if (edgelist->nedges >= edgelist->allocated) {
+        edgelist->allocated *= 2;
+        size_t new_size =
+            sizeof(struct halfedge *) * (size_t)(edgelist->allocated);
+        edgelist->edges = realloc(edgelist->edges, new_size);
+    }
+    edgelist->edges[edgelist->nedges] = (*h1);
+    edgelist->nedges++;
+    edgelist->edges[edgelist->nedges] = (*h2);
+    edgelist->nedges++;
+}
+
+void
 copy_edges(struct edgelist *edgelist, point *dest)
 {
     for (int i = 0; i < edgelist->nedges; i++) {
