@@ -161,7 +161,6 @@ handle_site_event(struct event *event,
 
 static inline void
 handle_circle_event(struct event *event,
-                    // struct bnode *root,
                     struct heap *heap,
                     struct edgelist *edgelist)
 {
