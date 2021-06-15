@@ -12,6 +12,7 @@ if os.getenv('REPEL'):
 files = ["voronoi.pyx", "src/bintree.c", "src/edgelist.c", "src/fortunes.c", "src/geometry.c", "src/gradient.c", "src/heap.c", "src/main.c"]
 extensions = [Extension("voronoi",
                  files,
+		 extra_compile_args=['-std=c11'],
                  include_dirs=[numpy.get_include()],
                  define_macros=macros
                  )]

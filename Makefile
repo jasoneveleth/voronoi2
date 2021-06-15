@@ -1,7 +1,14 @@
+ifdef I_WANT_GCC
+CC = gcc
+FLAGS = -Wall -Wextra
+else
 CC = clang
+FLAGS = -Weverything
+endif
+
 PYTHON = .env/bin/python
 
-FLAGS = -std=c11 -Werror -Weverything
+FLAGS += -std=c11 -Werror
 FLAGS += -Wno-error=unused-parameter 
 FLAGS += -Wno-error=unused-variable 
 FLAGS += -Wno-error=unused-function
