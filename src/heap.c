@@ -46,10 +46,8 @@ downheap(struct heap *H, struct hnode *node)
 static inline void
 upheap(struct heap *H, struct hnode *node)
 {
-    while (
-        node->index > 1
-        && node->key
-               > H->arr[node->index / 2]->key) { // has parent && key > parent
+    while (node->index > 1 && node->key > H->arr[node->index / 2]->key) {
+        // has parent && key > parent
         struct hnode *parent = H->arr[node->index / 2];
         H->arr[parent->index] = node;
         H->arr[node->index] = parent;
