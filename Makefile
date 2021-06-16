@@ -13,6 +13,7 @@ FLAGS += -Wno-error=unused-parameter
 FLAGS += -Wno-error=unused-variable 
 FLAGS += -Wno-error=unused-function
 FLAGS += -Wno-error=double-promotion
+FLAGS += -Wno-error=reserved-id-macro
 # FLAGS += -Ofast -march=native
 FLAGS += -g -O0 
 
