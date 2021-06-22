@@ -61,7 +61,7 @@ clean:
 	rm -rf build/
 	rm -f voronoi.cpython* $(OBJ) *.gif
 
-setup_lib: $(OBJ)
+setup_lib:
 	$(PYTHON) setup.py build_ext -i
 
 # env PYTHONMALLOC=malloc valgrind python main.py
