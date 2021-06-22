@@ -33,9 +33,9 @@ SRC := $(wildcard src/*.c)
 OBJ := $(SRC:.c=.o)
 ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
 
-.PHONY: all format clean test setup_lib dirs run
+.PHONY: all format clean test lib dirs run
 
-all: format setup_lib
+all: format lib
 
 # the leading '-' keeps make from aborting if this fails
 format:
@@ -50,7 +50,7 @@ build/voronoi: $(OBJ)
 build/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-test: format dirs build/voronoi build/heap_test setup_lib
+test: format dirs build/voronoi build/heap_test lib
 	build/heap_test
 	sh tests/main_test.sh
 
@@ -61,11 +61,11 @@ clean:
 	rm -rf build/
 	rm -f voronoi.cpython* $(OBJ) *.gif
 
-setup_lib:
+lib:
 	$(PYTHON) setup.py build_ext -i
 
 # env PYTHONMALLOC=malloc valgrind python main.py
-run: setup_lib
+run: lib
 	$(PYTHON) main.py -g 100
 	$(PYTHON) main.py -n 100
 
