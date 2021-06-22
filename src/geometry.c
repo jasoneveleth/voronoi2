@@ -115,7 +115,7 @@ intersect_parabolas(float sweepline, point *parabolas)
 
     float x1, x2;
     quadraticFormula(a, b, c, &x1, &x2);
-    assert(x1 < x2);
+    assert(x1 <= x2);
     const float y1 =
         (1.0f / (2.0f * (p1.y - l)))
         * (x1 * x1 - 2.0f * p1.x * x1 + p1.x * p1.x + p1.y * p1.y - l * l);
