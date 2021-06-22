@@ -2,7 +2,11 @@
 *.o
 *.dSYM/
 build/
+bin/
 
 voronoi.cpython*
 *.gif
 input*
+
+core.*
+vcore*
