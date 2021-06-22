@@ -138,23 +138,6 @@ calc_stats(struct edgelist *edgelist,
     calc_char_length(edgelist, char_max_length, char_min_length);
 }
 
-static inline void
-subtract_avg(point *gradient, int nsites)
-{
-    float sumx = 0;
-    float sumy = 0;
-    for (int j = 0; j < nsites; j++) {
-        sumx += gradient[j].x;
-        sumy += gradient[j].y;
-    }
-    float avgx = sumx / (float)nsites;
-    float avgy = sumy / (float)nsites;
-    for (int j = 0; j < nsites; j++) {
-        gradient[j].x -= avgx;
-        gradient[j].y -= avgy;
-    }
-}
-
 void
 simple_descent(struct arrays numpy_arrs,
                const float jiggle,
@@ -178,7 +161,6 @@ simple_descent(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
                                 prev_objective);
-            if (options.obj & REPULSION) subtract_avg(gradient, nsites);
             update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites,
                          options.alpha);
         }
@@ -187,7 +169,7 @@ simple_descent(struct arrays numpy_arrs,
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i],
+        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i], &obj_func_vals[i],
                    &char_max_length[i], &char_min_length[0], nsites);
         free_edgelist(&edgelist);
     }
@@ -218,7 +200,6 @@ barziilai_borwein(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
                                 prev_objective);
-            if (options.obj & REPULSION) subtract_avg(g_k, nsites);
 
             float alpha;
             if (i == 1) {
@@ -239,7 +220,7 @@ barziilai_borwein(struct arrays numpy_arrs,
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, sites, &perimeter[i], &obj_func_vals[i],
+        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i], &obj_func_vals[i],
                    &char_max_length[i], &char_min_length[0], nsites);
         free_edgelist(&edgelist);
     }
