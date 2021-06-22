@@ -44,25 +44,24 @@ format:
 %.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@
 
-build/voronoi: $(OBJ)
+bin/voronoi: $(OBJ)
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-build/heap_test: tests/heap_test.c src/heap.o
+bin/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-test: format dirs build/voronoi build/heap_test lib
-	build/heap_test
+test: format bin/voronoi bin/heap_test lib
+	bin/heap_test
 	sh tests/main_test.sh
 
-dirs:
-	mkdir -p build
-
 clean:
-	rm -rf build/
-	rm -f voronoi.cpython* $(OBJ) *.gif
+	rm -f $(OBJ) *.gif bin/*
 
+# could use just `$(PYTHON) setup.py build_ext -i` if you want .so file in cwd
 lib:
-	$(PYTHON) setup.py build_ext -i
+	$(PYTHON) setup.py build_ext
+	$(PYTHON) setup.py install
+	rm -rf build/
 
 # env PYTHONMALLOC=malloc valgrind python main.py
 run: lib
