@@ -169,8 +169,9 @@ simple_descent(struct arrays numpy_arrs,
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i], &obj_func_vals[i],
-                   &char_max_length[i], &char_min_length[0], nsites);
+        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
+                   &obj_func_vals[i], &char_max_length[i], &char_min_length[0],
+                   nsites);
         free_edgelist(&edgelist);
     }
     free(gradient);
@@ -220,8 +221,9 @@ barziilai_borwein(struct arrays numpy_arrs,
         init_edgelist(&edgelist);
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i], &obj_func_vals[i],
-                   &char_max_length[i], &char_min_length[0], nsites);
+        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
+                   &obj_func_vals[i], &char_max_length[i], &char_min_length[0],
+                   nsites);
         free_edgelist(&edgelist);
     }
     free(g_k);
