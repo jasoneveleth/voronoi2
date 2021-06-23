@@ -4,6 +4,9 @@
 #include "gradient.h"
 #include <stdio.h>
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) >= (b) ? (a) : (b))
+
 static inline float
 obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
 {
@@ -209,6 +212,8 @@ barziilai_borwein(struct arrays numpy_arrs,
                 point *x_k1 = &sites[(i - 2) * nsites];
                 point *x_k = &sites[(i - 1) * nsites];
                 alpha = bb_formula(x_k1, x_k, g_k1, g_k, nsites);
+                alpha = max(0, alpha);     // HARDCODE
+                alpha = min(alpha, 1e-2f); // HARDCODE
             }
 
             update_sites(old_sites_ptr, &sites[i * nsites], g_k, nsites, alpha);
