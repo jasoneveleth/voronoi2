@@ -112,20 +112,6 @@ gradient_descent(struct arrays arrs, int nsites, const int pts_per_trial)
     } else {
         FATAL(1, "%s\n", "unreachable code");
     }
-    point *linesegs = (point *)arrs.linesegs_to_be_cast;
-    point *sites = (point *)arrs.sites_to_be_cast;
-    float *perimeter = arrs.perimeter;
-    size_t bytes;
-
-    bytes = sizeof(linesegs[0]) * (size_t)options.ntrials * 2
-            * (3 * (size_t)nsites - 6) * 2;
-    binary_write("output/linesegs", linesegs, bytes);
-
-    bytes = sizeof(sites[0]) * (size_t)nsites * (size_t)options.ntrials;
-    binary_write("output/sites", sites, bytes);
-
-    bytes = sizeof(perimeter[0]) * (size_t)options.ntrials;
-    binary_write("output/perimeter", perimeter, bytes);
 }
 
 void
@@ -207,6 +193,32 @@ main(int argc, char **argv)
         arrs.char_min_length = malloc(ntrials * sizeof(float));
         gradient_descent(arrs, (int)nsites,
                          (int)(linesegs_per_trial * pts_per_lineseg));
+
+        point *linesegs = (point *)arrs.linesegs_to_be_cast;
+        point *sites = (point *)arrs.sites_to_be_cast;
+        float *perimeter = arrs.perimeter;
+        size_t bytes;
+        bytes = sizeof(linesegs[0]) * (size_t)options.ntrials * 2
+                * (3 * (size_t)nsites - 6) * 2;
+        binary_write("output/linesegs", linesegs, bytes);
+
+        bytes = sizeof(sites[0]) * (size_t)nsites * (size_t)options.ntrials;
+        binary_write("output/sites", sites, bytes);
+
+        bytes = sizeof(perimeter[0]) * (size_t)options.ntrials;
+        binary_write("output/perimeter", perimeter, bytes);
+
+        // arrs.objective_function = malloc(ntrials * sizeof(float));
+        bytes = sizeof(arrs.objective_function[0]) * (size_t)ntrials;
+        binary_write("output/objective_function", arrs.objective_function, bytes);
+
+        // arrs.char_max_length = malloc(ntrials * sizeof(float));
+        bytes = sizeof(arrs.char_max_length[0]) * (size_t)ntrials;
+        binary_write("output/char_max_length", arrs.char_max_length, bytes);
+
+        // arrs.char_min_length = malloc(ntrials * sizeof(float));
+        bytes = sizeof(arrs.char_min_length[0]) * (size_t)ntrials;
+        binary_write("output/char_min_length", arrs.char_min_length, bytes);
 
         // FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
         // fputs("set terminal gif animate delay 20\n", gnuplotPipe);

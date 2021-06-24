@@ -104,33 +104,27 @@ def descent(args):
     pts_per_lineseg = 2
     floats_per_pt = 2
 
-    # allocate arrs
-    linesegs = np.zeros((args.ntrials, linesegs_per_trial, pts_per_lineseg, floats_per_pt), 'float32') 
-    sites = np.zeros((args.ntrials, nsites, 2), 'float32')
-    perimeter = np.zeros((args.ntrials), 'float32')
-    char_max_length = np.zeros((args.ntrials), 'float32')
-    char_min_length = np.zeros((args.ntrials), 'float32')
-    objectivefunctions = np.zeros((args.ntrials), 'float32')
-
-    # descend
-    myprint('descending . . .')
-    voronoi.gradient_descent_func(args, linesegs, sites, perimeter, objectivefunctions, char_max_length, char_min_length)
-    log_time('\rfinished descent\n')
-    myprint('rendering . . .')
-
     perimeter = np.fromfile('output/perimeter', dtype='float32')
     sites = np.fromfile('output/sites', dtype='float32')
     linesegs = np.fromfile('output/linesegs', dtype='float32')
+    char_max_length = np.fromfile('output/char_max_length', dtype='float32')
+    char_min_length = np.fromfile('output/char_min_length', dtype='float32')
+    objective_function = np.fromfile('output/objective_function', dtype='float32')
+
     perimeter = perimeter.reshape((args.ntrials))
     sites = sites.reshape((args.ntrials, nsites, 2))
     linesegs = linesegs.reshape((args.ntrials, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
+    char_max_length = char_max_length.reshape((args.ntrials))
+    char_min_length = char_min_length.reshape((args.ntrials))
+    objective_function = objective_function.reshape((args.ntrials))
+
     # render
     if args.testing: 
         print(perimeter)
         print(sites)
         print(linesegs)
     else:
-        render_animation(linesegs, sites, perimeter, objectivefunctions, char_max_length, char_min_length)
+        render_animation(linesegs, sites, perimeter, objective_function, char_max_length, char_min_length)
     log_time('\rfinished render\n')
 
 
