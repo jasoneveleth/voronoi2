@@ -26,7 +26,7 @@ endif
 
 # probably shouldn't use Weverthing but this fixes it for mac
 ifeq ($(UNAME), Darwin)
-FLAGS += -Wno-poison-system-directories
+FLAGS += -Wno-poison-system-directories -DMAC
 endif
 
 SRC := $(wildcard src/*.c)
@@ -55,6 +55,7 @@ test: format bin/voronoi bin/heap_test lib
 	sh tests/main_test.sh
 
 clean:
+	rm -rf bin/*.dSYM
 	rm -f $(OBJ) *.gif bin/*
 
 # could use just `$(PYTHON) setup.py build_ext -i` if you want .so file in cwd

@@ -1,9 +1,11 @@
+#ifndef MAC
 #define _GNU_SOURCE
+#include <fenv.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <fenv.h>
 #include "main.h"
 
 // *** NEVER MODIFY THIS EXCEPT IN init_options() ***
@@ -158,7 +160,9 @@ graph_file(const char *path)
 int
 main(int argc, char **argv)
 {
+#ifndef MAC
     feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#endif
     if (argc == 1) {
         default_graph();
     } else if (argv[1][1] == 't') {
