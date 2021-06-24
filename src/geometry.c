@@ -98,10 +98,10 @@ intersect_parabolas(float sweepline, point *parabolas)
         return intersection;
     }
 
-    const float a = (p2.y - p1.y)/2;
-    const float b = l*(p1.x + p2.x) - p1.x * (p1.y + p2.y);
-    const float c = (p1.y - l)*(p2.y-l)*((p1.x+p2.x)*(p1.x-p2.x) 
-                                         + 2*((p2.y-l)*p2.y - (p1.y-l)*p1.y));
+    const float a = 1.0f / (2.0f * (p1.y - l)) - 1.0f / (2.0f * (p2.y - l));
+    const float b = (p2.x) / (p2.y - l) - (p1.x) / (p1.y - l);
+    const float c = (p1.x * p1.x + p1.y * p1.y - l * l) / (2.0f * (p1.y - l))
+                    - (p2.x * p2.x + p2.y * p2.y - l * l) / (2.0f * (p2.y - l));
 
     bool mutliple_points_have_same_y_value = fabsf(p1.y - p2.y) < 1e-6f;
     if (mutliple_points_have_same_y_value) {
