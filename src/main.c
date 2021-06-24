@@ -210,7 +210,8 @@ main(int argc, char **argv)
 
         // arrs.objective_function = malloc(ntrials * sizeof(float));
         bytes = sizeof(arrs.objective_function[0]) * (size_t)ntrials;
-        binary_write("output/objective_function", arrs.objective_function, bytes);
+        binary_write("output/objective_function", arrs.objective_function,
+                     bytes);
 
         // arrs.char_max_length = malloc(ntrials * sizeof(float));
         bytes = sizeof(arrs.char_max_length[0]) * (size_t)ntrials;
@@ -224,13 +225,13 @@ main(int argc, char **argv)
         // fputs("set terminal gif animate delay 20\n", gnuplotPipe);
         // fputs("set output 'newest.gif'\n", gnuplotPipe);
         // fputs(
-        //     "set style line 1 linecolor rgb '#0060ad' linetype 1 linewidth 1 "
-        //     "pointsize 0\n",
-        //     gnuplotPipe);
+        //     "set style line 1 linecolor rgb '#0060ad' linetype 1 linewidth 1
+        //     " "pointsize 0\n", gnuplotPipe);
 
         // fputs("set xrange [0:1]\n", gnuplotPipe);
         // fputs("set yrange [0:1]\n", gnuplotPipe);
-        // //  4 becuase we have each line segment on there twice, and its 2 points
+        // //  4 becuase we have each line segment on there twice, and its 2
+        // points
         // //  in a lineseg
         // size_t inner_loop_size = 4 * (3 * nsites - 6);
         // for (size_t i = 0; i < ntrials; i++) {

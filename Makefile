@@ -33,9 +33,9 @@ SRC := $(wildcard src/*.c)
 OBJ := $(SRC:.c=.o)
 ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
 
-.PHONY: all format clean test lib dirs run
+.PHONY: all format clean test dirs run
 
-all: format lib
+all: format voronoi
 
 # the leading '-' keeps make from aborting if this fails
 format:
@@ -44,28 +44,22 @@ format:
 %.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@
 
-bin/voronoi: $(OBJ)
+voronoi: $(OBJ)
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-bin/heap_test: tests/heap_test.c src/heap.o
+tests/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
-test: format bin/voronoi bin/heap_test lib
-	bin/heap_test
+test: format voronoi tests/heap_test
+	tests/heap_test
 	sh tests/main_test.sh
 
 clean:
-	rm -rf bin/*.dSYM
-	rm -f $(OBJ) *.gif bin/* output/*
-
-# could use just `$(PYTHON) setup.py build_ext -i` if you want .so file in cwd
-lib:
-	$(PYTHON) setup.py build_ext
-	$(PYTHON) setup.py install
-	rm -rf build/
+	rm -rf tests/*.dSYM
+	rm -f $(OBJ) *.gif output/*
 
 # env PYTHONMALLOC=malloc valgrind python main.py
-run: lib
+run:
 	$(PYTHON) main.py -g 100
 	$(PYTHON) main.py -n 100
 

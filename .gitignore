@@ -4,10 +4,11 @@
 build/
 bin/
 
-voronoi.cpython*
+voronoi
 *.gif
 input*
 
 core.*
 vcore*
 output/*
+tests/heap_test
