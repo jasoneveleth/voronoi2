@@ -118,6 +118,15 @@ def descent(args):
     log_time('\rfinished descent\n')
     myprint('rendering . . .')
 
+    pshape = perimeter.shape
+    sshape = sites.shape
+    lshape = linesegs.shape
+    perimeter = np.fromfile('output/perimeter', dtype='float32')
+    sites = np.fromfile('output/sites', dtype='float32')
+    linesegs = np.fromfile('output/linesegs', dtype='float32')
+    perimeter = perimeter.reshape(pshape)
+    sites = sites.reshape(sshape)
+    linesegs = linesegs.reshape(lshape)
     # render
     if args.testing: 
         print(perimeter)

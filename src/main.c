@@ -92,6 +92,14 @@ read_sites_from_file(const char *path, point **sites, int32_t *nsites)
     }
 }
 
+static void
+binary_write(const char *const path, void *const buf, const size_t length)
+{
+    FILE *file = fopen(path, "wb");
+    fwrite(buf, length, 1, file);
+    fclose(file);
+}
+
 void
 gradient_descent(struct arrays arrs, int nsites, const int pts_per_trial)
 {
@@ -104,6 +112,20 @@ gradient_descent(struct arrays arrs, int nsites, const int pts_per_trial)
     } else {
         FATAL(1, "%s\n", "unreachable code");
     }
+    point *linesegs = (point *)arrs.linesegs_to_be_cast;
+    point *sites = (point *)arrs.sites_to_be_cast;
+    float *perimeter = arrs.perimeter;
+    size_t bytes;
+
+    bytes = sizeof(linesegs[0]) * (size_t)options.ntrials * 2
+            * (3 * (size_t)nsites - 6) * 2;
+    binary_write("output/linesegs", linesegs, bytes);
+
+    bytes = sizeof(sites[0]) * (size_t)nsites * (size_t)options.ntrials;
+    binary_write("output/sites", sites, bytes);
+
+    bytes = sizeof(perimeter[0]) * (size_t)options.ntrials;
+    binary_write("output/perimeter", perimeter, bytes);
 }
 
 void
