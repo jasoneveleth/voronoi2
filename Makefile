@@ -56,7 +56,7 @@ test: format bin/voronoi bin/heap_test lib
 
 clean:
 	rm -rf bin/*.dSYM
-	rm -f $(OBJ) *.gif bin/*
+	rm -f $(OBJ) *.gif bin/* output/*
 
 # could use just `$(PYTHON) setup.py build_ext -i` if you want .so file in cwd
 lib:
