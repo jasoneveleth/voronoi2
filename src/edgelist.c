@@ -7,13 +7,17 @@ float
 calc_perimeter(struct edgelist *edgelist)
 {
     float length = 0;
+    FILE *file = fopen("output/hist", "wb");
     for (int i = 0; i < edgelist->nedges; i++) {
         float dx =
             edgelist->edges[i]->origin.x - edgelist->edges[i]->twin->origin.x;
         float dy =
             edgelist->edges[i]->origin.y - edgelist->edges[i]->twin->origin.y;
-        length += sqrtf(dx * dx + dy * dy);
+        float d = sqrtf(dx * dx + dy * dy);
+        length += d;
+        fwrite((void *)&d, sizeof(d), 1, file);
     }
+    fclose(file);
     return (length / 2) + 4;
 }
 
