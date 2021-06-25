@@ -62,5 +62,5 @@ clean:
 run: voronoi
 	$(PYTHON) plot.py -g 100
 	voronoi -t 100 100
-	$(PYTHON) plot.py -n 100
+	$(PYTHON) plot.py
 

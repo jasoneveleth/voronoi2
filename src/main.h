@@ -2,7 +2,6 @@
 #define MAIN_H
 
 #include "fortunes.h"
-#include "cython_stuff.h"
 #include "gradient.h"
 #include "config.h"
 
@@ -17,5 +16,10 @@
             exit(1);                                                          \
         }                                                                     \
     } while (0)
+#define OPTSTR "b:o:n:d:hi:"
+#define USAGE_FMT \
+    "usage: %s [-i PATH] [-b t|b] [-o p[r]] [-d c|b] [-n NUM] [-h]\n"
+#define DEFAULT_PROGNAME "voronoi"
+#define DEFAULT_INPUTFILE "input"
 
 #endif

@@ -4,7 +4,6 @@
 #include "heap.h"
 #include "bintree.h"
 #include "edgelist.h"
-#include "cython_stuff.h"
 
 struct bp {
     point sites[2];

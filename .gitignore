@@ -9,6 +9,6 @@ voronoi
 input*
 
 core.*
-vcore*
+vgcore*
 output/*
 tests/heap_test

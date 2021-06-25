@@ -35,9 +35,17 @@ struct options {
     enum boundary_condition boundary;
     float alpha;
     float repel_coeff;
-    int ntrials;
     float jiggle;
-    char padding[4];
+    unsigned long ntrials;
+};
+
+struct arrays {
+    float *linesegs_to_be_cast;
+    float *sites_to_be_cast;
+    float *perimeter;
+    float *objective_function;
+    float *char_max_length;
+    float *char_min_length;
 };
 
 #endif

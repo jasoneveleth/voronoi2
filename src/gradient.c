@@ -156,7 +156,7 @@ simple_descent(struct arrays numpy_arrs,
     float *char_min_length = numpy_arrs.char_min_length;
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
-    for (int i = 0; i < options.ntrials; i++) {
+    for (int i = 0; i < (int)options.ntrials; i++) {
         if (i > 0) { // skip this the first time
             float prev_objective = obj_func_vals[i - 1];
             point *old_sites_ptr = &sites[(i - 1) * nsites];
@@ -196,7 +196,7 @@ barziilai_borwein(struct arrays numpy_arrs,
 
     point *g_k = malloc((size_t)nsites * sizeof(point));
     point *g_k1 = malloc((size_t)nsites * sizeof(point));
-    for (int i = 0; i < options.ntrials; i++) {
+    for (int i = 0; i < (int)options.ntrials; i++) {
         if (i > 0) { // skip this the first time
             float prev_objective = obj_func_vals[i - 1];
             point *old_sites_ptr = &sites[(i - 1) * nsites];
