@@ -165,6 +165,49 @@ graph_file(const char *path)
     free_edgelist(&e);
 }
 
+static void
+big_func(size_t nsites, size_t ntrials)
+{
+    size_t linesegs_per_trial = 2 * (3 * nsites - 6);
+    size_t pts_per_lineseg = 2;
+    size_t floats_per_pt = 2;
+    struct arrays arrs;
+    arrs.linesegs_to_be_cast =
+        malloc(ntrials * linesegs_per_trial * pts_per_lineseg * floats_per_pt
+               * sizeof(float));
+    arrs.sites_to_be_cast =
+        malloc(ntrials * nsites * floats_per_pt * sizeof(float));
+    arrs.perimeter = malloc(ntrials * sizeof(float));
+    arrs.objective_function = malloc(ntrials * sizeof(float));
+    arrs.char_max_length = malloc(ntrials * sizeof(float));
+    arrs.char_min_length = malloc(ntrials * sizeof(float));
+    gradient_descent(arrs, (int)nsites,
+                     (int)(linesegs_per_trial * pts_per_lineseg));
+
+    point *linesegs = (point *)arrs.linesegs_to_be_cast;
+    point *sites = (point *)arrs.sites_to_be_cast;
+    float *perimeter = arrs.perimeter;
+    size_t bytes;
+    bytes = sizeof(linesegs[0]) * (size_t)options.ntrials * 2
+            * (3 * (size_t)nsites - 6) * 2;
+    binary_write("output/linesegs", linesegs, bytes);
+
+    bytes = sizeof(sites[0]) * (size_t)nsites * (size_t)options.ntrials;
+    binary_write("output/sites", sites, bytes);
+
+    bytes = sizeof(perimeter[0]) * (size_t)options.ntrials;
+    binary_write("output/perimeter", perimeter, bytes);
+
+    bytes = sizeof(arrs.objective_function[0]) * (size_t)ntrials;
+    binary_write("output/objective_function", arrs.objective_function, bytes);
+
+    bytes = sizeof(arrs.char_max_length[0]) * (size_t)ntrials;
+    binary_write("output/char_max_length", arrs.char_max_length, bytes);
+
+    bytes = sizeof(arrs.char_min_length[0]) * (size_t)ntrials;
+    binary_write("output/char_min_length", arrs.char_min_length, bytes);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -178,45 +221,7 @@ main(int argc, char **argv)
         size_t ntrials = strtoul(argv[3], NULL, 10);
         init_options("input", PERIMETER, CONSTANT_ALPHA, FINITE_DIFFERENCE,
                      TORUS, 3e-3f, 1e-4f, (int)ntrials, 1e-4f);
-        size_t linesegs_per_trial = 2 * (3 * nsites - 6);
-        size_t pts_per_lineseg = 2;
-        size_t floats_per_pt = 2;
-        struct arrays arrs;
-        arrs.linesegs_to_be_cast =
-            malloc(ntrials * linesegs_per_trial * pts_per_lineseg
-                   * floats_per_pt * sizeof(float));
-        arrs.sites_to_be_cast =
-            malloc(ntrials * nsites * floats_per_pt * sizeof(float));
-        arrs.perimeter = malloc(ntrials * sizeof(float));
-        arrs.objective_function = malloc(ntrials * sizeof(float));
-        arrs.char_max_length = malloc(ntrials * sizeof(float));
-        arrs.char_min_length = malloc(ntrials * sizeof(float));
-        gradient_descent(arrs, (int)nsites,
-                         (int)(linesegs_per_trial * pts_per_lineseg));
-
-        point *linesegs = (point *)arrs.linesegs_to_be_cast;
-        point *sites = (point *)arrs.sites_to_be_cast;
-        float *perimeter = arrs.perimeter;
-        size_t bytes;
-        bytes = sizeof(linesegs[0]) * (size_t)options.ntrials * 2
-                * (3 * (size_t)nsites - 6) * 2;
-        binary_write("output/linesegs", linesegs, bytes);
-
-        bytes = sizeof(sites[0]) * (size_t)nsites * (size_t)options.ntrials;
-        binary_write("output/sites", sites, bytes);
-
-        bytes = sizeof(perimeter[0]) * (size_t)options.ntrials;
-        binary_write("output/perimeter", perimeter, bytes);
-
-        bytes = sizeof(arrs.objective_function[0]) * (size_t)ntrials;
-        binary_write("output/objective_function", arrs.objective_function,
-                     bytes);
-
-        bytes = sizeof(arrs.char_max_length[0]) * (size_t)ntrials;
-        binary_write("output/char_max_length", arrs.char_max_length, bytes);
-
-        bytes = sizeof(arrs.char_min_length[0]) * (size_t)ntrials;
-        binary_write("output/char_min_length", arrs.char_min_length, bytes);
+        big_func(nsites, ntrials);
     } else {
         graph_file(argv[argc - 1]);
     }

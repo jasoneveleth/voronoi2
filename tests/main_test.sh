@@ -33,6 +33,7 @@ cp tests/sites/hundred_point.gradin input
 file_no_extension='tests/sites/hundredpoint_obj=perimeter'
 printf "testing ${file_no_extension} "
 #-----
+voronoi -t 100 50
 .env/bin/python plot.py -s -t -n 50 --objective perimeter --boundary torus --descent constant_alpha | md5sum > tests/tmp_file
 if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
     printf "${GRN}PASSED${CLR}\n"
@@ -45,6 +46,7 @@ fi
 file_no_extension='tests/sites/hundredpoint_obj=perimeter_repel'
 printf "testing ${file_no_extension} "
 #----
+voronoi -t 100 50
 .env/bin/python plot.py -s -t -n 50 --objective repulsion perimeter --boundary torus --descent constant_alpha | md5sum > tests/tmp_file
 if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
     printf "${GRN}PASSED${CLR}\n"
