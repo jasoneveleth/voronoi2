@@ -7,22 +7,22 @@ $ git clone https://github.com/jasoneveleth/voronoi2
 $ cd voronoi2
 $ python3 -m venv .env
 $ . .env/bin/activate
-$ python -m pip install Cython matplotlib numpy
+$ python -m pip install matplotlib numpy
 $ make run
 ```
 
 This will make 'newest.gif' in the current directory. Look at it with `open
 newest.gif`
 
-To run it with your own points, add them to 'input' file. And rerun the main.py
-file with the correct options:
+To run it with your own points, add them to 'input' file. And rerun the make 
+command:
 
 ```bash
 $ vi input
-$ python main.py -n 50
+$ make run
 ```
 
-Check options with `$ python main.py -h`
+Check options with `$ ./voronoi -h`
 
 ## Notes
 
@@ -46,19 +46,18 @@ Turns out I knew what I was doing when I didn't go with the array implementaion
 of a binary tree. That works great and is super elegant until you are trying to 
 rearrange the tree in a nontrivial way - like skipping over a node by 
 reassigning pointers. To do that it'd be like O(n) or something idk. Anyway, I 
-reimplemented everything and now it works (at least for 3 points)!
-
-So, I had a lot of memory issues, luckily valgrind really saved the day here. I 
-didn't initialize a lot of fields in structs to NULL, like bnodes and hnodes. 
-That caused undefined jumping behavior if that memory wasn't right. I also 
-forgot to reset the children of the parent's '-\>parent' which was leading to a 
-weird tree.
+reimplemented everything and now it works!
 
 ## Debug
 
-- I had the wrong criteria for being an internal node, I said both children 
-need to be null, when what I meant was that one of them needs to be null but 
-not necessarily. Also didn't null check.
+- I didn't initialize a lot of fields in structs to NULL, like bnodes and
+  hnodes. That caused undefined jumping behavior if that memory wasn't right. I
+  also forgot to reset the children of the parent's '-\>parent' which was
+  leading to a weird tree.
+
+- I had the wrong criteria for being an internal node, I said both children need
+  to be null, when what I meant was that one of them needs to be null but not
+  necessarily. Also didn't null check.
 
 - I had the wrong sign for calculating if two vectors formed a right turn, I
   was calculating if they took a left turn
