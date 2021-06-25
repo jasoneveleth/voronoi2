@@ -208,16 +208,13 @@ main(int argc, char **argv)
         bytes = sizeof(perimeter[0]) * (size_t)options.ntrials;
         binary_write("output/perimeter", perimeter, bytes);
 
-        // arrs.objective_function = malloc(ntrials * sizeof(float));
         bytes = sizeof(arrs.objective_function[0]) * (size_t)ntrials;
         binary_write("output/objective_function", arrs.objective_function,
                      bytes);
 
-        // arrs.char_max_length = malloc(ntrials * sizeof(float));
         bytes = sizeof(arrs.char_max_length[0]) * (size_t)ntrials;
         binary_write("output/char_max_length", arrs.char_max_length, bytes);
 
-        // arrs.char_min_length = malloc(ntrials * sizeof(float));
         bytes = sizeof(arrs.char_min_length[0]) * (size_t)ntrials;
         binary_write("output/char_min_length", arrs.char_min_length, bytes);
     } else {
