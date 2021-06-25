@@ -198,8 +198,10 @@ big_func(size_t nsites, size_t ntrials)
     size_t linesegs_per_trial = 2 * (3 * nsites - 6);
     size_t pts_per_lineseg = 2;
     size_t floats_per_pt = 2;
-    size_t bytes = ntrials * linesegs_per_trial * pts_per_lineseg
-                   * floats_per_pt * sizeof(float);
+
+    size_t bytes = ntrials * linesegs_per_trial * pts_per_lineseg;
+    bytes *= floats_per_pt * sizeof(float);
+
     struct arrays arrs;
     arrs.linesegs_to_be_cast = malloc(bytes);
     bytes = ntrials * nsites * floats_per_pt * sizeof(float);
@@ -208,8 +210,8 @@ big_func(size_t nsites, size_t ntrials)
     arrs.objective_function = malloc(ntrials * sizeof(float));
     arrs.char_max_length = malloc(ntrials * sizeof(float));
     arrs.char_min_length = malloc(ntrials * sizeof(float));
-    gradient_descent(arrs, (int)nsites,
-                     (int)(linesegs_per_trial * pts_per_lineseg));
+    int pts_per_trial = (int)(linesegs_per_trial * pts_per_lineseg);
+    gradient_descent(arrs, (int)nsites, pts_per_trial);
 
     output_to_file(arrs, nsites, ntrials);
 }
