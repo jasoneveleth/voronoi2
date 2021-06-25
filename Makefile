@@ -59,7 +59,8 @@ clean:
 	rm -f $(OBJ) *.gif output/*
 
 # env PYTHONMALLOC=malloc valgrind python main.py
-run:
-	$(PYTHON) main.py -g 100
-	$(PYTHON) main.py -n 100
+run: voronoi
+	$(PYTHON) plot.py -g 100
+	voronoi -t 100 100
+	$(PYTHON) plot.py -n 100
 

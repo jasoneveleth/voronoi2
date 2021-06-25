@@ -1,4 +1,3 @@
-import voronoi
 import numpy as np
 import matplotlib.collections
 import matplotlib.animation
