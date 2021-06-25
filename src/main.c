@@ -220,60 +220,6 @@ main(int argc, char **argv)
         // arrs.char_min_length = malloc(ntrials * sizeof(float));
         bytes = sizeof(arrs.char_min_length[0]) * (size_t)ntrials;
         binary_write("output/char_min_length", arrs.char_min_length, bytes);
-
-        // FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
-        // fputs("set terminal gif animate delay 20\n", gnuplotPipe);
-        // fputs("set output 'newest.gif'\n", gnuplotPipe);
-        // fputs(
-        //     "set style line 1 linecolor rgb '#0060ad' linetype 1 linewidth 1
-        //     " "pointsize 0\n", gnuplotPipe);
-
-        // fputs("set xrange [0:1]\n", gnuplotPipe);
-        // fputs("set yrange [0:1]\n", gnuplotPipe);
-        // //  4 becuase we have each line segment on there twice, and its 2
-        // points
-        // //  in a lineseg
-        // size_t inner_loop_size = 4 * (3 * nsites - 6);
-        // for (size_t i = 0; i < ntrials; i++) {
-        //     fputs("plot '-' with linespoints linestyle 1\n", gnuplotPipe);
-        //     for (size_t j = 0; j < inner_loop_size; j += 2) {
-        //         point start =
-        //             ((point *)(arrs.linesegs_to_be_cast))[i * inner_loop_size
-        //                                                   + j];
-        //         point end =
-        //             ((point *)(arrs.linesegs_to_be_cast))[i * inner_loop_size
-        //                                                   + j + 1];
-        //         fprintf(gnuplotPipe, "%f %f\n%f %f\n\n", (double)start.x,
-        //                 (double)start.y, (double)end.x, (double)end.y);
-        //     }
-        //     fputs("e\n", gnuplotPipe);
-        // }
-        // fprintf(gnuplotPipe, "exit");
-        // pclose(gnuplotPipe);
-        //
-        // -----------------------------=============-------------------------
-        //
-        // for (int i = 0; i < ntrials; i++) { printf("%f\n",
-        // arrs.perimeter[i]); } printf("\n");
-        // size_t len = ntrials * linesegs_per_trial * pts_per_lineseg
-        //              * floats_per_pt;
-        // for (size_t i = 0; i < len; i += 4) {
-        //     printf("(%f, %f) (%f, %f)\n", arrs.linesegs_to_be_cast[i],
-        //            arrs.linesegs_to_be_cast[i + 1],
-        //            arrs.linesegs_to_be_cast[i + 2],
-        //            arrs.linesegs_to_be_cast[i + 3]);
-        // }
-        // for (int i = 0; i < ntrials; i++) {
-        //     for (int j = 0; j < nsites; j++) {
-        //         printf("(%f, %f)\n",
-        //                ((point *)(arrs.sites_to_be_cast))[i * nsites + j].x,
-        //                ((point *)(arrs.sites_to_be_cast))[i * nsites + j].y);
-        //     }
-        // }
-        // printf("\n");
-        // for (int i = 0; i < ntrials; i++) {
-        //     for (int j = 0; j < nsites; j++) { printf(""); }
-        // }
     } else {
         graph_file(argv[argc - 1]);
     }
