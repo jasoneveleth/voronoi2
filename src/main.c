@@ -198,12 +198,12 @@ big_func(size_t nsites, size_t ntrials)
     size_t linesegs_per_trial = 2 * (3 * nsites - 6);
     size_t pts_per_lineseg = 2;
     size_t floats_per_pt = 2;
+    size_t bytes = ntrials * linesegs_per_trial * pts_per_lineseg
+                   * floats_per_pt * sizeof(float);
     struct arrays arrs;
-    arrs.linesegs_to_be_cast =
-        malloc(ntrials * linesegs_per_trial * pts_per_lineseg * floats_per_pt
-               * sizeof(float));
-    arrs.sites_to_be_cast =
-        malloc(ntrials * nsites * floats_per_pt * sizeof(float));
+    arrs.linesegs_to_be_cast = malloc(bytes);
+    bytes = ntrials * nsites * floats_per_pt * sizeof(float);
+    arrs.sites_to_be_cast = malloc(bytes);
     arrs.perimeter = malloc(ntrials * sizeof(float));
     arrs.objective_function = malloc(ntrials * sizeof(float));
     arrs.char_max_length = malloc(ntrials * sizeof(float));
