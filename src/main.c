@@ -166,24 +166,8 @@ graph_file(const char *path)
 }
 
 static void
-big_func(size_t nsites, size_t ntrials)
+output_to_file(struct arrays arrs, size_t nsites, size_t ntrials)
 {
-    size_t linesegs_per_trial = 2 * (3 * nsites - 6);
-    size_t pts_per_lineseg = 2;
-    size_t floats_per_pt = 2;
-    struct arrays arrs;
-    arrs.linesegs_to_be_cast =
-        malloc(ntrials * linesegs_per_trial * pts_per_lineseg * floats_per_pt
-               * sizeof(float));
-    arrs.sites_to_be_cast =
-        malloc(ntrials * nsites * floats_per_pt * sizeof(float));
-    arrs.perimeter = malloc(ntrials * sizeof(float));
-    arrs.objective_function = malloc(ntrials * sizeof(float));
-    arrs.char_max_length = malloc(ntrials * sizeof(float));
-    arrs.char_min_length = malloc(ntrials * sizeof(float));
-    gradient_descent(arrs, (int)nsites,
-                     (int)(linesegs_per_trial * pts_per_lineseg));
-
     point *linesegs = (point *)arrs.linesegs_to_be_cast;
     point *sites = (point *)arrs.sites_to_be_cast;
     float *perimeter = arrs.perimeter;
@@ -206,6 +190,28 @@ big_func(size_t nsites, size_t ntrials)
 
     bytes = sizeof(arrs.char_min_length[0]) * (size_t)ntrials;
     binary_write("output/char_min_length", arrs.char_min_length, bytes);
+}
+
+static void
+big_func(size_t nsites, size_t ntrials)
+{
+    size_t linesegs_per_trial = 2 * (3 * nsites - 6);
+    size_t pts_per_lineseg = 2;
+    size_t floats_per_pt = 2;
+    struct arrays arrs;
+    arrs.linesegs_to_be_cast =
+        malloc(ntrials * linesegs_per_trial * pts_per_lineseg * floats_per_pt
+               * sizeof(float));
+    arrs.sites_to_be_cast =
+        malloc(ntrials * nsites * floats_per_pt * sizeof(float));
+    arrs.perimeter = malloc(ntrials * sizeof(float));
+    arrs.objective_function = malloc(ntrials * sizeof(float));
+    arrs.char_max_length = malloc(ntrials * sizeof(float));
+    arrs.char_min_length = malloc(ntrials * sizeof(float));
+    gradient_descent(arrs, (int)nsites,
+                     (int)(linesegs_per_trial * pts_per_lineseg));
+
+    output_to_file(arrs, nsites, ntrials);
 }
 
 int
