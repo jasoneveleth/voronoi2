@@ -50,6 +50,7 @@ static void
 binary_write(const char *const path, void *const buf, const size_t length)
 {
     FILE *file = fopen(path, "wb");
+    FATAL(!file, "path: %s doesn't exist\n", path);
     fwrite(buf, length, 1, file);
     fclose(file);
 }
