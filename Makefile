@@ -61,6 +61,6 @@ clean:
 # env PYTHONMALLOC=malloc valgrind python main.py
 run: voronoi
 	$(PYTHON) plot.py -g 100
-	voronoi -t 100 100
+	voronoi -n 100
 	$(PYTHON) plot.py
 
