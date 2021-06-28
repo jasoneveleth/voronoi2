@@ -16,6 +16,7 @@ FLAGS += -Wno-error=double-promotion
 FLAGS += -Wno-error=reserved-id-macro
 # FLAGS += -Ofast -march=native
 FLAGS += -g -O0 
+# FLAGS += -pg
 
 UNAME := $(shell uname)
 
