@@ -32,9 +32,9 @@ cp tests/sites/hundred_point.gradin input
 #-----
 file_no_extension='tests/sites/hundredpoint_obj=perimeter'
 printf "testing ${file_no_extension} "
-#-----
 voronoi -n 50
-.env/bin/python plot.py -s -t -n 50 --objective perimeter --boundary torus --descent constant_alpha | md5sum > tests/tmp_file
+#-----
+.env/bin/python plot.py -s -t | md5sum > tests/tmp_file
 if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
     printf "${GRN}PASSED${CLR}\n"
 else
@@ -45,26 +45,13 @@ fi
 #----
 file_no_extension='tests/sites/hundredpoint_obj=perimeter_repel'
 printf "testing ${file_no_extension} "
-#----
 voronoi -n 50 -o pr
-.env/bin/python plot.py -s -t -n 50 --objective repulsion perimeter --boundary torus --descent constant_alpha | md5sum > tests/tmp_file
+#----
+.env/bin/python plot.py -s -t | md5sum > tests/tmp_file
 if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
     printf "${GRN}PASSED${CLR}\n"
 else
     printf "${RED}FAILED${CLR}\n"
 fi
-
-# for file in tests/sites/*.gradout; do
-#     file_no_extension="$(echo "$file" | cut -f1 -d'.')"
-#     printf "testing $file_no_extension: "
-
-#     .env/bin/python plot.py -s -t -n 50 | md5sum > tests/tmp_file
-
-#     if cmp --silent "${file_no_extension}.gradout" tests/tmp_file; then
-#         printf "${GRN}PASSED${CLR}\n"
-#     else
-#         printf "${RED}FAILED${CLR}\n"
-#     fi
-# done
 
 rm -f tests/tmp_file

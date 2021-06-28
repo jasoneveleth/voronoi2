@@ -8,7 +8,7 @@ from random import random
 import argparse
 
 start = time()
-np.set_printoptions(threshold=np.inf)
+np.set_printoptions(threshold=sys.maxsize)
 
 def log_time(string):
     global start
@@ -76,21 +76,6 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=20, blit=True)
     anim.save('newest.gif') # writer='ffmpeg'
 
-def plot_diagram(edges, sites):
-    """ edges - numpy arr (n, 2, 2)
-        sites - numpy arr (m, 2)"""
-    plt.axis([0, 1, 0, 1])
-    line_coll = matplotlib.collections.LineCollection(edges)
-    plt.plot(sites[:,0], sites[:,1], 'ro')
-    plt.gca().add_collection(line_coll)
-    plt.show()
-
-def default():
-    edges = np.zeros((1000, 2, 2), 'float32') # edges each with two points (2 coordinates)
-    sites = np.zeros((100, 2), 'float32') # 31 sites of 1 point (2 coordinates)
-    voronoi.simple_diagram_func(edges, sites)
-    plot_diagram(edges, sites)
-
 def myprint(string):
     if not args.silent:
         sys.stdout.write(string)
@@ -98,6 +83,7 @@ def myprint(string):
 
 def descent(args):
     # init vars
+    myprint('rendering . . . ')
     nsites = len(open('input').readlines())
     linesegs_per_trial = 2*(3*nsites - 6)
     pts_per_lineseg = 2
@@ -110,12 +96,8 @@ def descent(args):
     char_min_length = np.fromfile('output/char_min_length', dtype='float32')
     objective_function = np.fromfile('output/objective_function', dtype='float32')
 
-    perimeter = perimeter.reshape((args.ntrials))
-    sites = sites.reshape((args.ntrials, nsites, 2))
-    linesegs = linesegs.reshape((args.ntrials, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
-    char_max_length = char_max_length.reshape((args.ntrials))
-    char_min_length = char_min_length.reshape((args.ntrials))
-    objective_function = objective_function.reshape((args.ntrials))
+    sites = sites.reshape((-1, nsites, 2))
+    linesegs = linesegs.reshape((-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
 
     # render
     if args.testing: 
@@ -135,47 +117,12 @@ def generate_sites(num):
         f.write(str(rand) + '\t' + str(rand2) + '\n')
     f.close()
 
-objective_converter = { 
-        'perimeter': 1, 
-        'repulsion': 2 
-        }
-descent_method_converter = { 
-        'constant_alpha': 0,
-        'barziilai': 1,
-        'conjugate': 2 
-        }
-gradient_method_converter = { 
-        'finite_difference': 0 
-        }
-boundary_condition_converter = { 
-        'bounce': 0, 'torus': 1 
-        }
-
 # ================================ MAIN ====================================== #
-parser = argparse.ArgumentParser(description="compute and render grain coarsening on voronoi diagrams using gradient descent ", 
-                                 epilog="this help output is low key confusing, so if you use ```grep -o '^.env/bin/python[^|]*' tests/main_test.sh``` you can see the tests (and example calls)",
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-group = parser.add_mutually_exclusive_group()
-
+parser = argparse.ArgumentParser(description="render grain coarsening on voronoi diagrams")
 parser.add_argument("-s", "--silent", action="store_true", default=False, help="don't show progress output")
 parser.add_argument("-t", "--testing", action="store_true", default=False, help="output stuff for testing purposes")
-parser.add_argument("--file", default='input', help="the file that the site point coords are read from")
-parser.add_argument("--objective", choices=['repulsion', 'perimeter'], nargs='+', default=['perimeter'], help="the objective function you are minimizing, you can supply multiple arguments to it if you care about multiple things (and you can't just specify repulsion)")
-parser.add_argument("--descent", choices=['constant_alpha', 'barziilai'], default='constant_alpha', help="the gradient descent method to use")
-parser.add_argument("--gradient", choices=['finite_difference'], default='finite_difference', help="the gradient method to use")
-parser.add_argument("--boundary", choices=['torus', 'bounce'], default='bounce', help="how the points wrap when they are on the margin")
-parser.add_argument("--alpha", type=float, default=3e-3, help="the step size if the descent method is constants_alpha")
-parser.add_argument("--repel_coeff", type=float, default=1e-4, help="the strength of the repulsion of points")
-parser.add_argument("--jiggle", type=float, default=1e-4, help="the amount jiggle for each point's coords when doing finite difference gradient")
-
-group.add_argument("-n", "--ntrials", type=int, metavar="NUM", default=50, help="perform gradient descent for that many trials")
-group.add_argument("-g", "--npoints", type=int, metavar="NUM", help="generate points and put them in the input file")
-
+parser.add_argument("-g", "--npoints", type=int, metavar="NUM", help="generate points and put them in the input file")
 args = parser.parse_args()
-args.objective = sum([objective_converter[i] for i in args.objective])
-args.descent = descent_method_converter[args.descent]
-args.gradient = gradient_method_converter[args.gradient]
-args.boundary = boundary_condition_converter[args.boundary]
 
 if args.npoints:
     generate_sites(args.npoints)
