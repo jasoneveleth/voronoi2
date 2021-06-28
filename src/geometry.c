@@ -84,7 +84,7 @@ intersect_parabolas(float sweepline, point *parabolas)
     const point p2 = parabolas[1]; // parabola on the right of bp
     const float l = sweepline;
 
-    bool sweepline_and_point_same_y = p1.y - l < 1e-6f || p2.y - l < 1e-6f;
+    bool sweepline_and_point_same_y = p1.y - l < 1e-6f || p2.y - l < 1e-6f; // HARDCODE
     if (sweepline_and_point_same_y) {
         point lower = p1.y < p2.y ? p1 : p2;
         point higher = p1.y < p2.y ? p2 : p1;
@@ -103,7 +103,7 @@ intersect_parabolas(float sweepline, point *parabolas)
     const float c = (p1.x * p1.x + p1.y * p1.y - l * l) / (2.0f * (p1.y - l))
                     - (p2.x * p2.x + p2.y * p2.y - l * l) / (2.0f * (p2.y - l));
 
-    bool mutliple_points_have_same_y_value = fabsf(p1.y - p2.y) < 1e-6f;
+    bool mutliple_points_have_same_y_value = fabsf(p1.y - p2.y) < 1e-6f; // HARDCODE
     if (mutliple_points_have_same_y_value) {
         const float x = -c / b;
         const float y =

@@ -98,7 +98,7 @@ float
 bb_formula(
     point *x_k1_pt, point *x_k_pt, point *g_k1_pt, point *g_k_pt, int nsites)
 {
-    // we tree site.x and site.y as separate variables (x_k is a vector,
+    // we treat site.x and site.y as separate variables (x_k is a vector,
     // unrelated to that, the name x_k for the vector is just to remain
     // consistent with the website detailing the formula (linked below)).
     float *x_k1 = (float *)x_k1_pt;
