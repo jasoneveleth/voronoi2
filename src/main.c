@@ -23,8 +23,8 @@ read_lines_from_file(FILE *file, point **sites, size_t *nsites)
             allocated *= 2;
             (*sites) = realloc((*sites), sizeof(point) * allocated);
         }
-        char *first = strtok(line, ", \t");
-        char *second = strtok(NULL, ", \t");
+        char *first = strtok(line, "(), \t");
+        char *second = strtok(NULL, "(), \t");
         (*sites)[(*nsites)].x = strtof(first, NULL);
         (*sites)[(*nsites)].y = strtof(second, NULL);
     }
