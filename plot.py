@@ -117,13 +117,14 @@ def generate_sites(num):
         f.write(str(rand) + '\t' + str(rand2) + '\n')
     f.close()
 
-# ================================ MAIN ====================================== #
+# ================================ ARGS ====================================== #
 parser = argparse.ArgumentParser(description="render grain coarsening on voronoi diagrams")
 parser.add_argument("-s", "--silent", action="store_true", default=False, help="don't show progress output")
 parser.add_argument("-t", "--testing", action="store_true", default=False, help="output stuff for testing purposes")
 parser.add_argument("-g", "--npoints", type=int, metavar="NUM", help="generate points and put them in the input file")
-args = parser.parse_args()
 
+# ================================ MAIN ====================================== #
+args = parser.parse_args()
 if args.npoints:
     generate_sites(args.npoints)
 else:
