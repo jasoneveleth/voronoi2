@@ -101,6 +101,9 @@ output_to_file(struct arrays arrs, size_t nsites)
 
     nbytes = sizeof(arrs.char_min_length[0]) * options.ntrials;
     binary_write("output/char_min_length", arrs.char_min_length, nbytes);
+
+    nbytes = sizeof(arrs.edgehist[0]) * (size_t)((float)nsites * 1.4143f) * options.ntrials;
+    binary_write("output/edgehist", arrs.edgehist, nbytes);
 }
 
 static void
@@ -123,6 +126,10 @@ big_func()
     size_t bytes = (size_t)(options.ntrials * lines_in_trial * pts_in_lineseg);
     bytes *= floats_per_pt * sizeof(float);
     arrs.linesegs_to_be_cast = malloc(bytes);
+
+    // HARDCODE
+    bytes = options.ntrials * (size_t)((float)nsites * 1.4143f) * sizeof(float);
+    arrs.edgehist = malloc(bytes);
 
     arrs.objective_function = malloc(options.ntrials * sizeof(float));
     arrs.char_max_length = malloc(options.ntrials * sizeof(float));

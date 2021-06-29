@@ -16,7 +16,7 @@ def log_time(string):
     myprint(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs\n")
     start = time()
 
-def render_animation(edges, sites, perimeters, objectivefunctions, char_max_length, char_min_length):
+def render_animation(edges, sites, perimeters, objectivefunctions, char_max_length, char_min_length, edgedist):
     """ perimeters : numpy arr (n, 1)
         sites : numpy arr (n, m, 2)
         edges : numpy arr (n, 3*m-6, 2, 2)
@@ -31,7 +31,7 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     perimeter_ax = fig.add_subplot(4, 2, 1)
     char_len_ax = fig.add_subplot(4, 2, 2)
     earth_mover_ax = fig.add_subplot(4, 2, 3)
-    qr_rates_ax = fig.add_subplot(4, 2, 4)
+    edge_dist_ax = fig.add_subplot(4, 2, 4)
     objectivefunction_ax = fig.add_subplot(4, 2, 5)
     diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
 
@@ -56,8 +56,12 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     earth_mover_ax.set_title('earth mover distance')
     earth_mover_ax.set_xlim(0, nframes)
 
-    qr_rates_ax.set_title('q and r rates')
-    qr_rates_ax.set_xlim(0, nframes)
+    edge_dist_ax.set_title('edge distribution')
+    edge_dist_ax.set_xlim(0, 1.4143)
+    edge_dist_ax.set_ylim(0, np.max(edgedist) * (4/3))
+    nbars = int(sites.shape[1] * 1.4143)
+    x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
+    edge_dist_bars = edge_dist_ax.bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
 
     objectivefunction_ax.set_title('objective function')
     objectivefunction_ax.set_xlim(0, nframes)
@@ -65,6 +69,8 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     objectivefunction_line, = objectivefunction_ax.plot([], [], lw=3)
 
     def animate(trial_num):
+        for i, b in enumerate(edge_dist_bars):
+            b.set_height(edgedist[trial_num][i])
         edge_line_coll.set_segments(edges[trial_num])
         sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
         perimeter_line.set_data(np.arange(trial_num), perimeters[:trial_num])
@@ -95,9 +101,11 @@ def descent(args):
     char_max_length = np.fromfile('output/char_max_length', dtype='float32')
     char_min_length = np.fromfile('output/char_min_length', dtype='float32')
     objective_function = np.fromfile('output/objective_function', dtype='float32')
+    edgedist = np.fromfile('output/edgehist', dtype='int32')
 
     sites = sites.reshape((-1, nsites, 2))
     linesegs = linesegs.reshape((-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
+    edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
 
     # render
     if args.testing: 
@@ -105,7 +113,7 @@ def descent(args):
         print(sites)
         print(linesegs)
     else:
-        render_animation(linesegs, sites, perimeter, objective_function, char_max_length, char_min_length)
+        render_animation(linesegs, sites, perimeter, objective_function, char_max_length, char_min_length, edgedist)
     log_time('\x1b[2K\r')
 
 

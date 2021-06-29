@@ -134,11 +134,13 @@ calc_stats(struct edgelist *edgelist,
            float *objective_function,
            float *char_max_length,
            float *char_min_length,
+           int *edgehist,
            int nsites)
 {
     *perimeter = calc_perimeter(edgelist);
     *objective_function = obj_function(sites, edgelist, nsites);
-    calc_char_length(edgelist, char_max_length, char_min_length);
+    calc_edge_length(edgelist, char_max_length, char_min_length, edgehist,
+                     (size_t)nsites);
 }
 
 void
@@ -154,6 +156,7 @@ simple_descent(struct arrays numpy_arrs,
     float *obj_func_vals = numpy_arrs.objective_function;
     float *char_max_length = numpy_arrs.char_max_length;
     float *char_min_length = numpy_arrs.char_min_length;
+    int *edgehist = numpy_arrs.edgehist;
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
     for (int i = 0; i < (int)options.ntrials; i++) {
@@ -174,7 +177,7 @@ simple_descent(struct arrays numpy_arrs,
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
         calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
                    &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
-                   nsites);
+                   &edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
         free_edgelist(&edgelist);
     }
     free(gradient);
@@ -193,6 +196,7 @@ barziilai_borwein(struct arrays numpy_arrs,
     float *obj_func_vals = numpy_arrs.objective_function;
     float *char_max_length = numpy_arrs.char_max_length;
     float *char_min_length = numpy_arrs.char_min_length;
+    int *edgehist = numpy_arrs.edgehist;
 
     point *g_k = malloc((size_t)nsites * sizeof(point));
     point *g_k1 = malloc((size_t)nsites * sizeof(point));
@@ -228,7 +232,7 @@ barziilai_borwein(struct arrays numpy_arrs,
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
         calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
                    &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
-                   nsites);
+                   &edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
         free_edgelist(&edgelist);
     }
     free(g_k);
