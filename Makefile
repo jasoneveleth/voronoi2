@@ -53,7 +53,7 @@ tests/heap_test: tests/heap_test.c src/heap.o
 
 test: format voronoi tests/heap_test
 	tests/heap_test
-	sh tests/main_test.sh
+	bash tests/main_test.sh
 
 clean:
 	rm -rf tests/*.dSYM
