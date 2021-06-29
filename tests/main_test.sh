@@ -34,7 +34,7 @@ done
 cp tests/sites/hundred_point.gradin input
 
 files=("tests/sites/hundredpoint_obj=perimeter" "tests/sites/hundredpoint_obj=perimeter_repel")
-args=("" "-o pr")
+args=("-b t" "-b t -o pr")
 
 for i in ${!files[@]}; do
     printf "testing ${files[$i]} "
