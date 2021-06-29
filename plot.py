@@ -77,7 +77,6 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
         objectivefunction_line.set_data(np.arange(trial_num), objectivefunctions[:trial_num])
         char_len_max_line.set_data(np.arange(trial_num), char_max_length[:trial_num])
         char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
-        return perimeter_line,edge_line_coll,sites_line,
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=20, blit=False)
     anim.save('newest.gif') # writer='ffmpeg'
