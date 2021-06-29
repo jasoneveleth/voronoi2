@@ -173,7 +173,7 @@ simple_descent(struct arrays numpy_arrs,
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
         calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
-                   &obj_func_vals[i], &char_max_length[i], &char_min_length[0],
+                   &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
                    nsites);
         free_edgelist(&edgelist);
     }
@@ -227,7 +227,7 @@ barziilai_borwein(struct arrays numpy_arrs,
         fortunes(&sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
         calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
-                   &obj_func_vals[i], &char_max_length[i], &char_min_length[0],
+                   &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
                    nsites);
         free_edgelist(&edgelist);
     }
