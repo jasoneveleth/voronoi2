@@ -11,8 +11,8 @@ $ python -m pip install matplotlib numpy
 $ make run
 ```
 
-This will make 'newest.gif' in the current directory. Look at it with `open
-newest.gif`
+This will make 'newest.mp4' in the current directory. Look at it with `open
+newest.mp4`
 
 To run it with your own points, add them to 'input' file. And rerun the make 
 command:

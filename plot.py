@@ -78,8 +78,8 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
         char_len_max_line.set_data(np.arange(trial_num), char_max_length[:trial_num])
         char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
 
-    anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=20, blit=False)
-    anim.save('newest.gif') # writer='ffmpeg'
+    anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=50, blit=False)
+    anim.save('newest.mp4')
 
 def myprint(string):
     if not args.silent:
