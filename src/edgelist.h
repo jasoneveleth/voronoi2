@@ -30,7 +30,7 @@ void init_edgelist(struct edgelist *);
 void calc_char_length(struct edgelist *, float *, float *);
 void print_edgelist(struct edgelist *);
 void print_edge(struct halfedge *);
-void print_sites(point *, int32_t);
+void print_sites(const point *const, const int32_t);
 void new_edge(struct edgelist *, struct halfedge **, struct halfedge **);
 
 #endif

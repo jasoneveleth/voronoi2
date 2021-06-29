@@ -99,9 +99,15 @@ print_edge(struct halfedge *e)
 }
 
 void
-print_sites(point *sites, int32_t length)
+print_sites(const point *const sites, const int32_t length)
 {
-    for (int i = 0; i < length; i++)
+    int len = 0;
+    for (int i = 0; i < length; i++) {
         printf("(%f,%f),\t", (double)sites[i].x, (double)sites[i].y);
+        if ((len += 25) > 80) {
+            len = 0;
+            printf("\n");
+        }
+    }
     printf("\n");
 }
