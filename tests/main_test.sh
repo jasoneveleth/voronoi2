@@ -25,7 +25,8 @@ for file in tests/sites/*.in; do
     file_no_extension="$(echo "$file" | cut -f1 -d'.')"
     printf "testing $file_no_extension: "
 
-    voronoi -n 0 -i "${file_no_extension}.in" | md5sum > tests/tmp_file
+    voronoi -n 0 -i "${file_no_extension}.in"
+    cat output/sites output/linesegs | md5sum > tests/tmp_file
     check_tmp "${file_no_extension}.out"
 done
 

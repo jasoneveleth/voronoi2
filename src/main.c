@@ -62,11 +62,18 @@ graph_file(const char *path)
     init_edgelist(&e);
     point *sites;
     size_t nsites;
+
     file2sites(path, &sites, &nsites);
-    print_sites(sites, (int)nsites);
+    binary_write("output/sites", sites, nsites * sizeof(point));
     fortunes(sites, (int)nsites, &e);
     free(sites);
-    print_edgelist(&e);
+
+    size_t size_of_edgelist = sizeof(point) * 2 * (size_t)e.nedges;
+    point *edges = malloc(size_of_edgelist);
+    copy_edges(&e, edges);
+    binary_write("output/linesegs", edges, size_of_edgelist);
+
+    free(edges);
     free_edgelist(&e);
 }
 
