@@ -83,7 +83,7 @@ def myprint(string):
 
 def descent(args):
     # init vars
-    myprint('rendering . . . ')
+    myprint('rendering movie . . . ')
     nsites = len(open('input').readlines())
     linesegs_per_trial = 2*(3*nsites - 6)
     pts_per_lineseg = 2
@@ -106,7 +106,7 @@ def descent(args):
         print(linesegs)
     else:
         render_animation(linesegs, sites, perimeter, objective_function, char_max_length, char_min_length)
-    log_time('\rfinished render\n')
+    log_time('\x1b[2K\r')
 
 
 def generate_sites(num):
