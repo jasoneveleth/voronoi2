@@ -105,6 +105,9 @@ output_to_file(struct arrays arrs, size_t nsites)
     nbytes = sizeof(arrs.edgehist[0]) * (size_t)((float)nsites * 1.4143f)
              * options.ntrials;
     binary_write("output/edgehist", arrs.edgehist, nbytes);
+
+    nbytes = sizeof(arrs.earthmover[0]) * options.ntrials;
+    binary_write("output/earthmover", arrs.earthmover, nbytes);
 }
 
 static void
@@ -136,6 +139,7 @@ big_func()
     arrs.char_max_length = malloc(options.ntrials * sizeof(float));
     arrs.char_min_length = malloc(options.ntrials * sizeof(float));
     arrs.perimeter = malloc(options.ntrials * sizeof(float));
+    arrs.earthmover = malloc(options.ntrials * sizeof(float));
 
     int pts_per_trial = (int)(lines_in_trial * pts_in_lineseg);
     if (options.descent == CONSTANT_ALPHA) {

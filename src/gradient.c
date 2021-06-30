@@ -127,6 +127,24 @@ bb_formula(
     return numerator / denominator;
 }
 
+static void
+calc_earth_mover(size_t nbins, int *earthmover, int *edgehist, int i)
+{
+    if (i > 0) {
+        int *old_hist = &edgehist[(i - 1) * (int)nbins];
+        int *new_hist = &edgehist[i * (int)nbins];
+        int total = 0;
+        int ith = 0;
+        for (int j = 1; j < (int)nbins; j++) {
+            ith = old_hist[j] + ith - new_hist[j];
+            total += abs(ith);
+        }
+        earthmover[i] = total;
+    } else {
+        earthmover[i] = 0;
+    }
+}
+
 static inline void
 calc_stats(struct edgelist *edgelist,
            point *sites,
@@ -157,6 +175,7 @@ simple_descent(struct arrays numpy_arrs,
     float *char_max_length = numpy_arrs.char_max_length;
     float *char_min_length = numpy_arrs.char_min_length;
     int *edgehist = numpy_arrs.edgehist;
+    int *earthmover = numpy_arrs.earthmover;
 
     point *gradient = malloc((size_t)nsites * sizeof(point));
     for (int i = 0; i < (int)options.ntrials; i++) {
@@ -178,6 +197,9 @@ simple_descent(struct arrays numpy_arrs,
         calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
                    &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
                    &edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
+        // HARDCODE
+        calc_earth_mover((size_t)((float)nsites * 1.4143f), earthmover,
+                         edgehist, i);
         free_edgelist(&edgelist);
     }
     free(gradient);
@@ -197,6 +219,7 @@ barziilai_borwein(struct arrays numpy_arrs,
     float *char_max_length = numpy_arrs.char_max_length;
     float *char_min_length = numpy_arrs.char_min_length;
     int *edgehist = numpy_arrs.edgehist;
+    int *earthmover = numpy_arrs.earthmover;
 
     point *g_k = malloc((size_t)nsites * sizeof(point));
     point *g_k1 = malloc((size_t)nsites * sizeof(point));
@@ -233,6 +256,9 @@ barziilai_borwein(struct arrays numpy_arrs,
         calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
                    &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
                    &edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
+        // HARDCODE
+        calc_earth_mover((size_t)((float)nsites * 1.4143f), earthmover,
+                         edgehist, i);
         free_edgelist(&edgelist);
     }
     free(g_k);

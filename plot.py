@@ -43,6 +43,7 @@ def render():
     char_min_length = arr('char_min_length')
     objfunc = arr('objective_function')
     edgedist = arr('edgehist', dtype='int32')
+    earthmover = arr('earthmover', dtype='int32')
 
     sites = sites.reshape((-1, nsites, 2))
     linesegs = linesegs.reshape(linesegs_shape)
@@ -70,7 +71,8 @@ def render():
     char_len_max_line, = axs[0, 1].plot([], [], lw=3)
     char_len_min_line, = axs[0, 1].plot([], [], lw=3)
 
-    setup_ax(axs[1, 0], 'earth mover distance', (0, nframes), (0,1))
+    setup_ax(axs[1, 0], 'earth mover distance', (0, nframes), (0, (4/3) * np.max(earthmover)))
+    earthmover_line, = axs[1,0].plot([], [], lw=3)
 
     setup_ax(axs[1, 1], 'edge distribution', (0, 1.4143), (0, np.max(edgedist) * (4/3)))
     nbars = int(sites.shape[1] * 1.4143)
@@ -89,6 +91,7 @@ def render():
         objectivefunction_line.set_data(np.arange(trial_num), objfunc[:trial_num])
         char_len_max_line.set_data(np.arange(trial_num), char_max_length[:trial_num])
         char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
+        earthmover_line.set_data(np.arange(trial_num), earthmover[:trial_num])
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=50, blit=False)
     anim.save('newest.mp4')
