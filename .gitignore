@@ -6,6 +6,8 @@ bin/
 
 voronoi
 *.gif
+newest*
+*.mp4
 input*
 
 core.*
