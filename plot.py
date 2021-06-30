@@ -28,39 +28,34 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     """
     nframes = sites.shape[0]
 
-    fig = plt.figure(figsize=(16, 10))
-    # The position of the <edge> of the subplots, as a fraction of the figure width.
-    # The width/height of the padding between subplots, as a fraction of the average Axes width/height
+    fig, axs = plt.subplots(nrows=4, ncols=2)
     fig.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97, wspace=0.3, hspace=0.3)
-    # (nrows, ncols, start_end_indices)
-    perimeter_ax = fig.add_subplot(421)
-    char_len_ax = fig.add_subplot(422)
-    earth_mover_ax = fig.add_subplot(423)
-    edge_dist_ax = fig.add_subplot(424)
-    objectivefunction_ax = fig.add_subplot(425)
+    fig.set_size_inches(16, 10)
+    axs[2, 1].remove()
+    axs[3, 1].remove()
     diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
 
-    setup_ax(perimeter_ax, 'perimeter', (0, nframes), (0, (4/3)*np.max(perimeters)))
-    perimeter_line, = perimeter_ax.plot([], [], lw=3) # the comma unpacks the tuple
+    setup_ax(axs[0, 0], 'perimeter', (0, nframes), (0, (4/3)*np.max(perimeters)))
+    perimeter_line, = axs[0, 0].plot([], [], lw=3) # the comma unpacks the tuple
 
     setup_ax(diagram_ax, 'voronoi diagram', (0, 1), (0, 1))
     edge_line_coll = matplotlib.collections.LineCollection(())
     diagram_ax.add_collection(edge_line_coll)
     sites_line, = diagram_ax.plot([], [], 'ro')
 
-    setup_ax(char_len_ax, 'longest edge and shortest edge (characteristic length)', (0, nframes), (0, (4/3)*np.max(char_max_length)))
-    char_len_max_line, = char_len_ax.plot([], [], lw=3)
-    char_len_min_line, = char_len_ax.plot([], [], lw=3)
+    setup_ax(axs[0, 1], 'longest edge and shortest edge (characteristic length)', (0, nframes), (0, (4/3)*np.max(char_max_length)))
+    char_len_max_line, = axs[0, 1].plot([], [], lw=3)
+    char_len_min_line, = axs[0, 1].plot([], [], lw=3)
 
-    setup_ax(earth_mover_ax, 'earth mover distance', (0, nframes), (0,1))
+    setup_ax(axs[1, 0], 'earth mover distance', (0, nframes), (0,1))
 
-    setup_ax(edge_dist_ax, 'edge distribution', (0, 1.4143), (0, np.max(edgedist) * (4/3)))
+    setup_ax(axs[1, 1], 'edge distribution', (0, 1.4143), (0, np.max(edgedist) * (4/3)))
     nbars = int(sites.shape[1] * 1.4143)
     x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
-    edge_dist_bars = edge_dist_ax.bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
+    edge_dist_bars = axs[1,1].bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
 
-    setup_ax(objectivefunction_ax, 'objective function', (0, nframes), (0, (4/3)*np.max(objectivefunctions)))
-    objectivefunction_line, = objectivefunction_ax.plot([], [], lw=3)
+    setup_ax(axs[2, 0], 'objective function', (0, nframes), (0, (4/3)*np.max(objectivefunctions)))
+    objectivefunction_line, = axs[2,0].plot([], [], lw=3)
 
     def animate(trial_num):
         for i, b in enumerate(edge_dist_bars):
