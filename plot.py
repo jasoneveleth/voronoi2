@@ -16,6 +16,11 @@ def log_time(string):
     myprint(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs\n")
     start = time()
 
+def setup_ax(ax, title, xlim, ylim):
+    ax.set_title(title)
+    ax.set_xlim(xlim[0], xlim[1])
+    ax.set_ylim(ylim[0], ylim[1])
+
 def render_animation(edges, sites, perimeters, objectivefunctions, char_max_length, char_min_length, edgedist):
     """ perimeters : numpy arr (n, 1)
         sites : numpy arr (n, m, 2)
@@ -35,37 +40,26 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     objectivefunction_ax = fig.add_subplot(4, 2, 5)
     diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
 
-    perimeter_ax.set_title('perimeter')
-    perimeter_ax.set_xlim(0, nframes)
-    perimeter_ax.set_ylim(0, (4/3)*np.max(perimeters))
+    setup_ax(perimeter_ax, 'perimeter', (0, nframes), (0, (4/3)*np.max(perimeters)))
     perimeter_line, = perimeter_ax.plot([], [], lw=3) # the comma unpacks the tuple
 
-    diagram_ax.set_title('voronoi diagram')
-    diagram_ax.set_xlim(0, 1)
-    diagram_ax.set_ylim(0, 1)
+    setup_ax(diagram_ax, 'voronoi diagram', (0, 1), (0, 1))
     edge_line_coll = matplotlib.collections.LineCollection(())
     diagram_ax.add_collection(edge_line_coll)
     sites_line, = diagram_ax.plot([], [], 'ro')
 
-    char_len_ax.set_title('longest edge and shortest edge (characteristic length)')
-    char_len_ax.set_xlim(0, nframes)
-    char_len_ax.set_ylim(0, (4/3)*np.max(char_max_length))
+    setup_ax(char_len_ax, 'longest edge and shortest edge (characteristic length)', (0, nframes), (0, (4/3)*np.max(char_max_length)))
     char_len_max_line, = char_len_ax.plot([], [], lw=3)
     char_len_min_line, = char_len_ax.plot([], [], lw=3)
 
-    earth_mover_ax.set_title('earth mover distance')
-    earth_mover_ax.set_xlim(0, nframes)
+    setup_ax(earth_mover_ax, 'earth mover distance', (0, nframes), (0,1))
 
-    edge_dist_ax.set_title('edge distribution')
-    edge_dist_ax.set_xlim(0, 1.4143)
-    edge_dist_ax.set_ylim(0, np.max(edgedist) * (4/3))
+    setup_ax(edge_dist_ax, 'edge distribution', (0, 1.4143), (0, np.max(edgedist) * (4/3)))
     nbars = int(sites.shape[1] * 1.4143)
     x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
     edge_dist_bars = edge_dist_ax.bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
 
-    objectivefunction_ax.set_title('objective function')
-    objectivefunction_ax.set_xlim(0, nframes)
-    objectivefunction_ax.set_ylim(0, (4/3)*np.max(objectivefunctions))
+    setup_ax(objectivefunction_ax, 'objective function', (0, nframes), (0, (4/3)*np.max(objectivefunctions)))
     objectivefunction_line, = objectivefunction_ax.plot([], [], lw=3)
 
     def animate(trial_num):
