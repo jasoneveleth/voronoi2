@@ -119,30 +119,23 @@ big_func()
     }
 
     struct arrays arrs;
-    size_t floats_per_pt = 2;
     size_t nsites;
     file2sites(options.filepath, (point **)&arrs.sites_to_be_cast, &nsites);
-    // size of arrs.sites is: (options.ntrials * nsites * floats_per_pt *
-    // sizeof(float))
-    size_t lines_in_trial = 2 * (3 * nsites - 6);
-    size_t pts_in_lineseg = 2;
-
-    size_t bytes = (size_t)(options.ntrials * lines_in_trial * pts_in_lineseg);
-    bytes *= floats_per_pt * sizeof(float);
-    arrs.linesegs_to_be_cast = malloc(bytes);
-
+    size_t pts_per_trial = (2 * (3 * nsites - 6)) * (2);
+    size_t size_of_linsegs =
+        options.ntrials * (2 * (3 * nsites - 6)) * (2) * (2);
     // HARDCODE
-    bytes = options.ntrials * (size_t)((float)nsites * 1.4143f) * sizeof(float);
-    arrs.edgehist = malloc(bytes);
+    size_t size_of_edgehist = options.ntrials * (nsites * 14143) / 10000;
 
+    arrs.linesegs_to_be_cast = malloc(size_of_linsegs * sizeof(float));
+    arrs.edgehist = malloc(size_of_edgehist * sizeof(float));
     arrs.objective_function = malloc(options.ntrials * sizeof(float));
     arrs.char_max_length = malloc(options.ntrials * sizeof(float));
     arrs.char_min_length = malloc(options.ntrials * sizeof(float));
     arrs.perimeter = malloc(options.ntrials * sizeof(float));
     arrs.earthmover = malloc(options.ntrials * sizeof(float));
 
-    int pts_per_trial = (int)(lines_in_trial * pts_in_lineseg);
-    gradient_descent(arrs, options.jiggle, (int)nsites, pts_per_trial);
+    gradient_descent(arrs, options.jiggle, (int)nsites, (int)pts_per_trial);
     output_to_file(arrs, nsites);
 }
 
