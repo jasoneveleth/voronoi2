@@ -11,7 +11,7 @@ enum __attribute__((packed)) objective_function
 enum __attribute__((packed)) descent_method
 {
     CONSTANT_ALPHA,
-    BARZIILAI,
+    BARZILAI,
     CONJUGATE
 };
 

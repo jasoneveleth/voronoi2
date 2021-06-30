@@ -161,7 +161,7 @@ gradient_descent(struct arrays arr,
     point *g_k = NULL;
     point *g_k1 = NULL;
     g_k = malloc((size_t)nsites * sizeof(point));
-    if (options.descent == BARZIILAI) {
+    if (options.descent == BARZILAI) {
         g_k1 = malloc((size_t)nsites * sizeof(point));
     }
     for (int i = 0; i < (int)options.ntrials; i++) {
@@ -173,7 +173,7 @@ gradient_descent(struct arrays arr,
                 gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
                                 prev_objective);
             float alpha;
-            if (options.descent == BARZIILAI) {
+            if (options.descent == BARZILAI) {
                 if (i == 1) {
                     alpha = options.alpha;
                 } else {
@@ -188,7 +188,7 @@ gradient_descent(struct arrays arr,
             }
             update_sites(old_sites_ptr, &arr.sites[i * nsites], g_k, nsites,
                          alpha);
-            if (options.descent == BARZIILAI) {
+            if (options.descent == BARZILAI) {
                 point *tmp = g_k1;
                 g_k1 = g_k;
                 g_k = tmp;
