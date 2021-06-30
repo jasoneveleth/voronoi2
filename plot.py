@@ -65,7 +65,7 @@ def render():
     setup_ax(diagram_ax, 'voronoi diagram', (0, 1), (0, 1))
     edge_line_coll = matplotlib.collections.LineCollection(())
     diagram_ax.add_collection(edge_line_coll)
-    sites_line, = diagram_ax.plot([], [], 'ro')
+    sites_line, = diagram_ax.plot([], [], 'ro', ms=5)
 
     setup_ax(axs[0, 1], 'longest edge and shortest edge (characteristic length)', (0, nframes), (0, (4/3)*np.max(char_max_length)))
     char_len_max_line, = axs[0, 1].plot([], [], lw=3)
