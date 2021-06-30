@@ -199,7 +199,7 @@ main(int argc, char **argv)
             if (optarg[0] == 'c') {
                 options.descent = CONSTANT_ALPHA;
             } else if (optarg[0] == 'b') {
-                options.descent = BARZIILAI;
+                options.descent = BARZILAI;
             } else {
                 usage(argv[0], optopt);
                 return EXIT_FAILURE;
