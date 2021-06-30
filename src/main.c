@@ -102,7 +102,8 @@ output_to_file(struct arrays arrs, size_t nsites)
     nbytes = sizeof(arrs.char_min_length[0]) * options.ntrials;
     binary_write("output/char_min_length", arrs.char_min_length, nbytes);
 
-    nbytes = sizeof(arrs.edgehist[0]) * (size_t)((float)nsites * 1.4143f) * options.ntrials;
+    nbytes = sizeof(arrs.edgehist[0]) * (size_t)((float)nsites * 1.4143f)
+             * options.ntrials;
     binary_write("output/edgehist", arrs.edgehist, nbytes);
 }
 
