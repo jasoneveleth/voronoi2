@@ -57,6 +57,7 @@ def render():
     fig, axs = plt.subplots(nrows=4, ncols=2)
     fig.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97, wspace=0.3, hspace=0.3)
     fig.set_size_inches(16, 10)
+
     axs[2, 1].remove()
     axs[3, 1].remove()
     diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
