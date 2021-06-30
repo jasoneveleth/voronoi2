@@ -33,11 +33,11 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     # The width/height of the padding between subplots, as a fraction of the average Axes width/height
     fig.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97, wspace=0.3, hspace=0.3)
     # (nrows, ncols, start_end_indices)
-    perimeter_ax = fig.add_subplot(4, 2, 1)
-    char_len_ax = fig.add_subplot(4, 2, 2)
-    earth_mover_ax = fig.add_subplot(4, 2, 3)
-    edge_dist_ax = fig.add_subplot(4, 2, 4)
-    objectivefunction_ax = fig.add_subplot(4, 2, 5)
+    perimeter_ax = fig.add_subplot(421)
+    char_len_ax = fig.add_subplot(422)
+    earth_mover_ax = fig.add_subplot(423)
+    edge_dist_ax = fig.add_subplot(424)
+    objectivefunction_ax = fig.add_subplot(425)
     diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
 
     setup_ax(perimeter_ax, 'perimeter', (0, nframes), (0, (4/3)*np.max(perimeters)))
