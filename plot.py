@@ -18,12 +18,10 @@ def log_time(string):
 
 def test():
     nsites = len(open('input').readlines())
-    linesegs_per_trial = 2*(3*nsites - 6)
-    pts_per_lineseg = 2
-    floats_per_pt = 2
+    linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
     print(arr('perimeter'))
     print(arr('sites').reshape((-1, nsites, 2)))
-    print(arr('linesegs').reshape(-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
+    print(arr('linesegs').reshape(linesegs_shape))
 
 def setup_ax(ax, title, xlim, ylim):
     ax.set_title(title)
@@ -36,9 +34,7 @@ def arr(filename, dtype='float32'):
 def render():
     myprint('rendering movie . . . ')
     nsites = len(open('input').readlines())
-    linesegs_per_trial = 2*(3*nsites - 6)
-    pts_per_lineseg = 2
-    floats_per_pt = 2
+    linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
 
     perimeters = arr('perimeter')
     sites = arr('sites')
@@ -49,7 +45,7 @@ def render():
     edgedist = arr('edgehist', dtype='int32')
 
     sites = sites.reshape((-1, nsites, 2))
-    linesegs = linesegs.reshape((-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
+    linesegs = linesegs.reshape(linesegs_shape)
     edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
 
     nframes = sites.shape[0]
