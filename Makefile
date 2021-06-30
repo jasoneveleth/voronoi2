@@ -52,6 +52,7 @@ tests/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@
 
 test: format voronoi tests/heap_test
+	rm -f output/*
 	tests/heap_test
 	bash tests/main_test.sh
 
