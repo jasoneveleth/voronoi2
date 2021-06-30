@@ -1,7 +1,6 @@
 #ifndef GRADIENT_H
 #define GRADIENT_H
 
-#include "edgelist.h"
 #include "fortunes.h"
 
 struct arrays {
