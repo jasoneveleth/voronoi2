@@ -50,39 +50,6 @@ update_sites(point *src, point *dest, point *grad, int nsites, float alpha)
     }
 }
 
-static inline void
-finite_difference(const int j,
-                  const int nsites,
-                  const point *const old_sites,
-                  point *gradient,
-                  const float jiggle,
-                  const float prev_objective)
-{
-    const point deltax = {jiggle, 0.0f};
-    const point deltay = {0.0f, jiggle};
-    point *local_sites = malloc((size_t)nsites * sizeof(point));
-    memcpy(local_sites, old_sites, (size_t)nsites * sizeof(point));
-    struct edgelist local_edgelist;
-    // x
-    local_sites[j] = boundary_cond(local_sites[j], deltax);
-    init_edgelist(&local_edgelist);
-    fortunes(local_sites, nsites, &local_edgelist);
-    float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
-    gradient[j].x = (curr_obj - prev_objective) / jiggle;
-    free_edgelist(&local_edgelist);
-    // reset for y
-    local_sites[j] = old_sites[j];
-    // y
-    local_sites[j] = boundary_cond(local_sites[j], deltay);
-    init_edgelist(&local_edgelist);
-    fortunes(local_sites, nsites, &local_edgelist);
-    curr_obj = obj_function(local_sites, &local_edgelist, nsites);
-    gradient[j].y = (curr_obj - prev_objective) / jiggle;
-    free_edgelist(&local_edgelist);
-
-    free(local_sites);
-}
-
 void
 gradient_method(const int j,
                 const int nsites,
@@ -91,7 +58,31 @@ gradient_method(const int j,
                 const float jiggle,
                 const float prev_objective)
 {
-    finite_difference(j, nsites, old_sites, gradient, jiggle, prev_objective);
+    if (options.gradient == FINITE_DIFFERENCE) {
+        const point deltax = {jiggle, 0.0f};
+        const point deltay = {0.0f, jiggle};
+        point *local_sites = malloc((size_t)nsites * sizeof(point));
+        memcpy(local_sites, old_sites, (size_t)nsites * sizeof(point));
+        struct edgelist local_edgelist;
+        // x
+        local_sites[j] = boundary_cond(local_sites[j], deltax);
+        init_edgelist(&local_edgelist);
+        fortunes(local_sites, nsites, &local_edgelist);
+        float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+        gradient[j].x = (curr_obj - prev_objective) / jiggle;
+        free_edgelist(&local_edgelist);
+        // reset for y
+        local_sites[j] = old_sites[j];
+        // y
+        local_sites[j] = boundary_cond(local_sites[j], deltay);
+        init_edgelist(&local_edgelist);
+        fortunes(local_sites, nsites, &local_edgelist);
+        curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+        gradient[j].y = (curr_obj - prev_objective) / jiggle;
+        free_edgelist(&local_edgelist);
+
+        free(local_sites);
+    }
 }
 
 float
