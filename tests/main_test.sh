@@ -33,8 +33,8 @@ done
 # =========================== gradient descent =============================
 cp tests/sites/hundred_point.gradin input
 
-files=("tests/sites/hundredpoint_obj=perimeter" "tests/sites/hundredpoint_obj=perimeter_repel")
-args=("-b t" "-b t -o pr")
+files=("tests/sites/hundredpoint_obj=perimeter" "tests/sites/hundredpoint_obj=perimeter_repel" "tests/sites/100b=b_o=p" "tests/sites/100b=b_o=pr")
+args=("-bt -op" "-bt -opr" "-bb -op" "-bb -opr")
 
 for i in ${!files[@]}; do
     printf "testing ${files[$i]} "
