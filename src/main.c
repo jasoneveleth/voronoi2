@@ -153,9 +153,10 @@ main(int argc, char **argv)
     opterr = 0;
     options.filepath = DEFAULT_INPUTFILE;
     options.obj = PERIMETER;
+    options.obj |= REPULSION;
     options.descent = CONSTANT_ALPHA;
     options.gradient = FINITE_DIFFERENCE;
-    options.boundary = TORUS;
+    options.boundary = BOUNCE;
     options.alpha = 3e-3f;
     options.repel_coeff = 1e-4f;
     options.ntrials = 50;
