@@ -188,7 +188,7 @@ gradient_descent(struct arrays arr,
             }
             update_sites(old_sites_ptr, &arr.sites[i * nsites], g_k, nsites,
                          alpha);
-            if (options.gradient == BARZIILAI) {
+            if (options.descent == BARZIILAI) {
                 point *tmp = g_k1;
                 g_k1 = g_k;
                 g_k = tmp;
