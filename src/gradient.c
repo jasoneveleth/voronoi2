@@ -168,8 +168,8 @@ gradient_descent(struct arrays numpy_arrs,
                  const int pts_per_trial)
 {
     // unpack numpy arrays
-    point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
-    point *sites = (point *)numpy_arrs.sites_to_be_cast;
+    point *linesegs = numpy_arrs.linesegs;
+    point *sites = numpy_arrs.sites;
     float *perimeter = numpy_arrs.perimeter;
     float *obj_func_vals = numpy_arrs.objective_function;
     float *char_max_length = numpy_arrs.char_max_length;

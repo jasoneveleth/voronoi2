@@ -39,15 +39,4 @@ struct options {
     unsigned long ntrials;
 };
 
-struct arrays {
-    float *linesegs_to_be_cast;
-    float *sites_to_be_cast;
-    float *perimeter;
-    float *objective_function;
-    float *char_max_length;
-    float *char_min_length;
-    int *edgehist;
-    int *earthmover;
-};
-
 #endif

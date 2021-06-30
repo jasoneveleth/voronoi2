@@ -80,18 +80,16 @@ graph_file(const char *path)
 static void
 output_to_file(struct arrays arrs, size_t nsites)
 {
-    point *linesegs = (point *)arrs.linesegs_to_be_cast;
-    point *sites = (point *)arrs.sites_to_be_cast;
-    float *perimeter = arrs.perimeter;
     size_t nbytes;
-    nbytes = sizeof(linesegs[0]) * options.ntrials * 2 * (3 * nsites - 6) * 2;
-    binary_write("output/linesegs", linesegs, nbytes);
+    nbytes =
+        sizeof(arrs.linesegs[0]) * options.ntrials * 2 * (3 * nsites - 6) * 2;
+    binary_write("output/linesegs", arrs.linesegs, nbytes);
 
-    nbytes = sizeof(sites[0]) * (size_t)nsites * options.ntrials;
-    binary_write("output/sites", sites, nbytes);
+    nbytes = sizeof(arrs.sites[0]) * (size_t)nsites * options.ntrials;
+    binary_write("output/sites", arrs.sites, nbytes);
 
-    nbytes = sizeof(perimeter[0]) * (size_t)options.ntrials;
-    binary_write("output/perimeter", perimeter, nbytes);
+    nbytes = sizeof(arrs.perimeter[0]) * (size_t)options.ntrials;
+    binary_write("output/perimeter", arrs.perimeter, nbytes);
 
     nbytes = sizeof(arrs.objective_function[0]) * options.ntrials;
     binary_write("output/objective_function", arrs.objective_function, nbytes);
@@ -120,14 +118,13 @@ big_func()
 
     struct arrays arrs;
     size_t nsites;
-    file2sites(options.filepath, (point **)&arrs.sites_to_be_cast, &nsites);
+    file2sites(options.filepath, (point **)&arrs.sites, &nsites);
     size_t pts_per_trial = (2 * (3 * nsites - 6)) * (2);
-    size_t size_of_linsegs =
-        options.ntrials * (2 * (3 * nsites - 6)) * (2) * (2);
+    size_t size_of_linsegs = options.ntrials * (2 * (3 * nsites - 6)) * (2);
     // HARDCODE
     size_t size_of_edgehist = options.ntrials * (nsites * 14143) / 10000;
 
-    arrs.linesegs_to_be_cast = malloc(size_of_linsegs * sizeof(float));
+    arrs.linesegs = malloc(size_of_linsegs * sizeof(point));
     arrs.edgehist = malloc(size_of_edgehist * sizeof(float));
     arrs.objective_function = malloc(options.ntrials * sizeof(float));
     arrs.char_max_length = malloc(options.ntrials * sizeof(float));
