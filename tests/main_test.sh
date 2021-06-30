@@ -10,6 +10,7 @@ CLR='\033[0m'
 if [ "" != "$1" ]; then
     printf "cp tests/sites/hundred_point.gradin input\n"
     printf "voronoi -n 50 [args]; python plot.py -s -t | md5sum > \"tests/sites/${1}.gradout\"\n"
+    exit 0
 fi
 
 check_tmp() {
