@@ -80,6 +80,9 @@ def myprint(string):
         sys.stdout.write(string)
         sys.stdout.flush()
 
+def arr(filename, dtype='float32'):
+    return np.fromfile('output/' + filename, dtype=dtype);
+
 def descent(args):
     # init vars
     myprint('rendering movie . . . ')
@@ -88,13 +91,13 @@ def descent(args):
     pts_per_lineseg = 2
     floats_per_pt = 2
 
-    perimeter = np.fromfile('output/perimeter', dtype='float32')
-    sites = np.fromfile('output/sites', dtype='float32')
-    linesegs = np.fromfile('output/linesegs', dtype='float32')
-    char_max_length = np.fromfile('output/char_max_length', dtype='float32')
-    char_min_length = np.fromfile('output/char_min_length', dtype='float32')
-    objective_function = np.fromfile('output/objective_function', dtype='float32')
-    edgedist = np.fromfile('output/edgehist', dtype='int32')
+    perimeter = arr('perimeter')
+    sites = arr('sites')
+    linesegs = arr('linesegs')
+    char_max_length = arr('char_max_length')
+    char_min_length = arr('char_min_length')
+    objective_function = arr('objective_function')
+    edgedist = arr('edgehist', dtype='int32')
 
     sites = sites.reshape((-1, nsites, 2))
     linesegs = linesegs.reshape((-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
