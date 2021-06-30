@@ -162,10 +162,10 @@ calc_stats(struct edgelist *edgelist,
 }
 
 void
-simple_descent(struct arrays numpy_arrs,
-               const float jiggle,
-               int nsites,
-               const int pts_per_trial)
+gradient_descent(struct arrays numpy_arrs,
+                 const float jiggle,
+                 int nsites,
+                 const int pts_per_trial)
 {
     // unpack numpy arrays
     point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
@@ -177,52 +177,12 @@ simple_descent(struct arrays numpy_arrs,
     int *edgehist = numpy_arrs.edgehist;
     int *earthmover = numpy_arrs.earthmover;
 
-    point *gradient = malloc((size_t)nsites * sizeof(point));
-    for (int i = 0; i < (int)options.ntrials; i++) {
-        if (i > 0) { // skip this the first time
-            float prev_objective = obj_func_vals[i - 1];
-            point *old_sites_ptr = &sites[(i - 1) * nsites];
-            // PARALLEL
-            for (int j = 0; j < nsites; j++)
-                gradient_method(j, nsites, old_sites_ptr, gradient, jiggle,
-                                prev_objective);
-            update_sites(old_sites_ptr, &sites[i * nsites], gradient, nsites,
-                         options.alpha);
-        }
-
-        struct edgelist edgelist;
-        init_edgelist(&edgelist);
-        fortunes(&sites[i * nsites], nsites, &edgelist);
-        copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
-                   &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
-                   &edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
-        // HARDCODE
-        calc_earth_mover((size_t)((float)nsites * 1.4143f), earthmover,
-                         edgehist, i);
-        free_edgelist(&edgelist);
+    point *g_k = NULL;
+    point *g_k1 = NULL;
+    g_k = malloc((size_t)nsites * sizeof(point));
+    if (options.descent == BARZIILAI) {
+        g_k1 = malloc((size_t)nsites * sizeof(point));
     }
-    free(gradient);
-}
-
-void
-barziilai_borwein(struct arrays numpy_arrs,
-                  const float jiggle,
-                  int nsites,
-                  const int pts_per_trial)
-{
-    // unpack numpy arrays
-    point *linesegs = (point *)numpy_arrs.linesegs_to_be_cast;
-    point *sites = (point *)numpy_arrs.sites_to_be_cast;
-    float *perimeter = numpy_arrs.perimeter;
-    float *obj_func_vals = numpy_arrs.objective_function;
-    float *char_max_length = numpy_arrs.char_max_length;
-    float *char_min_length = numpy_arrs.char_min_length;
-    int *edgehist = numpy_arrs.edgehist;
-    int *earthmover = numpy_arrs.earthmover;
-
-    point *g_k = malloc((size_t)nsites * sizeof(point));
-    point *g_k1 = malloc((size_t)nsites * sizeof(point));
     for (int i = 0; i < (int)options.ntrials; i++) {
         if (i > 0) { // skip this the first time
             float prev_objective = obj_func_vals[i - 1];
@@ -231,22 +191,26 @@ barziilai_borwein(struct arrays numpy_arrs,
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
                                 prev_objective);
-
             float alpha;
-            if (i == 1) {
-                alpha = options.alpha;
+            if (options.descent == BARZIILAI) {
+                if (i == 1) {
+                    alpha = options.alpha;
+                } else {
+                    point *x_k1 = &sites[(i - 2) * nsites];
+                    point *x_k = &sites[(i - 1) * nsites];
+                    alpha = bb_formula(x_k1, x_k, g_k1, g_k, nsites);
+                    alpha = max(0, alpha);     // HARDCODE
+                    alpha = min(alpha, 1e-2f); // HARDCODE
+                }
             } else {
-                point *x_k1 = &sites[(i - 2) * nsites];
-                point *x_k = &sites[(i - 1) * nsites];
-                alpha = bb_formula(x_k1, x_k, g_k1, g_k, nsites);
-                alpha = max(0, alpha);     // HARDCODE
-                alpha = min(alpha, 1e-2f); // HARDCODE
+                alpha = options.alpha;
             }
-
             update_sites(old_sites_ptr, &sites[i * nsites], g_k, nsites, alpha);
-            point *tmp = g_k1;
-            g_k1 = g_k;
-            g_k = tmp;
+            if (options.gradient == BARZIILAI) {
+                point *tmp = g_k1;
+                g_k1 = g_k;
+                g_k = tmp;
+            }
         } // <- skipped the first time
 
         struct edgelist edgelist;

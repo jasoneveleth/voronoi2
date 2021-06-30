@@ -142,14 +142,7 @@ big_func()
     arrs.earthmover = malloc(options.ntrials * sizeof(float));
 
     int pts_per_trial = (int)(lines_in_trial * pts_in_lineseg);
-    if (options.descent == CONSTANT_ALPHA) {
-        simple_descent(arrs, options.jiggle, (int)nsites, pts_per_trial);
-    } else if (options.descent == BARZIILAI) {
-        barziilai_borwein(arrs, options.jiggle, (int)nsites, pts_per_trial);
-    } else {
-        FATAL(1, "%s\n", "unreachable code");
-    }
-
+    gradient_descent(arrs, options.jiggle, (int)nsites, pts_per_trial);
     output_to_file(arrs, nsites);
 }
 

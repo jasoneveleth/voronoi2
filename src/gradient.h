@@ -13,7 +13,6 @@ void gradient_method(const int,
                      const float,
                      const float);
 float bb_formula(point *, point *, point *, point *, int);
-void simple_descent(struct arrays, const float, int, const int);
-void barziilai_borwein(struct arrays, const float, int, const int);
+void gradient_descent(struct arrays, const float, int, const int);
 
 #endif
