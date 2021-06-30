@@ -162,21 +162,11 @@ calc_stats(struct edgelist *edgelist,
 }
 
 void
-gradient_descent(struct arrays numpy_arrs,
+gradient_descent(struct arrays arr,
                  const float jiggle,
                  int nsites,
                  const int pts_per_trial)
 {
-    // unpack numpy arrays
-    point *linesegs = numpy_arrs.linesegs;
-    point *sites = numpy_arrs.sites;
-    float *perimeter = numpy_arrs.perimeter;
-    float *obj_func_vals = numpy_arrs.objective_function;
-    float *char_max_length = numpy_arrs.char_max_length;
-    float *char_min_length = numpy_arrs.char_min_length;
-    int *edgehist = numpy_arrs.edgehist;
-    int *earthmover = numpy_arrs.earthmover;
-
     point *g_k = NULL;
     point *g_k1 = NULL;
     g_k = malloc((size_t)nsites * sizeof(point));
@@ -185,8 +175,8 @@ gradient_descent(struct arrays numpy_arrs,
     }
     for (int i = 0; i < (int)options.ntrials; i++) {
         if (i > 0) { // skip this the first time
-            float prev_objective = obj_func_vals[i - 1];
-            point *old_sites_ptr = &sites[(i - 1) * nsites];
+            float prev_objective = arr.objective_function[i - 1];
+            point *old_sites_ptr = &arr.sites[(i - 1) * nsites];
             // PARALLEL
             for (int j = 0; j < nsites; j++)
                 gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
@@ -196,8 +186,8 @@ gradient_descent(struct arrays numpy_arrs,
                 if (i == 1) {
                     alpha = options.alpha;
                 } else {
-                    point *x_k1 = &sites[(i - 2) * nsites];
-                    point *x_k = &sites[(i - 1) * nsites];
+                    point *x_k1 = &arr.sites[(i - 2) * nsites];
+                    point *x_k = &arr.sites[(i - 1) * nsites];
                     alpha = bb_formula(x_k1, x_k, g_k1, g_k, nsites);
                     alpha = max(0, alpha);     // HARDCODE
                     alpha = min(alpha, 1e-2f); // HARDCODE
@@ -205,7 +195,8 @@ gradient_descent(struct arrays numpy_arrs,
             } else {
                 alpha = options.alpha;
             }
-            update_sites(old_sites_ptr, &sites[i * nsites], g_k, nsites, alpha);
+            update_sites(old_sites_ptr, &arr.sites[i * nsites], g_k, nsites,
+                         alpha);
             if (options.gradient == BARZIILAI) {
                 point *tmp = g_k1;
                 g_k1 = g_k;
@@ -215,14 +206,15 @@ gradient_descent(struct arrays numpy_arrs,
 
         struct edgelist edgelist;
         init_edgelist(&edgelist);
-        fortunes(&sites[i * nsites], nsites, &edgelist);
-        copy_edges(&edgelist, &linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, &sites[i * nsites], &perimeter[i],
-                   &obj_func_vals[i], &char_max_length[i], &char_min_length[i],
-                   &edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
+        fortunes(&arr.sites[i * nsites], nsites, &edgelist);
+        copy_edges(&edgelist, &arr.linesegs[i * pts_per_trial]);
+        calc_stats(&edgelist, &arr.sites[i * nsites], &arr.perimeter[i],
+                   &arr.objective_function[i], &arr.char_max_length[i],
+                   &arr.char_min_length[i],
+                   &arr.edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
         // HARDCODE
-        calc_earth_mover((size_t)((float)nsites * 1.4143f), earthmover,
-                         edgehist, i);
+        calc_earth_mover((size_t)((float)nsites * 1.4143f), arr.earthmover,
+                         arr.edgehist, i);
         free_edgelist(&edgelist);
     }
     free(g_k);
