@@ -16,16 +16,42 @@ def log_time(string):
     myprint(f"elapsed: {(((time() - start)*1000)//1) / 1000} secs\n")
     start = time()
 
+def test():
+    nsites = len(open('input').readlines())
+    linesegs_per_trial = 2*(3*nsites - 6)
+    pts_per_lineseg = 2
+    floats_per_pt = 2
+    print(arr('perimeter'))
+    print(arr('sites').reshape((-1, nsites, 2)))
+    print(arr('linesegs').reshape(-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
+
 def setup_ax(ax, title, xlim, ylim):
     ax.set_title(title)
     ax.set_xlim(xlim[0], xlim[1])
     ax.set_ylim(ylim[0], ylim[1])
 
-def render_animation(edges, sites, perimeters, objectivefunctions, char_max_length, char_min_length, edgedist):
-    """ perimeters : numpy arr (n, 1)
-        sites : numpy arr (n, m, 2)
-        edges : numpy arr (n, 3*m-6, 2, 2)
-    """
+def arr(filename, dtype='float32'):
+    return np.fromfile('output/' + filename, dtype=dtype);
+
+def render():
+    myprint('rendering movie . . . ')
+    nsites = len(open('input').readlines())
+    linesegs_per_trial = 2*(3*nsites - 6)
+    pts_per_lineseg = 2
+    floats_per_pt = 2
+
+    perimeters = arr('perimeter')
+    sites = arr('sites')
+    linesegs = arr('linesegs')
+    char_max_length = arr('char_max_length')
+    char_min_length = arr('char_min_length')
+    objfunc = arr('objective_function')
+    edgedist = arr('edgehist', dtype='int32')
+
+    sites = sites.reshape((-1, nsites, 2))
+    linesegs = linesegs.reshape((-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
+    edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
+
     nframes = sites.shape[0]
 
     fig, axs = plt.subplots(nrows=4, ncols=2)
@@ -54,59 +80,27 @@ def render_animation(edges, sites, perimeters, objectivefunctions, char_max_leng
     x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
     edge_dist_bars = axs[1,1].bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
 
-    setup_ax(axs[2, 0], 'objective function', (0, nframes), (0, (4/3)*np.max(objectivefunctions)))
+    setup_ax(axs[2, 0], 'objective function', (0, nframes), (0, (4/3)*np.max(objfunc)))
     objectivefunction_line, = axs[2,0].plot([], [], lw=3)
 
     def animate(trial_num):
         for i, b in enumerate(edge_dist_bars):
             b.set_height(edgedist[trial_num][i])
-        edge_line_coll.set_segments(edges[trial_num])
+        edge_line_coll.set_segments(linesegs[trial_num])
         sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
         perimeter_line.set_data(np.arange(trial_num), perimeters[:trial_num])
-        objectivefunction_line.set_data(np.arange(trial_num), objectivefunctions[:trial_num])
+        objectivefunction_line.set_data(np.arange(trial_num), objfunc[:trial_num])
         char_len_max_line.set_data(np.arange(trial_num), char_max_length[:trial_num])
         char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=50, blit=False)
     anim.save('newest.mp4')
+    log_time('\x1b[2K\r')
 
 def myprint(string):
     if not args.silent:
         sys.stdout.write(string)
         sys.stdout.flush()
-
-def arr(filename, dtype='float32'):
-    return np.fromfile('output/' + filename, dtype=dtype);
-
-def descent(args):
-    # init vars
-    myprint('rendering movie . . . ')
-    nsites = len(open('input').readlines())
-    linesegs_per_trial = 2*(3*nsites - 6)
-    pts_per_lineseg = 2
-    floats_per_pt = 2
-
-    perimeter = arr('perimeter')
-    sites = arr('sites')
-    linesegs = arr('linesegs')
-    char_max_length = arr('char_max_length')
-    char_min_length = arr('char_min_length')
-    objective_function = arr('objective_function')
-    edgedist = arr('edgehist', dtype='int32')
-
-    sites = sites.reshape((-1, nsites, 2))
-    linesegs = linesegs.reshape((-1, linesegs_per_trial, pts_per_lineseg, floats_per_pt))
-    edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
-
-    # render
-    if args.testing: 
-        print(perimeter)
-        print(sites)
-        print(linesegs)
-    else:
-        render_animation(linesegs, sites, perimeter, objective_function, char_max_length, char_min_length, edgedist)
-    log_time('\x1b[2K\r')
-
 
 def generate_sites(num):
     f = open('input', 'w')
@@ -126,6 +120,8 @@ parser.add_argument("-g", "--npoints", type=int, metavar="NUM", help="generate p
 args = parser.parse_args()
 if args.npoints:
     generate_sites(args.npoints)
+elif args.testing:
+    test()
 else:
-    descent(args)
+    render()
 
