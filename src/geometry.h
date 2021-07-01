@@ -2,6 +2,12 @@
 #define GEOMETRY_H
 #include "config.h"
 
+#define RAISE(fmt, ...)                                               \
+    do {                                                              \
+        fprintf(stderr, "error %s:%d:%s(): " fmt, __FILE__, __LINE__, \
+                __func__, __VA_ARGS__);                               \
+    } while (0)
+
 extern struct options options;
 
 typedef struct point point;

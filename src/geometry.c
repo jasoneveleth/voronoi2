@@ -45,6 +45,10 @@ quadraticFormula(float a, float b, float c, float *smaller, float *larger)
     // https://en.wikipedia.org/wiki/Loss_of_significance#A_better_algorithm
     float sgn_b = copysignf(1.0f, b);
     float des = b * b - 4 * a * c;
+    if (des < 0) {
+        RAISE("Floating point exception sqrt(%f)\n", (double)des);
+        des = 1e-15f;
+    }
     float x1 = (-b - sgn_b * sqrtf(des)) / (2 * a);
     float x2 = c / (a * x1);
     *smaller = x1 > x2 ? x2 : x1;
