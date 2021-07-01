@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "fortunes.h"
 
 inline void
@@ -106,6 +107,26 @@ add_subtree(struct bnode **lnode,
 }
 
 static inline void
+handle_first_pts_same_height(struct event *event,
+                             struct bnode *root,
+                             struct edgelist *edgelist)
+{
+    point old_site = root->arc->site;
+    free(root->arc);
+
+    // make edges
+    struct halfedge *edge, *edgetwin;
+    new_edge(edgelist, &edge, &edgetwin);
+
+    struct arc *larc = new_arc(old_site, NULL);
+    struct arc *rarc = new_arc(event->site, NULL);
+    struct bp *bp = new_bp(edge, old_site, event->site);
+    root->bp = bp;
+    baddleft(root, larc);
+    baddright(root, rarc);
+}
+
+static inline void
 handle_site_event(struct event *event,
                   struct bnode *root,
                   struct heap *heap,
@@ -116,6 +137,13 @@ handle_site_event(struct event *event,
         return;
     }
 
+    bool first_two_pts_same_y =
+        root->left == NULL && root->right == NULL
+        && root->arc->site.y - event->site.y < 5e-6f; // HARDCODE
+    if (first_two_pts_same_y) {
+        handle_first_pts_same_height(event, root, edgelist);
+        return;
+    }
     struct bnode *old_node = bfindarc(root, event->site);
     struct arc *old_arc = old_node->arc;
     point old_site = old_arc->site;
