@@ -4,9 +4,6 @@
 #include "gradient.h"
 #include <stdio.h>
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#define max(a, b) ((a) >= (b) ? (a) : (b))
-
 static inline float
 obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
 {
@@ -180,8 +177,6 @@ gradient_descent(struct arrays arr,
                     point *x_k1 = &arr.sites[(i - 2) * nsites];
                     point *x_k = &arr.sites[(i - 1) * nsites];
                     alpha = bb_formula(x_k1, x_k, g_k1, g_k, nsites);
-                    alpha = max(0, alpha);     // HARDCODE
-                    alpha = min(alpha, 1e-2f); // HARDCODE
                 }
             } else {
                 alpha = options.alpha;
