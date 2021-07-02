@@ -75,7 +75,7 @@ def render():
     earthmover_line, = axs[1,0].plot([], [], lw=3)
 
     # HARDCODE 1.4143
-    setup_ax(axs[1, 1], 'edge distribution', (0, 0.5), (0, np.max(edgedist) * (4/3)))
+    setup_ax(axs[1, 1], 'edge distribution', (-0.01, 0.5), (0, np.max(edgedist) * (4/3)))
     nbars = int(sites.shape[1] * 1.4143)
     x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
     edge_dist_bars = axs[1,1].bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
