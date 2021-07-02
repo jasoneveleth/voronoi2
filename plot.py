@@ -44,6 +44,7 @@ def render():
     objfunc = arr('objective_function')
     edgedist = arr('edgehist', dtype='int32')
     earthmover = arr('earthmover', dtype='int32')
+    alpha = arr('alpha')
 
     sites = sites.reshape((-1, nsites, 2))
     linesegs = linesegs.reshape(linesegs_shape)
@@ -83,6 +84,9 @@ def render():
     setup_ax(axs[2, 0], 'objective function', (0, nframes), (0, (4/3)*np.max(objfunc)))
     objectivefunction_line, = axs[2,0].plot([], [], lw=3)
 
+    setup_ax(axs[3,0], 'alpha', (0, nframes), (0, 1))
+    alpha_line, = axs[3,0].plot([], [], lw=3)
+
     def animate(trial_num):
         for i, b in enumerate(edge_dist_bars):
             b.set_height(edgedist[trial_num][i])
@@ -93,6 +97,7 @@ def render():
         char_len_max_line.set_data(np.arange(trial_num), char_max_length[:trial_num])
         char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
         earthmover_line.set_data(np.arange(trial_num), earthmover[:trial_num])
+        alpha_line.set_data(np.arange(trial_num), alpha[:trial_num])
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=50, blit=False)
     anim.save('newest.mp4')

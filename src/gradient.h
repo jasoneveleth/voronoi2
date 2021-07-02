@@ -12,6 +12,7 @@ struct arrays {
     float *char_min_length;
     int *edgehist;
     int *earthmover;
+    float *alpha;
 };
 
 float obj_function(point *, struct edgelist *, int);

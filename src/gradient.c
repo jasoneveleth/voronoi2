@@ -181,6 +181,7 @@ gradient_descent(struct arrays arr,
             } else {
                 alpha = options.alpha;
             }
+            arr.alpha[i] = alpha;
             update_sites(old_sites_ptr, &arr.sites[i * nsites], g_k, nsites,
                          alpha);
             if (options.descent == BARZILAI) {

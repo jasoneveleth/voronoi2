@@ -106,6 +106,9 @@ output_to_file(struct arrays arrs, size_t nsites)
 
     nbytes = sizeof(arrs.earthmover[0]) * options.ntrials;
     binary_write("output/earthmover", arrs.earthmover, nbytes);
+
+    nbytes = sizeof(arrs.alpha[0]) * options.ntrials;
+    binary_write("output/alpha", arrs.alpha, nbytes);
 }
 
 static void
@@ -131,6 +134,7 @@ big_func()
     arrs.char_min_length = malloc(options.ntrials * sizeof(float));
     arrs.perimeter = malloc(options.ntrials * sizeof(float));
     arrs.earthmover = malloc(options.ntrials * sizeof(float));
+    arrs.alpha = malloc(options.ntrials * sizeof(float));
 
     gradient_descent(arrs, options.jiggle, (int)nsites, (int)pts_per_trial);
     output_to_file(arrs, nsites);
