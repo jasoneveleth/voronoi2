@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -149,6 +150,17 @@ calc_stats(struct edgelist *edgelist,
                      (size_t)nsites);
 }
 
+static void *
+wrapper(void *args_to_cast)
+{
+    struct pthread_args *args = (struct pthread_args *)args_to_cast;
+    for (int i = args->start; i < args->end; i++) {
+        gradient_method(i, args->nsites, args->old_sites, args->gradient,
+                        args->jiggle, args->prev_objective);
+    }
+    return args_to_cast;
+}
+
 void
 gradient_descent(struct arrays arr,
                  const float jiggle,
@@ -165,10 +177,27 @@ gradient_descent(struct arrays arr,
         if (i > 0) { // skip this the first time
             float prev_objective = arr.objective_function[i - 1];
             point *old_sites_ptr = &arr.sites[(i - 1) * nsites];
-            // PARALLEL
-            for (int j = 0; j < nsites; j++)
-                gradient_method(j, nsites, old_sites_ptr, g_k, jiggle,
-                                prev_objective);
+            // {{{ PARALLEL
+            pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
+            for (int j = 0; j < NTHREADS; j++) {
+                struct pthread_args *thread_args =
+                    malloc(sizeof(struct pthread_args));
+                // we cast to work with const
+                thread_args->start = j * nsites / NTHREADS;
+                thread_args->end = (j + 1) * nsites / NTHREADS;
+                thread_args->nsites = nsites;
+                thread_args->old_sites = old_sites_ptr;
+                thread_args->gradient = g_k;
+                thread_args->jiggle = jiggle;
+                thread_args->prev_objective = prev_objective;
+                pthread_create(&thr[j], NULL, wrapper, thread_args);
+            }
+            for (int j = 0; j < NTHREADS; j++) {
+                void *args = NULL;
+                pthread_join(thr[j], &args);
+                free(args);
+            }
+            // PARALLEL }}}
             float alpha;
             if (options.descent == BARZILAI) {
                 if (i == 1) {

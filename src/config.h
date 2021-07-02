@@ -1,6 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#ifndef NTHREADS
+#define NTHREADS 1
+#endif
+
 enum __attribute__((packed)) objective_function
 {
     PERIMETER = 1,

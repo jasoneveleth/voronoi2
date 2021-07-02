@@ -17,6 +17,8 @@ FLAGS += -Wno-error=reserved-id-macro
 # FLAGS += -Ofast -march=native
 FLAGS += -g -O0 
 # FLAGS += -pg
+FLAGS += -DNTHREADS=16
+LINKER = -lpthread
 
 UNAME := $(shell uname)
 
@@ -46,7 +48,7 @@ format:
 	$(CC) $(FLAGS) -c $< -o $@
 
 voronoi: $(OBJ)
-	$(CC) $(FLAGS) $(MATH) $^ -o $@
+	$(CC) $(FLAGS) $(LINKER) $(MATH) $^ -o $@
 
 tests/heap_test: tests/heap_test.c src/heap.o
 	$(CC) $(FLAGS) $(MATH) $^ -o $@

@@ -15,6 +15,17 @@ struct arrays {
     float *alpha;
 };
 
+struct pthread_args {
+    int start;
+    int end;
+    int nsites;
+    float jiggle;
+    const point *old_sites;
+    point *gradient;
+    float prev_objective;
+    const char padding[4];
+};
+
 float obj_function(point *, struct edgelist *, int);
 void update_sites(point *, point *, point *, int, float);
 void gradient_method(const int,
