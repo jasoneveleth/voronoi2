@@ -127,8 +127,8 @@ big_func()
     // HARDCODE
     size_t size_of_edgehist = options.ntrials * (nsites * 14143) / 10000;
 
-    arrs.linesegs = malloc(size_of_linsegs * sizeof(point));
-    arrs.edgehist = malloc(size_of_edgehist * sizeof(float));
+    arrs.linesegs = calloc(1, size_of_linsegs * sizeof(point));
+    arrs.edgehist = calloc(1, size_of_edgehist * sizeof(float));
     arrs.objective_function = malloc(options.ntrials * sizeof(float));
     arrs.char_max_length = malloc(options.ntrials * sizeof(float));
     arrs.char_min_length = malloc(options.ntrials * sizeof(float));
@@ -136,8 +136,18 @@ big_func()
     arrs.earthmover = malloc(options.ntrials * sizeof(float));
     arrs.alpha = malloc(options.ntrials * sizeof(float));
 
+    arrs.alpha[0] = 0; // there is no step first.
     gradient_descent(arrs, options.jiggle, (int)nsites, (int)pts_per_trial);
     output_to_file(arrs, nsites);
+    free(arrs.linesegs);
+    free(arrs.edgehist);
+    free(arrs.objective_function);
+    free(arrs.char_max_length);
+    free(arrs.char_min_length);
+    free(arrs.perimeter);
+    free(arrs.earthmover);
+    free(arrs.alpha);
+    free(arrs.sites);
 }
 
 static void

@@ -173,12 +173,12 @@ gradient_descent(struct arrays arr,
     if (options.descent == BARZILAI) {
         g_k1 = malloc((size_t)nsites * sizeof(point));
     }
+    pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
     for (int i = 0; i < (int)options.ntrials; i++) {
         if (i > 0) { // skip this the first time
             float prev_objective = arr.objective_function[i - 1];
             point *old_sites_ptr = &arr.sites[(i - 1) * nsites];
             // {{{ PARALLEL
-            pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
             for (int j = 0; j < NTHREADS; j++) {
                 struct pthread_args *thread_args =
                     malloc(sizeof(struct pthread_args));
@@ -233,6 +233,7 @@ gradient_descent(struct arrays arr,
                          arr.edgehist, i);
         free_edgelist(&edgelist);
     }
+    free(thr);
     free(g_k);
     free(g_k1);
 }
