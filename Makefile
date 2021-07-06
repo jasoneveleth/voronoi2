@@ -8,7 +8,7 @@ endif
 
 PYTHON = .env/bin/python
 
-FLAGS += -std=gnu11 -Werror
+FLAGS += -std=c11 -Werror
 FLAGS += -Wno-error=unused-parameter 
 FLAGS += -Wno-error=unused-variable 
 FLAGS += -Wno-error=unused-function
