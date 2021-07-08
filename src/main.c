@@ -75,7 +75,7 @@ graph_file(const char *path)
     copy_edges(&e, edges);
     // binary_write("output/linesegs", edges, size_of_edgelist);
 
-    // preserve
+    // preserve tests
     point *better = calloc(1, size_of_edgelist * 2);
     for (int j = 0; j < e.nedges / 2; j++) {
         better[j * 4] = edges[j * 2];
@@ -85,7 +85,7 @@ graph_file(const char *path)
     }
     binary_write("output/linesegs", better, size_of_edgelist * 2);
     free(better);
-    // preserve
+    // preserve tests
 
     free(edges);
     free_edgelist(&e);
