@@ -182,7 +182,6 @@ gradient_descent(struct arrays arr,
             for (int j = 0; j < NTHREADS; j++) {
                 struct pthread_args *thread_args =
                     malloc(sizeof(struct pthread_args));
-                // we cast to work with const
                 thread_args->start = j * nsites / NTHREADS;
                 thread_args->end = (j + 1) * nsites / NTHREADS;
                 thread_args->nsites = nsites;
