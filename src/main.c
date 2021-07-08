@@ -46,6 +46,26 @@ file2sites(const char *path, point **sites, size_t *nsites)
     }
 }
 
+static long
+get_nsites(const char *const path)
+{
+    FILE *infile = fopen(path, "r");
+    FATAL(!infile, "file: %s doesn't exist\n", path);
+
+    long nsites = 0;
+    int c;
+    int lastchar = '\0';
+    while ((c = fgetc(infile)) != EOF) {
+        lastchar = c;
+        if (c == '\n') nsites++;
+    }
+    // if last character isn't a new line add it anyway
+    if (lastchar != '\n') nsites++;
+
+    fclose(infile);
+    return nsites;
+}
+
 static void
 binary_write(const char *const path, void *const buf, const size_t length)
 {
@@ -53,6 +73,42 @@ binary_write(const char *const path, void *const buf, const size_t length)
     FATAL(!file, "path: %s doesn't exist\n", path);
     fwrite(buf, length, 1, file);
     fclose(file);
+}
+
+static void
+edges2linesegs()
+{
+    // == https://stackoverflow.com/questions/22059189/read-a-file-as-byte-array
+    FILE *fileptr;
+    point *buffer;
+    size_t filelen;
+
+    fileptr = fopen("output/edges", "rb"); // Open the file in binary mode
+    FATAL(!fileptr, "file: %s doesn't exist\n", "output/edges");
+    fseek(fileptr, 0, SEEK_END);      // Jump to the end of the file
+    filelen = (size_t)ftell(fileptr); // Get the current byte offset in the file
+    rewind(fileptr);                  // Jump back to the beginning of the file
+
+    buffer = malloc(filelen);           // Enough memory for the file
+    fread(buffer, filelen, 1, fileptr); // Read in the entire file
+    fclose(fileptr);                    // Close the file
+    // ===========
+
+    size_t nsites = (size_t)get_nsites("input");
+    point *better = malloc(filelen * 2);
+    size_t shape = 3 * nsites - 6;
+    for (size_t i = 0; i < options.ntrials; i++) {
+        for (size_t j = 0; j < shape; j++) {
+            better[i * 4 * shape + j * 4] = buffer[i * 2 * shape + j * 2];
+            better[i * 4 * shape + j * 4 + 1] =
+                buffer[i * 2 * shape + j * 2 + 1];
+            better[i * 4 * shape + j * 4 + 2] =
+                buffer[i * 2 * shape + j * 2 + 1];
+            better[i * 4 * shape + j * 4 + 3] = buffer[i * 2 * shape + j * 2];
+        }
+    }
+    binary_write("output/linesegs", better, filelen * 2);
+    free(better);
 }
 
 static void
@@ -96,25 +152,7 @@ output_to_file(struct arrays arrs, size_t nsites)
 {
     size_t nbytes;
     nbytes = sizeof(arrs.linesegs[0]) * options.ntrials * (3 * nsites - 6) * 2;
-    // preserve
-    point *better = malloc(nbytes * 2);
-    int shape = 3 * (int)nsites - 6;
-    for (int i = 0; i < (int)options.ntrials; i++) {
-        for (int j = 0; j < shape; j++) {
-            better[i * 4 * shape + j * 4] =
-                arrs.linesegs[i * 2 * shape + j * 2];
-            better[i * 4 * shape + j * 4 + 1] =
-                arrs.linesegs[i * 2 * shape + j * 2 + 1];
-            better[i * 4 * shape + j * 4 + 2] =
-                arrs.linesegs[i * 2 * shape + j * 2 + 1];
-            better[i * 4 * shape + j * 4 + 3] =
-                arrs.linesegs[i * 2 * shape + j * 2];
-        }
-    }
-    binary_write("output/linesegs", better, nbytes * 2);
-    free(better);
-    // preserve
-    // binary_write("output/linesegs", arrs.linesegs, nbytes);
+    binary_write("output/edges", arrs.linesegs, nbytes);
 
     nbytes = sizeof(arrs.sites[0]) * (size_t)nsites * options.ntrials;
     binary_write("output/sites", arrs.sites, nbytes);
@@ -179,6 +217,8 @@ big_func()
     free(arrs.earthmover);
     free(arrs.alpha);
     free(arrs.sites);
+
+    edges2linesegs();
 }
 
 static void
