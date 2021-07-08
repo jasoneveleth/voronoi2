@@ -116,38 +116,15 @@ bb_formula(
     return numerator / denominator;
 }
 
-static void
-calc_earth_mover(size_t nbins, int *earthmover, int *edgehist, int i)
-{
-    if (i > 0) {
-        int *old_hist = &edgehist[(i - 1) * (int)nbins];
-        int *new_hist = &edgehist[i * (int)nbins];
-        int total = 0;
-        int ith = 0;
-        for (int j = 1; j < (int)nbins; j++) {
-            ith = old_hist[j] + ith - new_hist[j];
-            total += abs(ith);
-        }
-        earthmover[i] = total;
-    } else {
-        earthmover[i] = 0;
-    }
-}
-
 static inline void
 calc_stats(struct edgelist *edgelist,
            point *sites,
            float *perimeter,
            float *objective_function,
-           float *char_max_length,
-           float *char_min_length,
-           int *edgehist,
            int nsites)
 {
     *perimeter = calc_perimeter(edgelist);
     *objective_function = obj_function(sites, edgelist, nsites);
-    calc_edge_length(edgelist, char_max_length, char_min_length, edgehist,
-                     (size_t)nsites);
 }
 
 static void *
@@ -224,12 +201,7 @@ gradient_descent(struct arrays arr,
         fortunes(&arr.sites[i * nsites], nsites, &edgelist);
         copy_edges(&edgelist, &arr.linesegs[i * pts_per_trial]);
         calc_stats(&edgelist, &arr.sites[i * nsites], &arr.perimeter[i],
-                   &arr.objective_function[i], &arr.char_max_length[i],
-                   &arr.char_min_length[i],
-                   &arr.edgehist[i * (int)(1.4143f * (float)nsites)], nsites);
-        // HARDCODE
-        calc_earth_mover((size_t)((float)nsites * 1.4143f), arr.earthmover,
-                         arr.edgehist, i);
+                   &arr.objective_function[i], nsites);
         free_edgelist(&edgelist);
     }
     free(thr);

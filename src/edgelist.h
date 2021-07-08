@@ -28,7 +28,6 @@ struct edgelist {
 float calc_perimeter(struct edgelist *);
 void copy_edges(struct edgelist *, point *);
 void init_edgelist(struct edgelist *);
-void calc_edge_length(struct edgelist *, float *, float *, int *, size_t);
 void print_edgelist(struct edgelist *);
 void print_edge(struct halfedge *);
 void print_sites(const point *const, const int32_t);

@@ -64,27 +64,6 @@ init_edgelist(struct edgelist *e)
 }
 
 void
-calc_edge_length(struct edgelist *edgelist,
-                 float *max,
-                 float *min,
-                 int *edgehist,
-                 size_t nsites)
-{
-    *max = 0.0f;
-    *min = 1.0f / 0.0f;
-    for (int i = 0; i < edgelist->nedges; i += 2) { // notice += 2
-        float x1 = edgelist->edges[i]->origin.x;
-        float y1 = edgelist->edges[i]->origin.y;
-        float x2 = edgelist->edges[i]->twin->origin.x;
-        float y2 = edgelist->edges[i]->twin->origin.y;
-        float dist = sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-        edgehist[(size_t)(dist * (float)nsites)]++;
-        if (dist > *max) *max = dist;
-        if (dist < *min) *min = dist;
-    }
-}
-
-void
 print_edgelist(struct edgelist *edgelist)
 {
     for (int i = 0; i < edgelist->nedges; i += 2) {

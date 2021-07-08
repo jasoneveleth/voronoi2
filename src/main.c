@@ -76,7 +76,54 @@ binary_write(const char *const path, void *const buf, const size_t length)
 }
 
 static void
-edges2linesegs()
+calc_earth_mover(size_t nbins, int *earthmover, int *edgehist, int i)
+{
+    if (i > 0) {
+        int *old_hist = &edgehist[(i - 1) * (int)nbins];
+        int *new_hist = &edgehist[i * (int)nbins];
+        int total = 0;
+        int ith = 0;
+        for (int j = 1; j < (int)nbins; j++) {
+            ith = old_hist[j] + ith - new_hist[j];
+            total += abs(ith);
+        }
+        earthmover[i] = total;
+    } else {
+        earthmover[i] = 0;
+    }
+}
+
+static void
+calc_edge_length(struct point *linesegs,
+                 float *max,
+                 float *min,
+                 int *edgehist,
+                 int *earthmover,
+                 size_t ntrials,
+                 size_t nsites)
+{
+    const float maxdist = 1.4143f; // HARDCODE
+    const size_t nbins = (size_t)(maxdist * (float)nsites);
+    size_t nedges = 3 * nsites - 6;
+    for (size_t i = 0; i < ntrials; i++) {
+        max[i] = 0.0f;
+        min[i] = 1.0f / 0.0f;
+        for (size_t j = 0; j < nedges; j++) {
+            float x1 = linesegs[i * 2 * nedges + j * 2].x;
+            float y1 = linesegs[i * 2 * nedges + j * 2].y;
+            float x2 = linesegs[i * 2 * nedges + j * 2 + 1].x;
+            float y2 = linesegs[i * 2 * nedges + j * 2 + 1].y;
+            float dist = sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+            edgehist[i * nbins + (size_t)(dist * (float)nsites)]++;
+            if (dist > max[i]) max[i] = dist;
+            if (dist < min[i]) min[i] = dist;
+        }
+        calc_earth_mover(nbins, earthmover, edgehist, (int)i);
+    }
+}
+
+static void
+edges2linesegs(size_t nsites)
 {
     // == https://stackoverflow.com/questions/22059189/read-a-file-as-byte-array
     FILE *fileptr;
@@ -94,7 +141,6 @@ edges2linesegs()
     fclose(fileptr);                    // Close the file
     // ===========
 
-    size_t nsites = (size_t)get_nsites("input");
     point *better = malloc(filelen * 2);
     size_t shape = 3 * nsites - 6;
     for (size_t i = 0; i < options.ntrials; i++) {
@@ -109,6 +155,15 @@ edges2linesegs()
     }
     binary_write("output/linesegs", better, filelen * 2);
     free(better);
+}
+
+static void
+calc_arrays(struct arrays arrs)
+{
+    size_t nsites = (size_t)get_nsites("input");
+    edges2linesegs(nsites);
+    calc_edge_length(arrs.linesegs, arrs.char_max_length, arrs.char_min_length,
+                     arrs.edgehist, arrs.earthmover, options.ntrials, nsites);
 }
 
 static void
@@ -208,6 +263,8 @@ big_func()
     arrs.alpha[0] = 0; // there is no step first.
     gradient_descent(arrs, options.jiggle, (int)nsites, (int)pts_per_trial);
     output_to_file(arrs, nsites);
+    calc_arrays(arrs);
+    output_to_file(arrs, nsites);
     free(arrs.linesegs);
     free(arrs.edgehist);
     free(arrs.objective_function);
@@ -217,8 +274,6 @@ big_func()
     free(arrs.earthmover);
     free(arrs.alpha);
     free(arrs.sites);
-
-    edges2linesegs();
 }
 
 static void
