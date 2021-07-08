@@ -68,10 +68,24 @@ graph_file(const char *path)
     fortunes(sites, (int)nsites, &e);
     free(sites);
 
-    size_t size_of_edgelist = sizeof(point) * 2 * (size_t)e.nedges;
+    // misleading bc really its 2 pts per halfedge, but we only care about 1/2
+    // halfedges
+    size_t size_of_edgelist = sizeof(point) * (size_t)e.nedges;
     point *edges = malloc(size_of_edgelist);
     copy_edges(&e, edges);
-    binary_write("output/linesegs", edges, size_of_edgelist);
+    // binary_write("output/linesegs", edges, size_of_edgelist);
+
+    // preserve
+    point *better = calloc(1, size_of_edgelist * 2);
+    for (int j = 0; j < e.nedges / 2; j++) {
+        better[j * 4] = edges[j * 2];
+        better[j * 4 + 1] = edges[j * 2 + 1];
+        better[j * 4 + 2] = edges[j * 2 + 1];
+        better[j * 4 + 3] = edges[j * 2];
+    }
+    binary_write("output/linesegs", better, size_of_edgelist * 2);
+    free(better);
+    // preserve
 
     free(edges);
     free_edgelist(&e);
@@ -81,9 +95,26 @@ static void
 output_to_file(struct arrays arrs, size_t nsites)
 {
     size_t nbytes;
-    nbytes =
-        sizeof(arrs.linesegs[0]) * options.ntrials * 2 * (3 * nsites - 6) * 2;
-    binary_write("output/linesegs", arrs.linesegs, nbytes);
+    nbytes = sizeof(arrs.linesegs[0]) * options.ntrials * (3 * nsites - 6) * 2;
+    // preserve
+    point *better = malloc(nbytes * 2);
+    int shape = 3 * (int)nsites - 6;
+    for (int i = 0; i < (int)options.ntrials; i++) {
+        for (int j = 0; j < shape; j++) {
+            better[i * 4 * shape + j * 4] =
+                arrs.linesegs[i * 2 * shape + j * 2];
+            better[i * 4 * shape + j * 4 + 1] =
+                arrs.linesegs[i * 2 * shape + j * 2 + 1];
+            better[i * 4 * shape + j * 4 + 2] =
+                arrs.linesegs[i * 2 * shape + j * 2 + 1];
+            better[i * 4 * shape + j * 4 + 3] =
+                arrs.linesegs[i * 2 * shape + j * 2];
+        }
+    }
+    binary_write("output/linesegs", better, nbytes * 2);
+    free(better);
+    // preserve
+    // binary_write("output/linesegs", arrs.linesegs, nbytes);
 
     nbytes = sizeof(arrs.sites[0]) * (size_t)nsites * options.ntrials;
     binary_write("output/sites", arrs.sites, nbytes);
@@ -122,8 +153,8 @@ big_func()
     struct arrays arrs;
     size_t nsites;
     file2sites(options.filepath, (point **)&arrs.sites, &nsites);
-    size_t pts_per_trial = (2 * (3 * nsites - 6)) * (2);
-    size_t size_of_linsegs = options.ntrials * (2 * (3 * nsites - 6)) * (2);
+    size_t pts_per_trial = (3 * nsites - 6) * (2);
+    size_t size_of_linsegs = options.ntrials * pts_per_trial;
     // HARDCODE
     size_t size_of_edgehist = options.ntrials * (nsites * 14143) / 10000;
 

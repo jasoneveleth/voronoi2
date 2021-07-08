@@ -7,13 +7,15 @@ float
 calc_perimeter(struct edgelist *edgelist)
 {
     float length = 0;
-    for (int i = 0; i < edgelist->nedges; i++) {
-        float dx =
-            edgelist->edges[i]->origin.x - edgelist->edges[i]->twin->origin.x;
-        float dy =
-            edgelist->edges[i]->origin.y - edgelist->edges[i]->twin->origin.y;
+    for (int i = 0; i < edgelist->nedges; i += 2) { // notice += 2
+        struct halfedge *edge = edgelist->edges[i];
+        float dx = edge->origin.x - edge->twin->origin.x;
+        float dy = edge->origin.y - edge->twin->origin.y;
         float d = sqrtf(dx * dx + dy * dy);
         length += d;
+        // preserve
+        length += d;
+        // preserve
     }
     return (length / 2) + 4;
 }
@@ -47,11 +49,8 @@ void
 copy_edges(struct edgelist *edgelist, point *dest)
 {
     for (int i = 0; i < edgelist->nedges; i++) {
-        // multiply by 2 because: 1 edge = 2 points
-        dest[i * 2].x = edgelist->edges[i]->origin.x;
-        dest[i * 2].y = edgelist->edges[i]->origin.y;
-        dest[i * 2 + 1].x = edgelist->edges[i]->twin->origin.x;
-        dest[i * 2 + 1].y = edgelist->edges[i]->twin->origin.y;
+        // odd i's store the start, and even i's store end of lineseg
+        dest[i] = edgelist->edges[i]->origin;
     }
 }
 
@@ -73,7 +72,7 @@ calc_edge_length(struct edgelist *edgelist,
 {
     *max = 0.0f;
     *min = 1.0f / 0.0f;
-    for (int i = 0; i < edgelist->nedges; i++) {
+    for (int i = 0; i < edgelist->nedges; i += 2) { // notice += 2
         float x1 = edgelist->edges[i]->origin.x;
         float y1 = edgelist->edges[i]->origin.y;
         float x2 = edgelist->edges[i]->twin->origin.x;
