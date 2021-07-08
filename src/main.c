@@ -122,25 +122,29 @@ calc_edge_length(struct point *linesegs,
     }
 }
 
-static void
-edges2linesegs(size_t nsites)
+static void *
+from_file(const char *const path, size_t *filelen)
 {
-    // == https://stackoverflow.com/questions/22059189/read-a-file-as-byte-array
+    // https://stackoverflow.com/questions/22059189/read-a-file-as-byte-array
     FILE *fileptr;
-    point *buffer;
-    size_t filelen;
+    void *buffer;
 
-    fileptr = fopen("output/edges", "rb"); // Open the file in binary mode
-    FATAL(!fileptr, "file: %s doesn't exist\n", "output/edges");
-    fseek(fileptr, 0, SEEK_END);      // Jump to the end of the file
-    filelen = (size_t)ftell(fileptr); // Get the current byte offset in the file
-    rewind(fileptr);                  // Jump back to the beginning of the file
+    fileptr = fopen(path, "rb"); // Open the file in binary mode
+    FATAL(!fileptr, "file: %s doesn't exist\n", path);
+    fseek(fileptr, 0, SEEK_END); // Jump to the end of the file
+    *filelen =
+        (size_t)ftell(fileptr); // Get the current byte offset in the file
+    rewind(fileptr);            // Jump back to the beginning of the file
 
-    buffer = malloc(filelen);           // Enough memory for the file
-    fread(buffer, filelen, 1, fileptr); // Read in the entire file
-    fclose(fileptr);                    // Close the file
-    // ===========
+    buffer = malloc(*filelen);           // Enough memory for the file
+    fread(buffer, *filelen, 1, fileptr); // Read in the entire file
+    fclose(fileptr);                     // Close the file
+    return buffer;
+}
 
+static void
+edges2linesegs(point *buffer, size_t filelen, size_t nsites)
+{
     point *better = malloc(filelen * 2);
     size_t shape = 3 * nsites - 6;
     for (size_t i = 0; i < options.ntrials; i++) {
@@ -158,12 +162,43 @@ edges2linesegs(size_t nsites)
 }
 
 static void
-calc_arrays(struct arrays arrs)
+calc_arrays(void)
 {
+    struct arrays arrs;
     size_t nsites = (size_t)get_nsites("input");
-    edges2linesegs(nsites);
+    // HARDCODE
+    size_t size_of_edgehist =
+        options.ntrials * (size_t)(1.4143f * (float)nsites);
+
+    size_t nbytes;
+    arrs.linesegs = from_file("output/edges", &nbytes);
+    edges2linesegs(arrs.linesegs, nbytes, nsites);
+
+    arrs.edgehist = calloc(1, size_of_edgehist * sizeof(float));
+    arrs.earthmover = malloc(options.ntrials * sizeof(float));
+    arrs.char_max_length = malloc(options.ntrials * sizeof(float));
+    arrs.char_min_length = malloc(options.ntrials * sizeof(float));
+
     calc_edge_length(arrs.linesegs, arrs.char_max_length, arrs.char_min_length,
                      arrs.edgehist, arrs.earthmover, options.ntrials, nsites);
+
+    nbytes = sizeof(arrs.char_max_length[0]) * options.ntrials;
+    binary_write("output/char_max_length", arrs.char_max_length, nbytes);
+
+    nbytes = sizeof(arrs.char_min_length[0]) * options.ntrials;
+    binary_write("output/char_min_length", arrs.char_min_length, nbytes);
+
+    nbytes = sizeof(arrs.edgehist[0]) * (size_t)((float)nsites * 1.4143f)
+             * options.ntrials;
+    binary_write("output/edgehist", arrs.edgehist, nbytes);
+
+    nbytes = sizeof(arrs.earthmover[0]) * options.ntrials;
+    binary_write("output/earthmover", arrs.earthmover, nbytes);
+
+    free(arrs.edgehist);
+    free(arrs.char_max_length);
+    free(arrs.char_min_length);
+    free(arrs.earthmover);
 }
 
 static void
@@ -203,8 +238,21 @@ graph_file(const char *path)
 }
 
 static void
-output_to_file(struct arrays arrs, size_t nsites)
+big_func()
 {
+    struct arrays arrs;
+    size_t nsites;
+    file2sites(options.filepath, (point **)&arrs.sites, &nsites);
+    size_t pts_per_trial = (3 * nsites - 6) * (2);
+    size_t size_of_linsegs = options.ntrials * pts_per_trial;
+
+    arrs.linesegs = calloc(1, size_of_linsegs * sizeof(point));
+    arrs.objective_function = malloc(options.ntrials * sizeof(float));
+    arrs.perimeter = malloc(options.ntrials * sizeof(float));
+    arrs.alpha = malloc(options.ntrials * sizeof(float));
+
+    arrs.alpha[0] = 0; // there is no step first.
+    gradient_descent(arrs, options.jiggle, (int)nsites, (int)pts_per_trial);
     size_t nbytes;
     nbytes = sizeof(arrs.linesegs[0]) * options.ntrials * (3 * nsites - 6) * 2;
     binary_write("output/edges", arrs.linesegs, nbytes);
@@ -218,60 +266,12 @@ output_to_file(struct arrays arrs, size_t nsites)
     nbytes = sizeof(arrs.objective_function[0]) * options.ntrials;
     binary_write("output/objective_function", arrs.objective_function, nbytes);
 
-    nbytes = sizeof(arrs.char_max_length[0]) * options.ntrials;
-    binary_write("output/char_max_length", arrs.char_max_length, nbytes);
-
-    nbytes = sizeof(arrs.char_min_length[0]) * options.ntrials;
-    binary_write("output/char_min_length", arrs.char_min_length, nbytes);
-
-    nbytes = sizeof(arrs.edgehist[0]) * (size_t)((float)nsites * 1.4143f)
-             * options.ntrials;
-    binary_write("output/edgehist", arrs.edgehist, nbytes);
-
-    nbytes = sizeof(arrs.earthmover[0]) * options.ntrials;
-    binary_write("output/earthmover", arrs.earthmover, nbytes);
-
     nbytes = sizeof(arrs.alpha[0]) * options.ntrials;
     binary_write("output/alpha", arrs.alpha, nbytes);
-}
 
-static void
-big_func()
-{
-    if (options.ntrials == 0) {
-        graph_file(options.filepath);
-        return;
-    }
-
-    struct arrays arrs;
-    size_t nsites;
-    file2sites(options.filepath, (point **)&arrs.sites, &nsites);
-    size_t pts_per_trial = (3 * nsites - 6) * (2);
-    size_t size_of_linsegs = options.ntrials * pts_per_trial;
-    // HARDCODE
-    size_t size_of_edgehist = options.ntrials * (nsites * 14143) / 10000;
-
-    arrs.linesegs = calloc(1, size_of_linsegs * sizeof(point));
-    arrs.edgehist = calloc(1, size_of_edgehist * sizeof(float));
-    arrs.objective_function = malloc(options.ntrials * sizeof(float));
-    arrs.char_max_length = malloc(options.ntrials * sizeof(float));
-    arrs.char_min_length = malloc(options.ntrials * sizeof(float));
-    arrs.perimeter = malloc(options.ntrials * sizeof(float));
-    arrs.earthmover = malloc(options.ntrials * sizeof(float));
-    arrs.alpha = malloc(options.ntrials * sizeof(float));
-
-    arrs.alpha[0] = 0; // there is no step first.
-    gradient_descent(arrs, options.jiggle, (int)nsites, (int)pts_per_trial);
-    output_to_file(arrs, nsites);
-    calc_arrays(arrs);
-    output_to_file(arrs, nsites);
     free(arrs.linesegs);
-    free(arrs.edgehist);
     free(arrs.objective_function);
-    free(arrs.char_max_length);
-    free(arrs.char_min_length);
     free(arrs.perimeter);
-    free(arrs.earthmover);
     free(arrs.alpha);
     free(arrs.sites);
 }
@@ -358,7 +358,12 @@ main(int argc, char **argv)
         }
     }
 
-    big_func();
+    if (options.ntrials == 0) {
+        graph_file(options.filepath);
+    } else {
+        big_func();
+        calc_arrays();
+    }
     return EXIT_SUCCESS;
 }
 
