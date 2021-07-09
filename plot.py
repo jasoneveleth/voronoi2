@@ -32,7 +32,6 @@ def arr(filename, dtype='float32'):
     return np.fromfile('output/' + filename, dtype=dtype);
 
 def render():
-    myprint('rendering movie . . . ')
     nsites = len(open('input').readlines())
     linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
 
