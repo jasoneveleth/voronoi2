@@ -222,15 +222,19 @@ static inline void
 intersect_lines(point *dest, point p1, point p2, point p3, point p4)
 {
     // https://en.wikipedia.org/wiki/Line–line_intersection
-    float x1 = p1.x, y1 = p1.y;
-    float x2 = p2.x, y2 = p2.y;
-    float x3 = p3.x, y3 = p3.y;
-    float x4 = p4.x, y4 = p4.y;
-    float D = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-    float subexpr = x1 * y2 - y1 * x2;
-    float subexpr2 = x3 * y4 - y3 * x4;
-    dest->x = (subexpr * (x3 - x4) - subexpr2 * (x1 - x2)) / D;
-    dest->y = (subexpr * (y3 - y4) - subexpr2 * (y1 - y2)) / D;
+    double x1 = (double)p1.x, y1 = (double)p1.y;
+    double x2 = (double)p2.x, y2 = (double)p2.y;
+    double x3 = (double)p3.x, y3 = (double)p3.y;
+    double x4 = (double)p4.x, y4 = (double)p4.y;
+    double D = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    // if the lines don't intersect, this could mean both points are outside the
+    // box, in that case, leave them. Weirdly constructed comparison because
+    // can't compare floats for equality
+    if (D <= 0 && D >= 0) return;
+    double subexpr = x1 * y2 - y1 * x2;
+    double subexpr2 = x3 * y4 - y3 * x4;
+    dest->x = (float)((subexpr * (x3 - x4) - subexpr2 * (x1 - x2)) / D);
+    dest->y = (float)((subexpr * (y3 - y4) - subexpr2 * (y1 - y2)) / D);
 }
 
 static inline void
