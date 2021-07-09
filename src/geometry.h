@@ -16,10 +16,17 @@ struct point {
     float y;
 };
 
+typedef struct dpoint dpoint;
+struct dpoint {
+    double x;
+    double y;
+};
+
 point intersect_parabolas(float, point *);
-point circleBottom(point, point, point);
-point circle_center(point, point, point);
+point __attribute__((const)) circleBottom(point, point, point);
+dpoint __attribute__((const)) circle_center(point, point, point);
+point __attribute__((const)) circle_centerf(point, point, point);
 point boundary_cond(point, point);
-float frac(float);
+float __attribute__((const)) frac(float);
 
 #endif

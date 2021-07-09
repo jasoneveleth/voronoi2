@@ -171,8 +171,8 @@ handle_circle_event(struct event *event,
     struct bnode *const parent = leaf->parent;
     struct bnode *nextleaf = bnextleaf(leaf);
     struct bnode *prevleaf = bprevleaf(leaf);
-    const point center = circle_center(prevleaf->arc->site, leaf->arc->site,
-                                       nextleaf->arc->site);
+    const point center = circle_centerf(prevleaf->arc->site, leaf->arc->site,
+                                        nextleaf->arc->site);
     int leaf_is_left_child = parent->left == leaf;
     struct bnode *other_child =
         leaf_is_left_child ? parent->right : parent->left;
