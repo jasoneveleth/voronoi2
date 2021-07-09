@@ -99,6 +99,7 @@ def render():
         char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
         earthmover_line.set_data(np.arange(trial_num), earthmover[:trial_num])
         alpha_line.set_data(np.arange(trial_num), alpha[:trial_num])
+        myprint(f'\rrender trial: {trial_num} ')
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=50, blit=False)
     anim.save('newest.mp4')
