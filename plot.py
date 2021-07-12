@@ -59,7 +59,7 @@ def render():
     axs[3, 1].remove()
     diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
 
-    setup_ax(axs[0, 0], 'perimeter', (0, nframes), (0, (4/3)*np.max(perimeters)))
+    setup_ax(axs[0, 0], 'perimeter', (1, nframes), (0, (4/3)*np.max(perimeters)))
     perimeter_line, = axs[0, 0].plot([], [], lw=3) # the comma unpacks the tuple
 
     setup_ax(diagram_ax, 'voronoi diagram', (0, 1), (0, 1))
@@ -67,11 +67,11 @@ def render():
     diagram_ax.add_collection(edge_line_coll)
     sites_line, = diagram_ax.plot([], [], 'ro', ms=5)
 
-    setup_ax(axs[0, 1], 'longest edge and shortest edge (characteristic length)', (0, nframes), (0, (4/3)*np.max(char_max_length)))
+    setup_ax(axs[0, 1], 'longest edge and shortest edge (characteristic length)', (1, nframes), (0, (4/3)*np.max(char_max_length)))
     char_len_max_line, = axs[0, 1].plot([], [], lw=3)
     char_len_min_line, = axs[0, 1].plot([], [], lw=3)
 
-    setup_ax(axs[1, 0], 'earth mover distance', (0, nframes), (0, (4/3) * np.max(earthmover)))
+    setup_ax(axs[1, 0], 'earth mover distance', (1, nframes), (0, (4/3) * np.max(earthmover)))
     earthmover_line, = axs[1,0].plot([], [], lw=3)
 
     view = 5/np.sqrt(nsites)
@@ -81,10 +81,10 @@ def render():
     x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
     edge_dist_bars = axs[1,1].bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
 
-    setup_ax(axs[2, 0], 'objective function', (0, nframes), (0, (4/3)*np.max(objfunc)))
+    setup_ax(axs[2, 0], 'objective function', (1, nframes), (0, (4/3)*np.max(objfunc)))
     objectivefunction_line, = axs[2,0].plot([], [], lw=3)
 
-    setup_ax(axs[3,0], 'alpha', (0, nframes), (0, 1))
+    setup_ax(axs[3,0], 'alpha', (1, nframes), (0, 1))
     alpha_line, = axs[3,0].plot([], [], lw=3)
 
     # dumb but needed
@@ -92,17 +92,17 @@ def render():
         pass
 
     def animate(trial_num):
-        end = trial_num + 1
+        end = trial_num + 1 # +1 because end is not included in range
         for i, b in enumerate(edge_dist_bars):
             b.set_height(edgedist[trial_num][i])
         edge_line_coll.set_segments(linesegs[trial_num])
         sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
-        perimeter_line.set_data(np.arange(end), perimeters[:end])
-        objectivefunction_line.set_data(np.arange(end), objfunc[:end])
-        char_len_max_line.set_data(np.arange(end), char_max_length[:end])
-        char_len_min_line.set_data(np.arange(end), char_min_length[:end])
-        earthmover_line.set_data(np.arange(end), earthmover[:end])
-        alpha_line.set_data(np.arange(end), alpha[:end])
+        perimeter_line.set_data(np.arange(1, end+1), perimeters[:end])
+        objectivefunction_line.set_data(np.arange(1, end+1), objfunc[:end])
+        char_len_max_line.set_data(np.arange(1, end+1), char_max_length[:end])
+        char_len_min_line.set_data(np.arange(1, end+1), char_min_length[:end])
+        earthmover_line.set_data(np.arange(1, end+1), earthmover[:end])
+        alpha_line.set_data(np.arange(1, end+1), alpha[:end])
         myprint(f'\rrender trial: {trial_num} ')
 
     anim = matplotlib.animation.FuncAnimation(fig, animate, init_func=init, frames=nframes, interval=50, blit=False)
