@@ -14,7 +14,7 @@ FLAGS += -Wno-error=unused-variable
 FLAGS += -Wno-error=unused-function
 FLAGS += -Wno-error=double-promotion
 FLAGS += -Wno-reserved-id-macro
-# FLAGS += -Ofast -march=native
+# FLAGS += -O3 -march=native
 FLAGS += -g -O0 
 # FLAGS += -pg
 FLAGS += -DNTHREADS=16
