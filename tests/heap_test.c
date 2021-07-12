@@ -211,7 +211,7 @@ main()
     for (size_t i = 0; i < len; i++) {
         int passed = tests[i]();
         if (passed) {
-            printf("\033[32mPASSED\033[0m\n");
+            printf("\033[32mOK\033[0m\n");
         } else {
             printf("\033[31mFAILED\033[0m\n");
             return 1;

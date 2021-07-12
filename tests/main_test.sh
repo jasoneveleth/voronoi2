@@ -15,7 +15,7 @@ fi
 
 check_tmp() {
     if cmp --silent "$1" tests/tmp_file; then
-        printf "${GRN}PASSED${CLR}\n"
+        printf "${GRN}OK${CLR}\n"
     else
         printf "${RED}FAILED${CLR}\n"
     fi
