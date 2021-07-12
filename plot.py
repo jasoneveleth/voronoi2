@@ -87,20 +87,25 @@ def render():
     setup_ax(axs[3,0], 'alpha', (0, nframes), (0, 1))
     alpha_line, = axs[3,0].plot([], [], lw=3)
 
+    # dumb but needed
+    def init():
+        pass
+
     def animate(trial_num):
+        end = trial_num + 1
         for i, b in enumerate(edge_dist_bars):
             b.set_height(edgedist[trial_num][i])
         edge_line_coll.set_segments(linesegs[trial_num])
         sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
-        perimeter_line.set_data(np.arange(trial_num), perimeters[:trial_num])
-        objectivefunction_line.set_data(np.arange(trial_num), objfunc[:trial_num])
-        char_len_max_line.set_data(np.arange(trial_num), char_max_length[:trial_num])
-        char_len_min_line.set_data(np.arange(trial_num), char_min_length[:trial_num])
-        earthmover_line.set_data(np.arange(trial_num), earthmover[:trial_num])
-        alpha_line.set_data(np.arange(trial_num), alpha[:trial_num])
+        perimeter_line.set_data(np.arange(end), perimeters[:end])
+        objectivefunction_line.set_data(np.arange(end), objfunc[:end])
+        char_len_max_line.set_data(np.arange(end), char_max_length[:end])
+        char_len_min_line.set_data(np.arange(end), char_min_length[:end])
+        earthmover_line.set_data(np.arange(end), earthmover[:end])
+        alpha_line.set_data(np.arange(end), alpha[:end])
         myprint(f'\rrender trial: {trial_num} ')
 
-    anim = matplotlib.animation.FuncAnimation(fig, animate, frames=nframes, interval=50, blit=False)
+    anim = matplotlib.animation.FuncAnimation(fig, animate, init_func=init, frames=nframes, interval=50, blit=False)
     anim.save('newest.mp4')
     log_time('\x1b[2K\r')
 
