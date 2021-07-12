@@ -39,7 +39,7 @@ args=("-bt -op" "-bt -opr" "-bb -op" "-bb -opr")
 
 for i in ${!files[@]}; do
     printf "testing ${files[$i]} "
-    voronoi -n 50 ${args[$i]}
+    voronoi -s -n 50 ${args[$i]}
     .env/bin/python plot.py -s -t | md5sum > tests/tmp_file
     check_tmp "${files[$i]}.gradout"
     rm -f tests/tmp_file

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <math.h>
 #include "main.h"
 
@@ -304,6 +305,9 @@ main(int argc, char **argv)
 
     while ((opt = getopt(argc, argv, OPTSTR)) != EOF) {
         switch (opt) {
+        case 's':
+            options.silent = true;
+            break;
         case 'i':
             options.filepath = optarg;
             break;

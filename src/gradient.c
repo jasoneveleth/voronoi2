@@ -152,8 +152,10 @@ gradient_descent(struct arrays arr,
     }
     pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
     for (int i = 0; i < (int)options.ntrials; i++) {
-        printf("\rdescent trial: %d ", i);
-        fflush(stdout);
+        if (!options.silent) {
+            printf("\rdescent trial: %d ", i);
+            fflush(stdout);
+        }
         if (i > 0) { // skip this the first time
             float prev_objective = arr.objective_function[i - 1];
             point *old_sites_ptr = &arr.sites[(i - 1) * nsites];
@@ -206,8 +208,10 @@ gradient_descent(struct arrays arr,
                    &arr.objective_function[i], nsites);
         free_edgelist(&edgelist);
     }
-    printf("\r");
-    fflush(stdout);
+    if (!options.silent) {
+        printf("\r");
+        fflush(stdout);
+    }
     free(thr);
     free(g_k);
     free(g_k1);

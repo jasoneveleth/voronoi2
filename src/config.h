@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <stdbool.h>
+
 #ifndef NTHREADS
 #define NTHREADS 1
 #endif
@@ -41,6 +43,8 @@ struct options {
     float repel_coeff;
     float jiggle;
     unsigned long ntrials;
+    bool silent;
+    char padding[7];
 };
 
 #endif
