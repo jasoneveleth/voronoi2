@@ -28,6 +28,7 @@ Check options with `$ ./voronoi -h`
 
 - a '+' at the end of git messages means this commit could be split into
   multiple parts
+- 1e-4 is good for 100 points, 2e-5 is good for 2000 points
 
 ## Updates
 
@@ -77,6 +78,4 @@ reimplemented everything and now it works!
 
 ## Possible speed optimizations (test to make sure it is an issue)
 
-- multithread each trial
 - rebalance tree
-- inline edges array
