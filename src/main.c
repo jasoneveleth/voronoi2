@@ -167,9 +167,9 @@ calc_arrays(void)
 {
     struct arrays arrs;
     size_t nsites = (size_t)get_nsites("input");
+    size_t nbins = (size_t)(1.4143f * (float)nsites);
     // HARDCODE
-    size_t size_of_edgehist =
-        options.ntrials * (size_t)(1.4143f * (float)nsites);
+    size_t size_of_edgehist = options.ntrials * nbins;
 
     size_t nbytes;
     arrs.linesegs = from_file("output/edges", &nbytes);
@@ -189,8 +189,7 @@ calc_arrays(void)
     nbytes = sizeof(arrs.char_min_length[0]) * options.ntrials;
     binary_write("output/char_min_length", arrs.char_min_length, nbytes);
 
-    nbytes = sizeof(arrs.edgehist[0]) * (size_t)((float)nsites * 1.4143f)
-             * options.ntrials;
+    nbytes = sizeof(arrs.edgehist[0]) * nbins * options.ntrials;
     binary_write("output/edgehist", arrs.edgehist, nbytes);
 
     nbytes = sizeof(arrs.earthmover[0]) * options.ntrials;
