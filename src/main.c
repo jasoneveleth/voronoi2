@@ -343,6 +343,8 @@ main(int argc, char **argv)
                 options.descent = CONSTANT_ALPHA;
             } else if (optarg[0] == 'b') {
                 options.descent = BARZILAI;
+            } else if (optarg[0] == 'j') {
+                options.descent = CONJUGATE;
             } else {
                 usage(argv[0], optopt);
                 return EXIT_FAILURE;

@@ -31,7 +31,7 @@ enum __attribute__((packed)) descent_method
 {
     CONSTANT_ALPHA,
     BARZILAI,
-    CONJUGATE
+    CONJUGATE,
 };
 
 enum __attribute__((packed)) gradient_method
