@@ -223,7 +223,7 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
     g[1] = malloc(grad_size);
     g[2] = malloc(grad_size);
     g[3] = malloc(grad_size);
-    pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
+    pthread_t thr[NTHREADS];
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
         if (i > 0) {
@@ -237,7 +237,6 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
                    &arr.perimeter[i], &arr.objective_function[i], nsites);
     }
     myprint("\r");
-    free(thr);
     free(g[0]);
     free(g[1]);
     free(g[2]);
