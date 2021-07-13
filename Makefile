@@ -15,8 +15,7 @@ FLAGS += -Wno-error=unused-function
 FLAGS += -Wno-error=double-promotion
 FLAGS += -Wno-reserved-id-macro
 FLAGS += -Wno-format-nonliteral
-# FLAGS += -O3 -march=native
-FLAGS += -g -O0 
+FLAGS += -g -O3 -march=native
 # FLAGS += -pg
 FLAGS += -DNTHREADS=16
 LINKER = -lpthread
