@@ -35,6 +35,6 @@ void gradient_method(const int,
                      const float,
                      const float);
 float bb_formula(point *, point *, point *, point *, int);
-void gradient_descent(struct arrays, const float, int, const int);
+void gradient_descent(struct arrays, int, const int);
 
 #endif

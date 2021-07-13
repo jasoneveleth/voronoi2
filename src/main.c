@@ -252,7 +252,7 @@ big_func()
     arrs.alpha = malloc(options.ntrials * sizeof(float));
 
     arrs.alpha[0] = 0; // there is no step first.
-    gradient_descent(arrs, options.jiggle, (int)nsites, (int)pts_per_trial);
+    gradient_descent(arrs, (int)nsites, (int)pts_per_trial);
     size_t nbytes;
     nbytes = sizeof(arrs.linesegs[0]) * options.ntrials * (3 * nsites - 6) * 2;
     binary_write("output/edges", arrs.linesegs, nbytes);

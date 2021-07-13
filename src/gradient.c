@@ -105,15 +105,15 @@ bb_formula(
     // res = -------------------
     //       s_{k-1} dot y_{k-1}
 
-    float numerator = 0;
-    float denominator = 0;
+    double numerator = 0;
+    double denominator = 0;
     for (int i = 0; i < 2 * nsites; i++) {
-        float s_k1 = x_k[i] - x_k1[i];
-        float y_k1 = g_k[i] - g_k1[i];
+        double s_k1 = (double)x_k[i] - (double)x_k1[i];
+        double y_k1 = (double)g_k[i] - (double)g_k1[i];
         numerator += s_k1 * s_k1;
         denominator += s_k1 * y_k1;
     }
-    return numerator / denominator;
+    return (float)(numerator / denominator);
 }
 
 static inline void
@@ -138,65 +138,118 @@ wrapper(void *args_to_cast)
     return args_to_cast;
 }
 
-void
-gradient_descent(struct arrays arr,
-                 const float jiggle,
-                 int nsites,
-                 const int pts_per_trial)
+static void
+myprint(const char *format, ...)
 {
-    point *g_k = NULL;
-    point *g_k1 = NULL;
-    g_k = malloc((size_t)nsites * sizeof(point));
-    if (options.descent == BARZILAI) {
-        g_k1 = malloc((size_t)nsites * sizeof(point));
+    if (!options.silent) {
+        va_list args;
+        va_start(args, format);
+        vprintf(format, args);
+        fflush(stdout);
+        va_end(args);
     }
+}
+
+static void
+parallel_grad(size_t nsites,
+              pthread_t *thr,
+              float prev_objective,
+              point *old_sites_ptr,
+              float jiggle,
+              point *grad)
+{
+    for (int j = 0; j < NTHREADS; j++) {
+        struct pthread_args *thread_args = malloc(sizeof(struct pthread_args));
+        thread_args->start = j * (int)nsites / NTHREADS;
+        thread_args->end = (j + 1) * (int)nsites / NTHREADS;
+        thread_args->nsites = (int)nsites;
+        thread_args->old_sites = old_sites_ptr;
+        thread_args->gradient = grad;
+        thread_args->jiggle = jiggle;
+        thread_args->prev_objective = prev_objective;
+        pthread_create(&thr[j], NULL, wrapper, thread_args);
+    }
+    for (int j = 0; j < NTHREADS; j++) {
+        void *args = NULL;
+        pthread_join(thr[j], &args);
+        free(args);
+    }
+}
+
+static void
+barzilai_update(
+    int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+{
+    point *r_i = g[0], *r_im1 = g[1];
+    point *x_km1 = &arr.sites[(i - 2) * nsites];
+    point *x_k = &arr.sites[(i - 1) * nsites];
+    point *x_kp1 = &arr.sites[i * nsites];
+
+    parallel_grad((size_t)nsites, thr, arr.objective_function[i - 1], x_k,
+                  options.jiggle, r_i);
+
+    if (i == 1) {
+        arr.alpha[i] = options.alpha;
+    } else {
+        arr.alpha[i] = bb_formula(x_km1, x_k, r_im1, r_i, nsites);
+    }
+
+    update_sites(x_k, x_kp1, r_i, nsites, arr.alpha[i]);
+
+    g[0] = r_im1;
+    g[1] = r_i;
+}
+
+static void
+conjugate_update(
+    int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+{
+    point *r_i = g[0], *r_im1 = g[1];
+    point *d_i = g[2], *d_im1 = g[3];
+    if (i == 1) {
+
+    }
+}
+
+static void
+constant_update(
+    int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+{
+    point *x_k1 = &arr.sites[(i - 1) * nsites];
+    point *x_k = &arr.sites[i * nsites];
+    point *r_i = g[0];
+
+    parallel_grad((size_t)nsites, thr, arr.objective_function[i - 1], x_k1,
+                  options.jiggle, r_i);
+    arr.alpha[i] = options.alpha;
+    update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
+}
+
+void
+gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
+{
+    point *g[4] = {NULL, NULL, NULL, NULL};
+    g[0] = malloc((size_t)nsites * sizeof(point));
+    g[1] = malloc((size_t)nsites * sizeof(point));
+    g[2] = malloc((size_t)nsites * sizeof(point));
+    g[3] = malloc((size_t)nsites * sizeof(point));
     pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
     for (int i = 0; i < (int)options.ntrials; i++) {
-        if (!options.silent) {
-            printf("\rdescent trial: %d ", i);
-            fflush(stdout);
-        }
+        myprint("\rdescent trial: %d ", i);
         if (i > 0) { // skip this the first time
-            float prev_objective = arr.objective_function[i - 1];
-            point *old_sites_ptr = &arr.sites[(i - 1) * nsites];
-            // {{{ PARALLEL
-            for (int j = 0; j < NTHREADS; j++) {
-                struct pthread_args *thread_args =
-                    malloc(sizeof(struct pthread_args));
-                thread_args->start = j * nsites / NTHREADS;
-                thread_args->end = (j + 1) * nsites / NTHREADS;
-                thread_args->nsites = nsites;
-                thread_args->old_sites = old_sites_ptr;
-                thread_args->gradient = g_k;
-                thread_args->jiggle = jiggle;
-                thread_args->prev_objective = prev_objective;
-                pthread_create(&thr[j], NULL, wrapper, thread_args);
-            }
-            for (int j = 0; j < NTHREADS; j++) {
-                void *args = NULL;
-                pthread_join(thr[j], &args);
-                free(args);
-            }
-            // PARALLEL }}}
-            float alpha;
-            if (options.descent == BARZILAI) {
-                if (i == 1) {
-                    alpha = options.alpha;
-                } else {
-                    point *x_k1 = &arr.sites[(i - 2) * nsites];
-                    point *x_k = &arr.sites[(i - 1) * nsites];
-                    alpha = bb_formula(x_k1, x_k, g_k1, g_k, nsites);
-                }
-            } else {
-                alpha = options.alpha;
-            }
-            arr.alpha[i] = alpha;
-            update_sites(old_sites_ptr, &arr.sites[i * nsites], g_k, nsites,
-                         alpha);
-            if (options.descent == BARZILAI) {
-                point *tmp = g_k1;
-                g_k1 = g_k;
-                g_k = tmp;
+            switch(options.descent) {
+                case BARZILAI:
+                    barzilai_update(i, arr, nsites, thr, g);
+                    break;
+                case CONJUGATE:
+                    conjugate_update(i, arr, nsites, thr, g);
+                    break;
+                case CONSTANT_ALPHA:
+                    constant_update(i, arr, nsites, thr, g);
+                    break;
+                default:
+                    RAISE("%s\n", "no more descent methods");
+                    break;
             }
         } // <- skipped the first time
 
@@ -208,11 +261,10 @@ gradient_descent(struct arrays arr,
                    &arr.objective_function[i], nsites);
         free_edgelist(&edgelist);
     }
-    if (!options.silent) {
-        printf("\r");
-        fflush(stdout);
-    }
+    myprint("\r");
     free(thr);
-    free(g_k);
-    free(g_k1);
+    free(g[0]);
+    free(g[1]);
+    free(g[2]);
+    free(g[3]);
 }
