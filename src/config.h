@@ -17,14 +17,15 @@
 #define NTHREADS 1
 #endif
 
+#define NOBJTYPES 3
 enum __attribute__((packed)) objective_function
 {
     PERIMETER = 1,
     REPULSION = 2,
+    R_AND_P = 3,
     // powers of 2, becuase it's a set
 };
 
-// *** IMPORTANT number of types ****** //
 #define NDESCENTTYPES 3
 enum __attribute__((packed)) descent_method
 {

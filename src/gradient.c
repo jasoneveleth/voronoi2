@@ -6,30 +6,25 @@
 #include <assert.h>
 #include "gradient.h"
 
-static inline float
-obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
-{
-    float perimeter = calc_perimeter(edgelist);
-    float repulsion_term = 0;
-    for (int i = 0; i < nsites; i++) {
-        for (int j = 0; j < nsites; j++) {
-            if (i == j) continue;
-            float dx = sites[i].x - sites[j].x;
-            float dy = sites[i].y - sites[j].y;
-            float dist = sqrtf((dx * dx) + (dy * dy));
-
-            repulsion_term += options.repel_coeff * (1 / dist);
-        }
-    }
-    return perimeter + repulsion_term;
-}
-
 float
 obj_function(point *sites, struct edgelist *edgelist, int nsites)
 {
-    if ((options.obj & REPULSION) && (options.obj & PERIMETER))
-        return obj_perimeter_and_repel(sites, edgelist, nsites);
-    else if (options.obj & PERIMETER) {
+    if (options.obj < NOBJTYPES) { RAISE("%s\n", "options/logic wrong"); }
+    if ((options.obj & REPULSION) && (options.obj & PERIMETER)) {
+        float perimeter = calc_perimeter(edgelist);
+        float repulsion_term = 0;
+        for (int i = 0; i < nsites; i++) {
+            for (int j = 0; j < nsites; j++) {
+                if (i == j) continue;
+                float dx = sites[i].x - sites[j].x;
+                float dy = sites[i].y - sites[j].y;
+                float dist = sqrtf((dx * dx) + (dy * dy));
+
+                repulsion_term += options.repel_coeff * (1 / dist);
+            }
+        }
+        return perimeter + repulsion_term;
+    } else if (options.obj & PERIMETER) {
         (void)sites;  // unused
         (void)nsites; // unused
         return calc_perimeter(edgelist);
