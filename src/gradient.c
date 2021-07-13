@@ -205,6 +205,11 @@ conjugate(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
     // point *r_i = g[0], *r_im1 = g[1];
     // point *d_i = g[2], *d_im1 = g[3];
     // if (i == 1) {}
+    (void)i;
+    (void)arr;
+    (void)nsites;
+    (void)thr;
+    (void)g;
 }
 
 static void
