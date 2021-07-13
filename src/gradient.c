@@ -177,8 +177,7 @@ parallel_grad(size_t nsites,
 }
 
 static void
-barzilai_update(
-    int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+barzilai(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
 {
     point *r_i = g[0], *r_im1 = g[1];
     point *x_km1 = &arr.sites[(i - 2) * nsites];
@@ -201,19 +200,15 @@ barzilai_update(
 }
 
 static void
-conjugate_update(
-    int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+conjugate(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
 {
-    point *r_i = g[0], *r_im1 = g[1];
-    point *d_i = g[2], *d_im1 = g[3];
-    if (i == 1) {
-
-    }
+    // point *r_i = g[0], *r_im1 = g[1];
+    // point *d_i = g[2], *d_im1 = g[3];
+    // if (i == 1) {}
 }
 
 static void
-constant_update(
-    int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+constant_alpha(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
 {
     point *x_k1 = &arr.sites[(i - 1) * nsites];
     point *x_k = &arr.sites[i * nsites];
@@ -237,20 +232,8 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
         if (i > 0) { // skip this the first time
-            switch(options.descent) {
-                case BARZILAI:
-                    barzilai_update(i, arr, nsites, thr, g);
-                    break;
-                case CONJUGATE:
-                    conjugate_update(i, arr, nsites, thr, g);
-                    break;
-                case CONSTANT_ALPHA:
-                    constant_update(i, arr, nsites, thr, g);
-                    break;
-                default:
-                    RAISE("%s\n", "no more descent methods");
-                    break;
-            }
+            descent_func descent[3] = {constant_alpha, barzilai, conjugate};
+            descent[options.descent](i, arr, nsites, thr, g);
         } // <- skipped the first time
 
         struct edgelist edgelist;
