@@ -183,16 +183,100 @@ barzilai(int i, struct arrays arr, int nsites, point *g[])
     g[1] = r_i;
 }
 
+static float
+polakribiere(point *r_im1_pt, point *r_i_pt, int nsites)
+{
+    float *r_im1 = (float *)r_im1_pt;
+    float *r_i = (float *)r_i_pt;
+    // https://bicmr.pku.edu.cn/~wenzw/courses/WenyuSun_YaxiangYuan_BB.pdf
+    //       r_i^T (r_i - r_{i-1})
+    // res = ---------------------
+    //          r_i^T r_{i-1}
+
+    double numerator = 0;
+    double denominator = 0;
+    for (int i = 0; i < 2 * nsites; i++) {
+        double r_i_ele = (double)r_i[i], r_im1_ele = (double)r_im1[i];
+        numerator += r_i_ele * (r_i_ele - r_im1_ele);
+        denominator += r_im1_ele * r_im1_ele;
+    }
+    return (float)(numerator / denominator);
+}
+
+static double
+dot(float *a, float *b, int len)
+{
+    double res = 0;
+    for (int i = 0; i < len; i++) { res += (double)a[i] * (double)b[i]; }
+    return res;
+}
+
+static void
+linesearch(point *x_k,
+           point *potential_x,
+           point *d,
+           int nsites,
+           float *alpha,
+           float prev_obj_f)
+{
+    //            obj        prev_obj               old_grad
+    //        v-----------v    v--v                v---------v
+    // >>>>>> f (x + a * d) <= f(x) + c1 * a * d^T \nabla f(x)
+    //          ^---------^                    ^-------------^
+    //          potential_x                     old_dot_prod
+    //
+    //
+    //              new_dot_prod                    old_grad
+    //        v----------------------v             v---------v
+    // >>>>>> -d^T \nabla f (x + a * d) <= -c2 d^T \nabla f(x)
+    //                      ^---------^        ^-------------^
+    //                      potential_x          old_dot_prod
+    //             ^------------------^
+    //                    new_grad
+    double prev_obj = (double)prev_obj_f;
+    point *old_grad = malloc((size_t)nsites * sizeof(point));
+    parallel_grad(old_grad, x_k, (size_t)nsites, prev_obj_f);
+    double old_dot_prod = dot((float *)d, (float *)x_k, 2 * nsites);
+    point *new_grad = malloc((size_t)nsites * sizeof(point));
+
+    // HARDCODE
+    static const double c1 = 1e-4;
+    static const double c2 = 0.1;
+    double tmp_alpha = 1.0;
+    while (1) {
+        update_sites(x_k, potential_x, d, nsites, (float)tmp_alpha);
+        double obj = (double)objective_function(potential_x, nsites);
+        bool wolfe_cond1 = obj <= prev_obj + c1 * tmp_alpha * old_dot_prod;
+        if (wolfe_cond1) continue;
+
+        parallel_grad(new_grad, potential_x, (size_t)nsites, prev_obj_f);
+        double new_dot_prod = -dot((float *)d, (float *)new_grad, nsites);
+        bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
+        if (wolfe_cond2) continue;
+
+        break;
+    }
+    *alpha = (float)tmp_alpha;
+}
+
 static void
 conjugate(int i, struct arrays arr, int nsites, point *g[])
 {
-    // point *r_i = g[0], *r_im1 = g[1];
-    // point *d_i = g[2], *d_im1 = g[3];
-    // if (i == 1) {}
-    (void)i;
-    (void)arr;
-    (void)nsites;
-    (void)g;
+    point *r_im1 = g[0], *r_i = g[1];
+    point *d_im1 = g[2], *d_i = g[3];
+    point *x_im1 = &arr.sites[(i - 1) * nsites];
+    point *x_i = &arr.sites[i * nsites];
+    const float prev_obj = arr.objective_function[i - 1];
+
+    // x_i = x_m1 + d_im1 * argmin_a[f(x_im1 + a * d_im1)]
+    linesearch(x_im1, x_i, d_im1, nsites, &arr.alpha[i], prev_obj);
+
+    parallel_grad(r_i, x_i, (size_t)nsites, prev_obj);
+
+    float beta = polakribiere(r_im1, r_i, nsites);
+    beta = beta > 0 ? beta : 0;
+
+    update_sites(r_i, d_i, d_im1, nsites, beta);
 }
 
 static void
