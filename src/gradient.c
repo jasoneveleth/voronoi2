@@ -228,9 +228,9 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
         myprint("\rdescent trial: %d ", i);
         if (i > 0) {
             assert(options.descent < NDESCENTTYPES); // validate enum
-            descent_func descent[NDESCENTTYPES] = {constant_alpha, barzilai,
-                                                   conjugate};
-            descent[options.descent](i, arr, nsites, thr, g);
+            descent_func jmp_table[NDESCENTTYPES] = {constant_alpha, barzilai,
+                                                     conjugate};
+            jmp_table[options.descent](i, arr, nsites, thr, g);
         }
 
         calc_stats(&arr.sites[i * nsites], &arr.linesegs[i * pts_per_trial],
