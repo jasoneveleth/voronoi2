@@ -75,14 +75,27 @@ bb_formula(
 }
 
 static inline void
-calc_stats(struct edgelist *edgelist,
-           point *sites,
-           float *perimeter,
-           float *objective_function,
-           int nsites)
+calc_stats(
+    point *sites, point *linesegs, float *perimeter, float *obj, int nsites)
 {
-    *perimeter = calc_perimeter(edgelist);
-    *objective_function = calc_objective(sites, edgelist, nsites);
+    struct edgelist edgelist;
+    init_edgelist(&edgelist);
+    fortunes(sites, nsites, &edgelist);
+    *obj = calc_objective(sites, &edgelist, nsites);
+    *perimeter = calc_perimeter(&edgelist);
+    copy_edges(&edgelist, linesegs);
+    free_edgelist(&edgelist);
+}
+
+static inline float
+objective_function(point *sites, int nsites)
+{
+    struct edgelist edgelist;
+    init_edgelist(&edgelist);
+    fortunes(sites, nsites, &edgelist);
+    float obj = calc_objective(sites, &edgelist, nsites);
+    free_edgelist(&edgelist);
+    return obj;
 }
 
 static void *
@@ -98,24 +111,16 @@ wrapper(void *args_to_cast)
         point *local_sites = malloc((size_t)args->nsites * sizeof(point));
         memcpy(local_sites, args->old_sites,
                (size_t)args->nsites * sizeof(point));
-        struct edgelist local_edgelist;
         // x
         local_sites[i] = boundary_cond(local_sites[i], deltax);
-        init_edgelist(&local_edgelist);
-        fortunes(local_sites, args->nsites, &local_edgelist);
-        float curr_obj =
-            calc_objective(local_sites, &local_edgelist, args->nsites);
+        float curr_obj = objective_function(local_sites, args->nsites);
         args->gradient[i].x = (curr_obj - args->prev_objective) / args->jiggle;
-        free_edgelist(&local_edgelist);
         // reset for y
         local_sites[i] = args->old_sites[i];
         // y
         local_sites[i] = boundary_cond(local_sites[i], deltay);
-        init_edgelist(&local_edgelist);
-        fortunes(local_sites, args->nsites, &local_edgelist);
-        curr_obj = calc_objective(local_sites, &local_edgelist, args->nsites);
+        curr_obj = objective_function(local_sites, args->nsites);
         args->gradient[i].y = (curr_obj - args->prev_objective) / args->jiggle;
-        free_edgelist(&local_edgelist);
 
         free(local_sites);
     }
@@ -213,27 +218,23 @@ void
 gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
 {
     point *g[4] = {NULL, NULL, NULL, NULL};
-    g[0] = malloc((size_t)nsites * sizeof(point));
-    g[1] = malloc((size_t)nsites * sizeof(point));
-    g[2] = malloc((size_t)nsites * sizeof(point));
-    g[3] = malloc((size_t)nsites * sizeof(point));
+    size_t grad_size = (size_t)nsites * sizeof(point);
+    g[0] = malloc(grad_size);
+    g[1] = malloc(grad_size);
+    g[2] = malloc(grad_size);
+    g[3] = malloc(grad_size);
     pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
-        if (i > 0) {                                 // skip this the first time
+        if (i > 0) {
             assert(options.descent < NDESCENTTYPES); // validate enum
             descent_func descent[NDESCENTTYPES] = {constant_alpha, barzilai,
                                                    conjugate};
             descent[options.descent](i, arr, nsites, thr, g);
-        } // <- skipped the first time
+        }
 
-        struct edgelist edgelist;
-        init_edgelist(&edgelist);
-        fortunes(&arr.sites[i * nsites], nsites, &edgelist);
-        copy_edges(&edgelist, &arr.linesegs[i * pts_per_trial]);
-        calc_stats(&edgelist, &arr.sites[i * nsites], &arr.perimeter[i],
-                   &arr.objective_function[i], nsites);
-        free_edgelist(&edgelist);
+        calc_stats(&arr.sites[i * nsites], &arr.linesegs[i * pts_per_trial],
+                   &arr.perimeter[i], &arr.objective_function[i], nsites);
     }
     myprint("\r");
     free(thr);
