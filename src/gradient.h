@@ -28,15 +28,6 @@ struct pthread_args {
 
 typedef void (*descent_func)(int, struct arrays, int, pthread_t *, point **);
 
-float obj_function(point *, struct edgelist *, int);
-void update_sites(point *, point *, point *, int, float);
-void gradient_method(const int,
-                     const int,
-                     const point *const,
-                     point *,
-                     const float,
-                     const float);
-float bb_formula(point *, point *, point *, point *, int);
 void gradient_descent(struct arrays, int, const int);
 
 #endif

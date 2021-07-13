@@ -6,8 +6,8 @@
 #include <assert.h>
 #include "gradient.h"
 
-float
-obj_function(point *sites, struct edgelist *edgelist, int nsites)
+static float
+calc_objective(point *sites, struct edgelist *edgelist, int nsites)
 {
     assert(options.obj < NOBJTYPES + 1); // validate, +1 bc sets start at 1
     if ((options.obj & REPULSION) && (options.obj & PERIMETER)) {
@@ -32,7 +32,7 @@ obj_function(point *sites, struct edgelist *edgelist, int nsites)
     return -1.0f;
 }
 
-void
+static void
 update_sites(point *src, point *dest, point *grad, int nsites, float alpha)
 {
     for (int i = 0; i < nsites; i++) {
@@ -41,7 +41,7 @@ update_sites(point *src, point *dest, point *grad, int nsites, float alpha)
     }
 }
 
-void
+static void
 gradient_method(const int j,
                 const int nsites,
                 const point *const old_sites,
@@ -59,7 +59,7 @@ gradient_method(const int j,
         local_sites[j] = boundary_cond(local_sites[j], deltax);
         init_edgelist(&local_edgelist);
         fortunes(local_sites, nsites, &local_edgelist);
-        float curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+        float curr_obj = calc_objective(local_sites, &local_edgelist, nsites);
         gradient[j].x = (curr_obj - prev_objective) / jiggle;
         free_edgelist(&local_edgelist);
         // reset for y
@@ -68,7 +68,7 @@ gradient_method(const int j,
         local_sites[j] = boundary_cond(local_sites[j], deltay);
         init_edgelist(&local_edgelist);
         fortunes(local_sites, nsites, &local_edgelist);
-        curr_obj = obj_function(local_sites, &local_edgelist, nsites);
+        curr_obj = calc_objective(local_sites, &local_edgelist, nsites);
         gradient[j].y = (curr_obj - prev_objective) / jiggle;
         free_edgelist(&local_edgelist);
 
@@ -76,7 +76,7 @@ gradient_method(const int j,
     }
 }
 
-float
+static float
 bb_formula(
     point *x_k1_pt, point *x_k_pt, point *g_k1_pt, point *g_k_pt, int nsites)
 {
@@ -117,7 +117,7 @@ calc_stats(struct edgelist *edgelist,
            int nsites)
 {
     *perimeter = calc_perimeter(edgelist);
-    *objective_function = obj_function(sites, edgelist, nsites);
+    *objective_function = calc_objective(sites, edgelist, nsites);
 }
 
 static void *
