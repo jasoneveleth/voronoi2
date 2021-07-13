@@ -9,7 +9,7 @@
 float
 obj_function(point *sites, struct edgelist *edgelist, int nsites)
 {
-    assert(options.obj > NOBJTYPES);
+    assert(options.obj > NOBJTYPES + 1); // validate, +1 bc sets start at 1
     if ((options.obj & REPULSION) && (options.obj & PERIMETER)) {
         float perimeter = calc_perimeter(edgelist);
         float repulsion_term = 0;
@@ -28,7 +28,7 @@ obj_function(point *sites, struct edgelist *edgelist, int nsites)
         (void)sites;  // unused
         (void)nsites; // unused
         return calc_perimeter(edgelist);
-    } 
+    }
     return -1.0f;
 }
 
