@@ -26,7 +26,7 @@ struct pthread_args {
     const char padding[4];
 };
 
-typedef void (*descent_func)(int, struct arrays, int, pthread_t *, point **);
+typedef void (*descent_func)(int, struct arrays, int, point **);
 
 void gradient_descent(struct arrays, int, const int);
 

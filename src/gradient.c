@@ -138,10 +138,9 @@ static void
 parallel_grad(point *grad,
               point *old_sites_ptr,
               size_t nsites,
-              pthread_t *thr,
-              float prev_objective,
-              float jiggle)
+              float prev_objective)
 {
+    pthread_t thr[NTHREADS];
     for (int j = 0; j < NTHREADS; j++) {
         struct pthread_args *thread_args = malloc(sizeof(struct pthread_args));
         thread_args->start = j * (int)nsites / NTHREADS;
@@ -149,7 +148,7 @@ parallel_grad(point *grad,
         thread_args->nsites = (int)nsites;
         thread_args->old_sites = old_sites_ptr;
         thread_args->gradient = grad;
-        thread_args->jiggle = jiggle;
+        thread_args->jiggle = options.jiggle;
         thread_args->prev_objective = prev_objective;
         pthread_create(&thr[j], NULL, calc_gradient, thread_args);
     }
@@ -161,7 +160,7 @@ parallel_grad(point *grad,
 }
 
 static void
-barzilai(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+barzilai(int i, struct arrays arr, int nsites, point *g[])
 {
     point *r_i = g[0], *r_im1 = g[1];
     point *x_km1 = &arr.sites[(i - 2) * nsites];
@@ -169,7 +168,7 @@ barzilai(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
     point *x_kp1 = &arr.sites[i * nsites];
     const float prev_obj = arr.objective_function[i - 1];
 
-    parallel_grad(r_i, x_k, (size_t)nsites, thr, prev_obj, options.jiggle);
+    parallel_grad(r_i, x_k, (size_t)nsites, prev_obj);
 
     if (i == 1) {
         arr.alpha[i] = options.alpha;
@@ -185,7 +184,7 @@ barzilai(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
 }
 
 static void
-conjugate(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+conjugate(int i, struct arrays arr, int nsites, point *g[])
 {
     // point *r_i = g[0], *r_im1 = g[1];
     // point *d_i = g[2], *d_im1 = g[3];
@@ -193,19 +192,18 @@ conjugate(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
     (void)i;
     (void)arr;
     (void)nsites;
-    (void)thr;
     (void)g;
 }
 
 static void
-constant_alpha(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
+constant_alpha(int i, struct arrays arr, int nsites, point *g[])
 {
     point *x_k1 = &arr.sites[(i - 1) * nsites];
     point *x_k = &arr.sites[i * nsites];
     point *r_i = g[0];
+    const float prev_obj = arr.objective_function[i - 1];
 
-    parallel_grad((size_t)nsites, thr, arr.objective_function[i - 1], x_k1,
-                  options.jiggle, r_i);
+    parallel_grad(r_i, x_k1, (size_t)nsites, prev_obj);
     arr.alpha[i] = options.alpha;
     update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
 }
@@ -219,14 +217,13 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
     g[1] = malloc(grad_size);
     g[2] = malloc(grad_size);
     g[3] = malloc(grad_size);
-    pthread_t thr[NTHREADS];
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
         if (i > 0) {
             assert(options.descent < NDESCENTTYPES); // validate enum
             descent_func jmp_table[NDESCENTTYPES] = {constant_alpha, barzilai,
                                                      conjugate};
-            jmp_table[options.descent](i, arr, nsites, thr, g);
+            jmp_table[options.descent](i, arr, nsites, g);
         }
 
         calc_stats(&arr.sites[i * nsites], &arr.linesegs[i * pts_per_trial],
