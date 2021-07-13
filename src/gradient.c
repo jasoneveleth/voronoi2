@@ -242,17 +242,24 @@ linesearch(point *x_k,
     // HARDCODE
     static const double c1 = 1e-4;
     static const double c2 = 0.1;
+    static const double gamma = 0.7; // backtracking
     double tmp_alpha = 1.0;
     while (1) {
         update_sites(x_k, potential_x, d, nsites, (float)tmp_alpha);
         double obj = (double)objective_function(potential_x, nsites);
         bool wolfe_cond1 = obj <= prev_obj + c1 * tmp_alpha * old_dot_prod;
-        if (wolfe_cond1) continue;
+        if (wolfe_cond1) {
+            tmp_alpha *= gamma;
+            continue;
+        }
 
         parallel_grad(new_grad, potential_x, (size_t)nsites, prev_obj_f);
         double new_dot_prod = -dot((float *)d, (float *)new_grad, nsites);
         bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
-        if (wolfe_cond2) continue;
+        if (wolfe_cond2) {
+            tmp_alpha *= gamma;
+            continue;
+        }
 
         break;
     }
