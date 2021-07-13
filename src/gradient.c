@@ -135,12 +135,12 @@ myprint(const char *format, ...)
 }
 
 static void
-parallel_grad(size_t nsites,
+parallel_grad(point *grad,
+              point *old_sites_ptr,
+              size_t nsites,
               pthread_t *thr,
               float prev_objective,
-              point *old_sites_ptr,
-              float jiggle,
-              point *grad)
+              float jiggle)
 {
     for (int j = 0; j < NTHREADS; j++) {
         struct pthread_args *thread_args = malloc(sizeof(struct pthread_args));
@@ -167,9 +167,9 @@ barzilai(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
     point *x_km1 = &arr.sites[(i - 2) * nsites];
     point *x_k = &arr.sites[(i - 1) * nsites];
     point *x_kp1 = &arr.sites[i * nsites];
+    const float prev_obj = arr.objective_function[i - 1];
 
-    parallel_grad((size_t)nsites, thr, arr.objective_function[i - 1], x_k,
-                  options.jiggle, r_i);
+    parallel_grad(r_i, x_k, (size_t)nsites, thr, prev_obj, options.jiggle);
 
     if (i == 1) {
         arr.alpha[i] = options.alpha;
@@ -177,6 +177,7 @@ barzilai(int i, struct arrays arr, int nsites, pthread_t *thr, point *g[])
         arr.alpha[i] = bb_formula(x_km1, x_k, r_im1, r_i, nsites);
     }
 
+    // x_kp1 = x_k + a * r_i
     update_sites(x_k, x_kp1, r_i, nsites, arr.alpha[i]);
 
     g[0] = r_im1;
