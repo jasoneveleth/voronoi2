@@ -28,11 +28,8 @@ obj_function(point *sites, struct edgelist *edgelist, int nsites)
         (void)sites;  // unused
         (void)nsites; // unused
         return calc_perimeter(edgelist);
-    } else {
-        fprintf(stderr, "\n%s:%d:%s: fatal error, options/logic wrong\n",
-                __FILE__, __LINE__, __func__);
-        exit(1);
     }
+    return -1.0f;
 }
 
 void
