@@ -9,7 +9,7 @@
 float
 obj_function(point *sites, struct edgelist *edgelist, int nsites)
 {
-    if (options.obj < NOBJTYPES) { RAISE("%s\n", "options/logic wrong"); }
+    assert(options.obj > NOBJTYPES);
     if ((options.obj & REPULSION) && (options.obj & PERIMETER)) {
         float perimeter = calc_perimeter(edgelist);
         float repulsion_term = 0;
@@ -28,7 +28,7 @@ obj_function(point *sites, struct edgelist *edgelist, int nsites)
         (void)sites;  // unused
         (void)nsites; // unused
         return calc_perimeter(edgelist);
-    }
+    } 
     return -1.0f;
 }
 
