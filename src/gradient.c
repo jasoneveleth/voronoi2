@@ -99,7 +99,7 @@ objective_function(point *sites, int nsites)
 }
 
 static void *
-wrapper(void *args_to_cast)
+calc_gradient(void *args_to_cast)
 {
     struct pthread_args *args = (struct pthread_args *)args_to_cast;
     if (options.gradient != FINITE_DIFFERENCE) {
@@ -156,7 +156,7 @@ parallel_grad(size_t nsites,
         thread_args->gradient = grad;
         thread_args->jiggle = jiggle;
         thread_args->prev_objective = prev_objective;
-        pthread_create(&thr[j], NULL, wrapper, thread_args);
+        pthread_create(&thr[j], NULL, calc_gradient, thread_args);
     }
     for (int j = 0; j < NTHREADS; j++) {
         void *args = NULL;
