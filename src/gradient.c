@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "gradient.h"
 #include <stdio.h>
+#include <assert.h>
+#include "gradient.h"
 
 static inline float
 obj_perimeter_and_repel(point *sites, struct edgelist *edgelist, int nsites)
@@ -236,8 +237,10 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
     pthread_t *thr = (pthread_t *)malloc(NTHREADS * sizeof(pthread_t));
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
-        if (i > 0) { // skip this the first time
-            descent_func descent[3] = {constant_alpha, barzilai, conjugate};
+        if (i > 0) {                                 // skip this the first time
+            assert(options.descent < NDESCENTTYPES); // validate enum
+            descent_func descent[NDESCENTTYPES] = {constant_alpha, barzilai,
+                                                   conjugate};
             descent[options.descent](i, arr, nsites, thr, g);
         } // <- skipped the first time
 

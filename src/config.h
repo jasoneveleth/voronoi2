@@ -24,6 +24,8 @@ enum __attribute__((packed)) objective_function
     // powers of 2, becuase it's a set
 };
 
+// *** IMPORTANT number of types ****** //
+#define NDESCENTTYPES 3
 enum __attribute__((packed)) descent_method
 {
     CONSTANT_ALPHA,
