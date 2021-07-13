@@ -41,41 +41,6 @@ update_sites(point *src, point *dest, point *grad, int nsites, float alpha)
     }
 }
 
-static void
-gradient_method(const int j,
-                const int nsites,
-                const point *const old_sites,
-                point *gradient,
-                const float jiggle,
-                const float prev_objective)
-{
-    if (options.gradient == FINITE_DIFFERENCE) {
-        const point deltax = {jiggle, 0.0f};
-        const point deltay = {0.0f, jiggle};
-        point *local_sites = malloc((size_t)nsites * sizeof(point));
-        memcpy(local_sites, old_sites, (size_t)nsites * sizeof(point));
-        struct edgelist local_edgelist;
-        // x
-        local_sites[j] = boundary_cond(local_sites[j], deltax);
-        init_edgelist(&local_edgelist);
-        fortunes(local_sites, nsites, &local_edgelist);
-        float curr_obj = calc_objective(local_sites, &local_edgelist, nsites);
-        gradient[j].x = (curr_obj - prev_objective) / jiggle;
-        free_edgelist(&local_edgelist);
-        // reset for y
-        local_sites[j] = old_sites[j];
-        // y
-        local_sites[j] = boundary_cond(local_sites[j], deltay);
-        init_edgelist(&local_edgelist);
-        fortunes(local_sites, nsites, &local_edgelist);
-        curr_obj = calc_objective(local_sites, &local_edgelist, nsites);
-        gradient[j].y = (curr_obj - prev_objective) / jiggle;
-        free_edgelist(&local_edgelist);
-
-        free(local_sites);
-    }
-}
-
 static float
 bb_formula(
     point *x_k1_pt, point *x_k_pt, point *g_k1_pt, point *g_k_pt, int nsites)
@@ -125,8 +90,30 @@ wrapper(void *args_to_cast)
 {
     struct pthread_args *args = (struct pthread_args *)args_to_cast;
     for (int i = args->start; i < args->end; i++) {
-        gradient_method(i, args->nsites, args->old_sites, args->gradient,
-                        args->jiggle, args->prev_objective);
+    if (options.gradient == FINITE_DIFFERENCE) {
+        const point deltax = {args->jiggle, 0.0f};
+        const point deltay = {0.0f, args->jiggle};
+        point *local_sites = malloc((size_t)args->nsites * sizeof(point));
+        memcpy(local_sites, args->old_sites, (size_t)args->nsites * sizeof(point));
+        struct edgelist local_edgelist;
+        // x
+        local_sites[i] = boundary_cond(local_sites[i], deltax);
+        init_edgelist(&local_edgelist);
+        fortunes(local_sites, args->nsites, &local_edgelist);
+        float curr_obj = calc_objective(local_sites, &local_edgelist, args->nsites);
+        args->gradient[i].x = (curr_obj - args->prev_objective) / args->jiggle;
+        free_edgelist(&local_edgelist);
+        // reset for y
+        local_sites[i] = args->old_sites[i];
+        // y
+        local_sites[i] = boundary_cond(local_sites[i], deltay);
+        init_edgelist(&local_edgelist);
+        fortunes(local_sites, args->nsites, &local_edgelist);
+        curr_obj = calc_objective(local_sites, &local_edgelist, args->nsites);
+        args->gradient[i].y = (curr_obj - args->prev_objective) / args->jiggle;
+        free_edgelist(&local_edgelist);
+
+        free(local_sites);
     }
     return args_to_cast;
 }
