@@ -53,15 +53,10 @@ bb_formula(
     float *g_k1 = (float *)g_k1_pt;
     float *g_k = (float *)g_k_pt;
     // https://bicmr.pku.edu.cn/~wenzw/courses/WenyuSun_YaxiangYuan_BB.pdf
-    //       (x_k - x_{k-1}) dot (x_k - x_{k-1})
-    // res = -----------------------------------
-    //       (x_k - x_{k-1}) dot (g_k - g_{k-1})
+    //       (x_k - x_{k-1}) dot (x_k - x_{k-1})             s_{k-1} dot s_{k-1}
+    // res = -----------------------------------  OR   res = -------------------
+    //       (x_k - x_{k-1}) dot (g_k - g_{k-1})             s_{k-1} dot y_{k-1}
     //
-    // AKA
-    //
-    //       s_{k-1} dot s_{k-1}
-    // res = -------------------
-    //       s_{k-1} dot y_{k-1}
 
     double numerator = 0;
     double denominator = 0;
