@@ -89,18 +89,22 @@ static void *
 wrapper(void *args_to_cast)
 {
     struct pthread_args *args = (struct pthread_args *)args_to_cast;
+    if (options.gradient != FINITE_DIFFERENCE) {
+        RAISE("%s\n", "unknown gradient method");
+    }
     for (int i = args->start; i < args->end; i++) {
-    if (options.gradient == FINITE_DIFFERENCE) {
         const point deltax = {args->jiggle, 0.0f};
         const point deltay = {0.0f, args->jiggle};
         point *local_sites = malloc((size_t)args->nsites * sizeof(point));
-        memcpy(local_sites, args->old_sites, (size_t)args->nsites * sizeof(point));
+        memcpy(local_sites, args->old_sites,
+               (size_t)args->nsites * sizeof(point));
         struct edgelist local_edgelist;
         // x
         local_sites[i] = boundary_cond(local_sites[i], deltax);
         init_edgelist(&local_edgelist);
         fortunes(local_sites, args->nsites, &local_edgelist);
-        float curr_obj = calc_objective(local_sites, &local_edgelist, args->nsites);
+        float curr_obj =
+            calc_objective(local_sites, &local_edgelist, args->nsites);
         args->gradient[i].x = (curr_obj - args->prev_objective) / args->jiggle;
         free_edgelist(&local_edgelist);
         // reset for y
