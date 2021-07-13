@@ -221,14 +221,14 @@ linesearch(point *x_k,
 {
     //            obj        prev_obj               old_grad
     //        v-----------v    v--v                v---------v
-    // >>>>>> f (x + a * d) <= f(x) + c1 * a * d^T \nabla f(x)
+    // >>     f (x + a * d) <= f(x) + c1 * a * d^T \nabla f(x)
     //          ^---------^                    ^-------------^
     //          potential_x                     old_dot_prod
     //
     //
     //              new_dot_prod                    old_grad
     //        v----------------------v             v---------v
-    // >>>>>> -d^T \nabla f (x + a * d) <= -c2 d^T \nabla f(x)
+    // >>     -d^T \nabla f (x + a * d) <= -c2 d^T \nabla f(x)
     //                      ^---------^        ^-------------^
     //                      potential_x          old_dot_prod
     //             ^------------------^
