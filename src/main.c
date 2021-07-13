@@ -244,9 +244,9 @@ big_func()
     size_t nsites;
     file2sites(options.filepath, (point **)&arrs.sites, &nsites);
     size_t pts_per_trial = (3 * nsites - 6) * (2);
-    size_t size_of_linsegs = options.ntrials * pts_per_trial;
+    size_t num_of_linsegs = options.ntrials * pts_per_trial;
 
-    arrs.linesegs = calloc(1, size_of_linsegs * sizeof(point));
+    arrs.linesegs = calloc(num_of_linsegs, sizeof(point));
     arrs.objective_function = malloc(options.ntrials * sizeof(float));
     arrs.perimeter = malloc(options.ntrials * sizeof(float));
     arrs.alpha = malloc(options.ntrials * sizeof(float));
