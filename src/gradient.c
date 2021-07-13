@@ -103,9 +103,9 @@ calc_gradient(void *args_to_cast)
     for (int i = args->start; i < args->end; i++) {
         const point deltax = {args->jiggle, 0.0f};
         const point deltay = {0.0f, args->jiggle};
-        point *local_sites = malloc((size_t)args->nsites * sizeof(point));
-        memcpy(local_sites, args->old_sites,
-               (size_t)args->nsites * sizeof(point));
+        size_t sites_size = (size_t)args->nsites * sizeof(point);
+        point *local_sites = malloc(sites_size);
+        memcpy(local_sites, args->old_sites, sites_size);
         // x
         local_sites[i] = boundary_cond(local_sites[i], deltax);
         float curr_obj = objective_function(local_sites, args->nsites);
