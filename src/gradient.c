@@ -162,6 +162,7 @@ parallel_grad(point *grad,
 static void
 barzilai(int i, struct arrays arr, int nsites, point *g[])
 {
+    if (i == 0) return;
     point *r_i = g[0], *r_im1 = g[1];
     point *x_km1 = &arr.sites[(i - 2) * nsites];
     point *x_k = &arr.sites[(i - 1) * nsites];
@@ -245,10 +246,12 @@ linesearch(point *x_k,
     static const double gamma = 0.7; // backtracking
     double tmp_alpha = 1.0;
     while (1) {
+        assert(tmp_alpha > 1e-10); // make sure it's not gotten tiny
         update_sites(x_k, potential_x, d, nsites, (float)tmp_alpha);
         double obj = (double)objective_function(potential_x, nsites);
         bool wolfe_cond1 = obj <= prev_obj + c1 * tmp_alpha * old_dot_prod;
-        if (wolfe_cond1) {
+        puts(wolfe_cond1 ? "1true" : "1false");
+        if (!wolfe_cond1) {
             tmp_alpha *= gamma;
             continue;
         }
@@ -256,7 +259,8 @@ linesearch(point *x_k,
         parallel_grad(new_grad, potential_x, (size_t)nsites, prev_obj_f);
         double new_dot_prod = -dot((float *)d, (float *)new_grad, nsites);
         bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
-        if (wolfe_cond2) {
+        puts(wolfe_cond2 ? "2true" : "2false");
+        if (!wolfe_cond2) {
             tmp_alpha *= gamma;
             continue;
         }
@@ -269,26 +273,39 @@ linesearch(point *x_k,
 static void
 conjugate(int i, struct arrays arr, int nsites, point *g[])
 {
+    if (i == 0) return;
     point *r_im1 = g[0], *r_i = g[1];
     point *d_im1 = g[2], *d_i = g[3];
     point *x_im1 = &arr.sites[(i - 1) * nsites];
     point *x_i = &arr.sites[i * nsites];
     const float prev_obj = arr.objective_function[i - 1];
 
-    // x_i = x_m1 + d_im1 * argmin_a[f(x_im1 + a * d_im1)]
-    linesearch(x_im1, x_i, d_im1, nsites, &arr.alpha[i], prev_obj);
+    if (i == 1) {
+        arr.alpha[i] = options.alpha;
+        parallel_grad(d_i, x_im1, (size_t)nsites, prev_obj);
+        update_sites(x_im1, x_i, d_i, nsites, arr.alpha[i]);
+        memcpy(r_i, d_i, (size_t)nsites * sizeof(point));
+    } else {
+        // x_i = x_m1 + d_im1 * argmin_a[f(x_im1 + a * d_im1)]
+        linesearch(x_im1, x_i, d_im1, nsites, &arr.alpha[i], prev_obj);
+        parallel_grad(r_i, x_i, (size_t)nsites, prev_obj);
 
-    parallel_grad(r_i, x_i, (size_t)nsites, prev_obj);
+        float beta = polakribiere(r_im1, r_i, nsites);
+        beta = beta > 0 ? beta : 0;
 
-    float beta = polakribiere(r_im1, r_i, nsites);
-    beta = beta > 0 ? beta : 0;
+        update_sites(r_i, d_i, d_im1, nsites, beta);
+    }
 
-    update_sites(r_i, d_i, d_im1, nsites, beta);
+    g[0] = r_i;
+    g[1] = r_im1;
+    g[2] = d_i;
+    g[3] = d_im1;
 }
 
 static void
 constant_alpha(int i, struct arrays arr, int nsites, point *g[])
 {
+    if (i == 0) return;
     point *x_k1 = &arr.sites[(i - 1) * nsites];
     point *x_k = &arr.sites[i * nsites];
     point *r_i = g[0];
@@ -302,27 +319,19 @@ constant_alpha(int i, struct arrays arr, int nsites, point *g[])
 void
 gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
 {
-    point *g[4] = {NULL, NULL, NULL, NULL};
+    // stores 4 gradient vectors in case they are needed by a descent method
+    point *g[NGRADIENT_VECS] = {NULL, NULL, NULL, NULL};
     size_t grad_size = (size_t)nsites * sizeof(point);
-    g[0] = malloc(grad_size);
-    g[1] = malloc(grad_size);
-    g[2] = malloc(grad_size);
-    g[3] = malloc(grad_size);
+    for (int i = 0; i < NGRADIENT_VECS; i++) g[i] = malloc(grad_size);
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
-        if (i > 0) {
-            assert(options.descent < NDESCENTTYPES); // validate enum
-            descent_func jmp_table[NDESCENTTYPES] = {constant_alpha, barzilai,
-                                                     conjugate};
-            jmp_table[options.descent](i, arr, nsites, g);
-        }
-
+        assert(options.descent < NDESCENTTYPES); // validate enum
+        const static descent_func jmp_table[NDESCENTTYPES] = {
+            constant_alpha, barzilai, conjugate};
+        jmp_table[options.descent](i, arr, nsites, g);
         calc_stats(&arr.sites[i * nsites], &arr.linesegs[i * pts_per_trial],
                    &arr.perimeter[i], &arr.objective_function[i], nsites);
     }
     myprint("\r");
-    free(g[0]);
-    free(g[1]);
-    free(g[2]);
-    free(g[3]);
+    for (int i = 0; i < NGRADIENT_VECS; i++) free(g[i]);
 }

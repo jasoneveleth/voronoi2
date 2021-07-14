@@ -3,6 +3,8 @@
 
 #include "fortunes.h"
 
+#define NGRADIENT_VECS 4
+
 struct arrays {
     point *linesegs;
     point *sites;
