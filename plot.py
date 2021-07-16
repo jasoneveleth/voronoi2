@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import matplotlib.collections
 import matplotlib.animation
 import matplotlib.pyplot as plt
@@ -49,7 +50,7 @@ def render():
     linesegs = linesegs.reshape(linesegs_shape)
     edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
 
-    nframes = int(np.sum(alpha) / 3e-3)
+    nframes = int(math.fsum(alpha) / 3e-3)
     graph_len = sites.shape[0]
 
     fig, axs = plt.subplots(nrows=4, ncols=2)
@@ -93,11 +94,9 @@ def render():
         pass
 
     def animate(frame_num):
-        acc = 0
         counter = 0
-        for a in alpha:
-            acc += a
-            if (acc > 3e-3 * frame_num):
+        for i,_ in enumerate(alpha):
+            if (math.fsum(alpha[:i+1]) > 3e-3 * frame_num):
                 break
             counter += 1
 
