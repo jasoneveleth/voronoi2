@@ -162,6 +162,8 @@ parallel_grad(point *grad,
 static void
 barzilai(int i, struct arrays arr, int nsites, point *g[])
 {
+    static float max_alpha = 1e-6f;
+    static float min_alpha = 2e-2f;
     if (i == 0) return;
     point *r_i = g[0], *r_im1 = g[1];
     point *x_km1 = &arr.sites[(i - 2) * nsites];
@@ -172,9 +174,11 @@ barzilai(int i, struct arrays arr, int nsites, point *g[])
     parallel_grad(r_i, x_k, (size_t)nsites, prev_obj);
 
     if (i == 1) {
-        arr.alpha[i] = options.alpha;
+        arr.alpha[i] = 1e-8f;
     } else {
         arr.alpha[i] = bb_formula(x_km1, x_k, r_im1, r_i, nsites);
+        arr.alpha[i] = arr.alpha[i] < max_alpha ? max_alpha : arr.alpha[i];
+        arr.alpha[i] = arr.alpha[i] < min_alpha ? arr.alpha[i] : min_alpha;
     }
 
     // x_kp1 = x_k + a * r_i
