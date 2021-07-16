@@ -41,8 +41,8 @@ def render():
     char_max_length = arr('char_max_length')
     char_min_length = arr('char_min_length')
     objfunc = arr('objective_function')
-    edgedist = arr('edgehist', dtype='int32')
-    earthmover = arr('earthmover', dtype='int32')
+    edgedist = arr('edgehist')
+    earthmover = arr('earthmover')
     alpha = arr('alpha')
 
     sites = sites.reshape((-1, nsites, 2))

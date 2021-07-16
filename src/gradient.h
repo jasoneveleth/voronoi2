@@ -12,8 +12,8 @@ struct arrays {
     float *objective_function;
     float *char_max_length;
     float *char_min_length;
-    int *edgehist;
-    int *earthmover;
+    float *edgehist;
+    float *earthmover;
     float *alpha;
 };
 

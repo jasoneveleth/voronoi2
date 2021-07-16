@@ -77,16 +77,16 @@ binary_write(const char *const path, void *const buf, const size_t length)
 }
 
 static void
-calc_earth_mover(size_t nbins, int *earthmover, int *edgehist, int i)
+calc_earth_mover(size_t nbins, float *earthmover, float *edgehist, int i)
 {
     if (i > 0) {
-        int *old_hist = &edgehist[(i - 1) * (int)nbins];
-        int *new_hist = &edgehist[i * (int)nbins];
-        int total = 0;
-        int ith = 0;
+        float *old_hist = &edgehist[(i - 1) * (int)nbins];
+        float *new_hist = &edgehist[i * (int)nbins];
+        float total = 0;
+        float ith = 0;
         for (int j = 1; j < (int)nbins; j++) {
             ith = old_hist[j] + ith - new_hist[j];
-            total += abs(ith);
+            total += fabsf(ith);
         }
         earthmover[i] = total;
     } else {
@@ -98,8 +98,8 @@ static void
 calc_edge_length(struct point *linesegs,
                  float *max,
                  float *min,
-                 int *edgehist,
-                 int *earthmover,
+                 float *edgehist,
+                 float *earthmover,
                  size_t ntrials,
                  size_t nsites)
 {
@@ -109,16 +109,27 @@ calc_edge_length(struct point *linesegs,
     for (size_t i = 0; i < ntrials; i++) {
         max[i] = 0.0f;
         min[i] = 1.0f / 0.0f;
+        size_t edges_count = 0;
         for (size_t j = 0; j < nedges; j++) {
             float x1 = linesegs[i * 2 * nedges + j * 2].x;
             float y1 = linesegs[i * 2 * nedges + j * 2].y;
             float x2 = linesegs[i * 2 * nedges + j * 2 + 1].x;
             float y2 = linesegs[i * 2 * nedges + j * 2 + 1].y;
-            float dist = sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-            edgehist[i * nbins + (size_t)(dist * (float)nsites)]++;
-            if (dist > max[i]) max[i] = dist;
-            if (dist < min[i]) min[i] = dist;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+            if (x1 == 0 && x2 == 0 && y1 == 0 && y2 == 0) {
+#pragma GCC diagnostic pop
+                edges_count++;
+            } else {
+                float dist =
+                    sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+                edgehist[i * nbins + (size_t)(dist * (float)nsites)] += 1.0f;
+                if (dist > max[i]) max[i] = dist;
+                if (dist < min[i]) min[i] = dist;
+            }
         }
+        for (size_t k = 0; k < nbins; k++)
+            edgehist[i * nbins + k] *= 1.0f / (float)(nedges - edges_count);
         calc_earth_mover(nbins, earthmover, edgehist, (int)i);
     }
 }
@@ -175,7 +186,7 @@ calc_arrays(void)
     arrs.linesegs = from_file("output/edges", &nbytes);
     edges2linesegs(arrs.linesegs, nbytes, nsites);
 
-    arrs.edgehist = calloc(1, size_of_edgehist * sizeof(float));
+    arrs.edgehist = calloc(size_of_edgehist, sizeof(float));
     arrs.earthmover = malloc(options.ntrials * sizeof(float));
     arrs.char_max_length = malloc(options.ntrials * sizeof(float));
     arrs.char_min_length = malloc(options.ntrials * sizeof(float));
