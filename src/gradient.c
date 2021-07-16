@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
@@ -330,7 +331,7 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
         assert(options.descent < NDESCENTTYPES); // validate enum
-        const static descent_func jmp_table[NDESCENTTYPES] = {
+        static const descent_func jmp_table[NDESCENTTYPES] = {
             constant_alpha, barzilai, conjugate};
         jmp_table[options.descent](i, arr, nsites, g);
         calc_stats(&arr.sites[i * nsites], &arr.linesegs[i * pts_per_trial],
