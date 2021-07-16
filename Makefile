@@ -35,19 +35,24 @@ endif
 SRC := $(wildcard src/*.c)
 OBJ := $(SRC:.c=.o)
 ONLY_FORMAT := $(wildcard src/*.h) tests/heap_test.c
+OUTPUTDIR := output
 
-.PHONY: all format clean test dirs run
+.PHONY: all format clean test run
 
 all: format voronoi
 
 # the leading '-' keeps make from aborting if this fails
 format:
-	-command -v clang-format >/dev/null 2>&1 && clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
+	-clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
 
 %.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@
 
-voronoi: $(OBJ)
+# the leading '@' means don't echo the command
+$(OUTPUTDIR):
+	@mkdir -p $@
+
+voronoi: $(OBJ) | $(OUTPUTDIR)
 	$(CC) $(FLAGS) $(LINKER) $(MATH) $^ -o $@
 
 tests/heap_test: tests/heap_test.c src/heap.o
@@ -62,7 +67,6 @@ clean:
 	rm -rf tests/*.dSYM
 	rm -f $(OBJ) *.gif output/*
 
-# env PYTHONMALLOC=malloc valgrind python main.py
 run: voronoi
 	$(PYTHON) plot.py -g 100
 	voronoi -n 100
