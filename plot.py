@@ -49,7 +49,8 @@ def render():
     linesegs = linesegs.reshape(linesegs_shape)
     edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
 
-    nframes = sites.shape[0]
+    nframes = int(np.sum(alpha) / 3e-3)
+    graph_len = sites.shape[0]
 
     fig, axs = plt.subplots(nrows=4, ncols=2)
     fig.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97, wspace=0.3, hspace=0.3)
@@ -59,7 +60,7 @@ def render():
     axs[3, 1].remove()
     diagram_ax = fig.add_subplot(4, 2, (6, 8), aspect='equal')
 
-    setup_ax(axs[0, 0], 'perimeter', (1, nframes), (0, (4/3)*np.max(perimeters)))
+    setup_ax(axs[0, 0], 'perimeter', (1, graph_len), (0, (4/3)*np.max(perimeters)))
     perimeter_line, = axs[0, 0].plot([], [], lw=3) # the comma unpacks the tuple
 
     setup_ax(diagram_ax, 'voronoi diagram', (0, 1), (0, 1))
@@ -67,11 +68,11 @@ def render():
     diagram_ax.add_collection(edge_line_coll)
     sites_line, = diagram_ax.plot([], [], 'ro', ms=5)
 
-    setup_ax(axs[0, 1], 'longest edge and shortest edge (characteristic length)', (1, nframes), (0, (4/3)*np.max(char_max_length)))
+    setup_ax(axs[0, 1], 'longest edge and shortest edge (characteristic length)', (1, graph_len), (0, (4/3)*np.max(char_max_length)))
     char_len_max_line, = axs[0, 1].plot([], [], lw=3)
     char_len_min_line, = axs[0, 1].plot([], [], lw=3)
 
-    setup_ax(axs[1, 0], 'earth mover distance', (1, nframes), (0, (4/3) * np.max(earthmover)))
+    setup_ax(axs[1, 0], 'earth mover distance', (1, graph_len), (0, (4/3) * np.max(earthmover)))
     earthmover_line, = axs[1,0].plot([], [], lw=3)
 
     view = 5/np.sqrt(nsites)
@@ -81,17 +82,26 @@ def render():
     x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
     edge_dist_bars = axs[1,1].bar(x, edgedist[0], width=(1/sites.shape[1]), align='edge')
 
-    setup_ax(axs[2, 0], 'objective function', (1, nframes), (0, (4/3)*np.max(objfunc)))
+    setup_ax(axs[2, 0], 'objective function', (1, graph_len), (0, (4/3)*np.max(objfunc)))
     objectivefunction_line, = axs[2,0].plot([], [], lw=3)
 
-    setup_ax(axs[3,0], 'alpha', (1, nframes), (0, 1))
+    setup_ax(axs[3,0], 'alpha', (1, graph_len), (0, 1))
     alpha_line, = axs[3,0].plot([], [], lw=3)
 
     # dumb but needed
     def init():
         pass
 
-    def animate(trial_num):
+    def animate(frame_num):
+        acc = 0
+        counter = 0
+        for a in alpha:
+            acc += a
+            if (acc > 3e-3 * frame_num):
+                break
+            counter += 1
+
+        trial_num = counter
         end = trial_num + 1 # +1 because end is not included in range
         for i, b in enumerate(edge_dist_bars):
             b.set_height(edgedist[trial_num][i])
