@@ -43,7 +43,7 @@ all: format voronoi
 
 # the leading '-' keeps make from aborting if this fails
 format:
-	-clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
+	@-clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
 
 %.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@
