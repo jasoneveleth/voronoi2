@@ -262,7 +262,7 @@ linesearch(point *x_k,
         }
 
         parallel_grad(new_grad, potential_x, (size_t)nsites, prev_obj_f);
-        double new_dot_prod = -dot((float *)d, (float *)new_grad, nsites);
+        double new_dot_prod = -dot((float *)d, (float *)new_grad, 2 * nsites);
         bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
         puts(wolfe_cond2 ? "2true" : "2false");
         if (!wolfe_cond2) {
