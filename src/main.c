@@ -113,7 +113,7 @@ calc_edge_length(struct point *linesegs,
     size_t nedges = 3 * nsites - 6;
     for (size_t i = 0; i < ntrials; i++) {
         max[i] = 0.0f;
-        min[i] = 1.0f / 0.0f;
+        min[i] = INFINITY;
         size_t edges_count = 0;
         for (size_t j = 0; j < nedges; j++) {
             float x1 = linesegs[i * 2 * nedges + j * 2].x;
