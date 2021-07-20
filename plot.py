@@ -32,7 +32,7 @@ def setup_ax(ax, title, xlim, ylim):
 def arr(filename, dtype='float32'):
     return np.fromfile('output/' + filename, dtype=dtype);
 
-def render():
+def render(speed=0):
     nsites = len(open('input').readlines())
     linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
 
@@ -50,8 +50,10 @@ def render():
     linesegs = linesegs.reshape(linesegs_shape)
     edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
 
-    nframes = int(math.fsum(alpha) / 3e-3)
     graph_len = sites.shape[0]
+    nframes = graph_len
+    if speed != 0:
+        nframes = int(math.fsum(alpha) / speed)
 
     fig, axs = plt.subplots(nrows=4, ncols=2)
     fig.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97, wspace=0.3, hspace=0.3)
@@ -94,13 +96,16 @@ def render():
         pass
 
     def animate(frame_num):
-        counter = 0
-        for i,_ in enumerate(alpha):
-            if (math.fsum(alpha[:i+1]) > 3e-3 * frame_num):
-                break
-            counter += 1
+        trial_num = frame_num
+        if speed != 0:
+            counter = 0
+            for i,_ in enumerate(alpha):
+                if (math.fsum(alpha[:i+1]) > speed * frame_num):
+                    break
+                counter += 1
+            myprint(f'sum: {math.fsum(alpha[:counter+1])}, goal: {speed * frame_num} ')
+            trial_num = counter
 
-        trial_num = counter
         end = trial_num + 1 # +1 because end is not included in range
         for i, b in enumerate(edge_dist_bars):
             b.set_height(edgedist[trial_num][i])
@@ -145,4 +150,5 @@ elif args.testing:
     test()
 else:
     render()
+    # render(speed=3e-3)
 
