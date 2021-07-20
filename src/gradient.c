@@ -194,10 +194,10 @@ polakribiere(point *r_im1_pt, point *r_i_pt, int nsites)
 {
     float *r_im1 = (float *)r_im1_pt;
     float *r_i = (float *)r_i_pt;
-    // https://bicmr.pku.edu.cn/~wenzw/courses/WenyuSun_YaxiangYuan_BB.pdf
+    // https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method
     //       r_i^T (r_i - r_{i-1})
     // res = ---------------------
-    //          r_i^T r_{i-1}
+    //          r_{i-1}^T r_{i-1}
 
     double numerator = 0;
     double denominator = 0;
