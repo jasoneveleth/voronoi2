@@ -350,15 +350,23 @@ main(int argc, char **argv)
             break;
 
         case 'd':
-            if (optarg[0] == 'c') {
-                options.descent = CONSTANT_ALPHA;
-            } else if (optarg[0] == 'b') {
-                options.descent = BARZILAI;
-            } else if (optarg[0] == 'j') {
-                options.descent = CONJUGATE;
-            } else {
+            if (strchr("bcjs", optarg[0]) == NULL) {
                 usage(argv[0], optopt);
                 return EXIT_FAILURE;
+            }
+            switch (optarg[0]) {
+            case 'c':
+                options.descent = CONSTANT_ALPHA;
+                break;
+            case 'b':
+                options.descent = BARZILAI;
+                break;
+            case 'j':
+                options.descent = CONJUGATE;
+                break;
+            case 's':
+                options.descent = STEEPEST;
+                break;
             }
             break;
 

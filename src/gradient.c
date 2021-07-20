@@ -321,6 +321,22 @@ constant_alpha(int i, struct arrays arr, int nsites, point *g[])
     update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
 }
 
+static void
+steepest_descent(int i, struct arrays arr, int nsites, point *g[])
+{
+    if (i == 0) return;
+    point *x_k1 = &arr.sites[(i - 1) * nsites];
+    point *x_k = &arr.sites[i * nsites];
+    point *r_i = g[0];
+    const float prev_obj = arr.objective_function[i - 1];
+
+    parallel_grad(r_i, x_k1, (size_t)nsites, prev_obj);
+    // x_k = x_k1 + r_i * argmin_a[f(x_k1 + a * r_i)]
+    linesearch(x_k1, x_k, r_i, nsites, &arr.alpha[i], prev_obj);
+
+    update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
+}
+
 void
 gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
 {
@@ -332,7 +348,7 @@ gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
         myprint("\rdescent trial: %d ", i);
         assert(options.descent < NDESCENTTYPES); // validate enum
         static const descent_func jmp_table[NDESCENTTYPES] = {
-            constant_alpha, barzilai, conjugate};
+            constant_alpha, barzilai, conjugate, steepest_descent};
         jmp_table[options.descent](i, arr, nsites, g);
         calc_stats(&arr.sites[i * nsites], &arr.linesegs[i * pts_per_trial],
                    &arr.perimeter[i], &arr.objective_function[i], nsites);

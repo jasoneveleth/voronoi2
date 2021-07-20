@@ -26,12 +26,13 @@ enum __attribute__((packed)) objective_function
     // powers of 2, becuase it's a set
 };
 
-#define NDESCENTTYPES 3
+#define NDESCENTTYPES 4
 enum __attribute__((packed)) descent_method
 {
     CONSTANT_ALPHA,
     BARZILAI,
     CONJUGATE,
+    STEEPEST,
 };
 
 enum __attribute__((packed)) gradient_method
