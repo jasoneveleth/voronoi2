@@ -193,6 +193,7 @@ calc_arrays(void)
 
     calc_edge_length(arrs.linesegs, arrs.char_max_length, arrs.char_min_length,
                      arrs.edgehist, arrs.earthmover, options.ntrials, nsites);
+    free(arrs.linesegs);
 
     nbytes = sizeof(arrs.char_max_length[0]) * options.ntrials;
     binary_write("output/char_max_length", arrs.char_max_length, nbytes);
@@ -253,7 +254,7 @@ big_func()
 {
     struct arrays arrs;
     size_t nsites;
-    file2sites(options.filepath, (point **)&arrs.sites, &nsites);
+    file2sites(options.filepath, &arrs.sites, &nsites);
     size_t pts_per_trial = (3 * nsites - 6) * (2);
     size_t num_of_linsegs = options.ntrials * pts_per_trial;
 
