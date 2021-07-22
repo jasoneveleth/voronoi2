@@ -190,10 +190,8 @@ barzilai(int i, struct arrays arr, int nsites, point *g[])
 }
 
 static float
-polakribiere(point *r_im1_pt, point *r_i_pt, int nsites)
+polakribiere(float *r_im1, float *r_i, size_t len)
 {
-    float *r_im1 = (float *)r_im1_pt;
-    float *r_i = (float *)r_i_pt;
     // https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method
     //       r_i^T (r_i - r_{i-1})
     // res = ---------------------
@@ -201,7 +199,7 @@ polakribiere(point *r_im1_pt, point *r_i_pt, int nsites)
 
     double numerator = 0;
     double denominator = 0;
-    for (int i = 0; i < 2 * nsites; i++) {
+    for (size_t i = 0; i < len; i++) {
         double r_i_ele = (double)r_i[i], r_im1_ele = (double)r_im1[i];
         numerator += r_i_ele * (r_i_ele - r_im1_ele);
         denominator += r_im1_ele * r_im1_ele;
@@ -275,36 +273,67 @@ linesearch(point *x_k,
     *alpha = (float)tmp_alpha;
 }
 
+static inline void
+add(float *a, float *b, size_t len)
+{
+    for (size_t i = 0; i < len; i++) { a[i] += b[i]; }
+}
+
+static inline void
+scale(float *a, size_t len, float c)
+{
+    for (size_t i = 0; i < len; i++) { a[i] *= c; }
+}
+
+static inline void
+copy(float *a, float *b, size_t len)
+{
+    for (size_t i = 0; i < len; i++) { a[i] = b[i]; }
+}
+
 static void
 conjugate(int i, struct arrays arr, int nsites, point *g[])
 {
-    if (i == 0) return;
-    point *r_im1 = g[0], *r_i = g[1];
-    point *d_im1 = g[2], *d_i = g[3];
-    point *x_im1 = &arr.sites[(i - 1) * nsites];
-    point *x_i = &arr.sites[i * nsites];
-    const float prev_obj = arr.objective_function[i - 1];
+    float *r_im1 = (float *)g[0], *r_i = (float *)g[1];
+    float *d_im1 = (float *)g[2], *d_i = (float *)g[3];
+    float *x_im1 = (float *)&arr.sites[(i - 1) * nsites];
+    float *x_i = (float *)&arr.sites[i * nsites];
+    const float prev_obj = i > 0 ? arr.objective_function[i - 1]
+                                 : objective_function((point *)x_i, nsites);
+    size_t len = (size_t)nsites * 2;
 
-    if (i == 1) {
+    if (i == 0) {
         arr.alpha[i] = options.alpha;
-        parallel_grad(d_i, x_im1, (size_t)nsites, prev_obj);
-        update_sites(x_im1, x_i, d_i, nsites, arr.alpha[i]);
-        memcpy(r_i, d_i, (size_t)nsites * sizeof(point));
+        parallel_grad((point *)d_i, (point *)x_i, (size_t)nsites, prev_obj);
+        scale(d_i, len, -1.0f);
+        copy(r_i, d_i, len);
     } else {
-        // x_i = x_m1 + d_im1 * argmin_a[f(x_im1 + a * d_im1)]
-        linesearch(x_im1, x_i, d_im1, nsites, &arr.alpha[i], prev_obj);
-        parallel_grad(r_i, x_i, (size_t)nsites, prev_obj);
+        // a = argmin_a[f(x_im1 + a * d_im1)]
+        linesearch((point *)x_im1, (point *)x_i, (point *)d_im1, nsites,
+                   &arr.alpha[i], prev_obj);
 
-        float beta = polakribiere(r_im1, r_i, nsites);
+        // x_i = x_im1 + a * d_im1
+        update_sites((point *)x_im1, (point *)x_i, (point *)d_im1, nsites,
+                     arr.alpha[i]);
+
+        // r_i = - \nabla f(x_i)
+        parallel_grad((point *)r_i, (point *)x_i, (size_t)nsites, prev_obj);
+        scale(r_i, len, -1.0f);
+
+        // b = max(polak_ribiere, 0)
+        float beta = polakribiere(r_im1, r_i, len);
         beta = beta > 0 ? beta : 0;
 
-        update_sites(r_i, d_i, d_im1, nsites, beta);
+        // d_i = r_i + b * d_im1
+        copy(d_i, d_im1, len);
+        scale(d_i, len, beta);
+        add(d_i, r_i, len);
     }
 
-    g[0] = r_i;
-    g[1] = r_im1;
-    g[2] = d_i;
-    g[3] = d_im1;
+    g[0] = (point *)r_i;
+    g[1] = (point *)r_im1;
+    g[2] = (point *)d_i;
+    g[3] = (point *)d_im1;
 }
 
 static void
@@ -331,7 +360,7 @@ steepest_descent(int i, struct arrays arr, int nsites, point *g[])
     const float prev_obj = arr.objective_function[i - 1];
 
     parallel_grad(r_i, x_k1, (size_t)nsites, prev_obj);
-    // x_k = x_k1 + r_i * argmin_a[f(x_k1 + a * r_i)]
+    // a = argmin_a[f(x_k1 + a * r_i)]
     linesearch(x_k1, x_k, r_i, nsites, &arr.alpha[i], prev_obj);
 
     update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
