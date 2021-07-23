@@ -32,6 +32,59 @@ def setup_ax(ax, title, xlim, ylim):
 def arr(filename, dtype='float32'):
     return np.fromfile('output/' + filename, dtype=dtype);
 
+def just_diagram(speed=0):
+    nsites = len(open('input').readlines())
+    linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
+
+    sites = arr('sites')
+    linesegs = arr('linesegs')
+    edgedist = arr('edgehist')
+    alpha = arr('alpha')
+
+    sites = sites.reshape((-1, nsites, 2))
+    linesegs = linesegs.reshape(linesegs_shape)
+    edgedist = edgedist.reshape((-1, int(nsites * 1.4143)))
+
+    graph_len = sites.shape[0]
+    nframes = graph_len
+    if speed != 0:
+        nframes = int(math.fsum(alpha) / speed)
+
+    fig = plt.figure()
+    fig.set_size_inches(10, 10)
+    fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.3, hspace=0.3)
+
+    diagram_ax = fig.add_subplot(111, aspect='equal')
+
+    setup_ax(diagram_ax, 'voronoi diagram', (0, 1), (0, 1))
+    edge_line_coll = matplotlib.collections.LineCollection(())
+    diagram_ax.add_collection(edge_line_coll)
+    sites_line, = diagram_ax.plot([], [], 'ro', ms=5)
+
+    # dumb but needed
+    def init():
+        pass
+
+    def animate(frame_num):
+        trial_num = frame_num
+        if speed != 0:
+            counter = 0
+            for i,_ in enumerate(alpha):
+                if (math.fsum(alpha[:i+1]) > speed * frame_num):
+                    break
+                counter += 1
+            myprint(f'sum: {math.fsum(alpha[:counter+1])}, goal: {speed * frame_num} ')
+            trial_num = counter
+
+        edge_line_coll.set_segments(linesegs[trial_num])
+        sites_line.set_data(sites[trial_num,:,0], sites[trial_num,:,1])
+        myprint(f'\rrender trial: {trial_num} ')
+
+    anim = matplotlib.animation.FuncAnimation(fig, animate, init_func=init, frames=nframes, interval=50, blit=False)
+    anim.save('newest.mp4')
+    log_time('\x1b[2K\r')
+
+
 def render(speed=0):
     nsites = len(open('input').readlines())
     linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
@@ -149,6 +202,7 @@ if args.npoints:
 elif args.testing:
     test()
 else:
-    render()
+    # render()
+    just_diagram()
     # render(speed=3e-3)
 
