@@ -1,0 +1,13 @@
+-Weverything
+-std=c11 
+-Werror
+-Wno-error=unused-parameter 
+-Wno-error=unused-variable 
+-Wno-error=unused-function
+-Wno-error=double-promotion
+-Wno-reserved-id-macro
+-Wno-format-nonliteral
+-g 
+-O3 
+-march=native
+-Wno-documentation-unknown-command
