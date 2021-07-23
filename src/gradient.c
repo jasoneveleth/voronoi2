@@ -233,6 +233,22 @@ copy(float *a, float *b, size_t len)
     for (size_t i = 0; i < len; i++) { a[i] = b[i]; }
 }
 
+static inline void
+print_vec(float *a, size_t len, FILE *file)
+{
+    for (size_t i = 0; i < len; i++) { fprintf(file, "%f\n", (double)a[i]); }
+}
+
+static inline void
+print_input(point *a, int nsites)
+{
+    puts("##########");
+    for (int i = 0; i < nsites; i++) {
+        printf("%f\t%f\n", (double)a[i].x, (double)a[i].y);
+    }
+    puts("##########");
+}
+
 static void
 linesearch(point *x_k,
            point *potential_x,
@@ -268,10 +284,11 @@ linesearch(point *x_k,
     double tmp_alpha = 1.0;
     while (1) {
         assert(tmp_alpha > 1e-10); // make sure it's not gotten tiny
+        assert(old_dot_prod < 0);  // make sure we are descending
         update_sites(x_k, potential_x, d, (int)nsites, (float)tmp_alpha);
+        print_input(potential_x, (int)nsites);
         double obj = (double)objective_function(potential_x, (int)nsites);
         bool wolfe_cond1 = obj <= prev_obj + c1 * tmp_alpha * old_dot_prod;
-        puts(wolfe_cond1 ? "1true" : "1false");
         if (!wolfe_cond1) {
             tmp_alpha *= gamma;
             continue;
@@ -280,7 +297,6 @@ linesearch(point *x_k,
         parallel_grad(new_grad, potential_x, nsites, prev_obj_f);
         double new_dot_prod = -dot((float *)d, (float *)new_grad, 2 * nsites);
         bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
-        puts(wolfe_cond2 ? "2true" : "2false");
         if (!wolfe_cond2) {
             tmp_alpha *= gamma;
             continue;
@@ -289,6 +305,8 @@ linesearch(point *x_k,
         break;
     }
     *alpha = (float)tmp_alpha;
+    free(old_grad);
+    free(new_grad);
 }
 
 static void
@@ -360,6 +378,7 @@ steepest_descent(int i, struct arrays arr, int nsites, point *g[])
     const float prev_obj = arr.objective_function[i - 1];
 
     parallel_grad(r_i, x_k1, (size_t)nsites, prev_obj);
+    scale((float *)r_i, 2 * (size_t)nsites, -1);
     // a = argmin_a[f(x_k1 + a * r_i)]
     linesearch(x_k1, x_k, r_i, (size_t)nsites, &arr.alpha[i], prev_obj);
 
