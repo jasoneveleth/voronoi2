@@ -208,69 +208,11 @@ polakribiere(float *r_im1, float *r_i, size_t len)
 }
 
 static double
-dot(float *a, float *b, int len)
+dot(float *a, float *b, size_t len)
 {
     double res = 0;
-    for (int i = 0; i < len; i++) { res += (double)a[i] * (double)b[i]; }
+    for (size_t i = 0; i < len; i++) { res += (double)a[i] * (double)b[i]; }
     return res;
-}
-
-static void
-linesearch(point *x_k,
-           point *potential_x,
-           point *d,
-           int nsites,
-           float *alpha,
-           float prev_obj_f)
-{
-    //            obj        prev_obj               old_grad
-    //        v-----------v    v--v                v---------v
-    // >>     f (x + a * d) <= f(x) + c1 * a * d^T \nabla f(x)
-    //          ^---------^                    ^-------------^
-    //          potential_x                     old_dot_prod
-    //
-    //
-    //              new_dot_prod                    old_grad
-    //        v----------------------v             v---------v
-    // >>     -d^T \nabla f (x + a * d) <= -c2 d^T \nabla f(x)
-    //                      ^---------^        ^-------------^
-    //                      potential_x          old_dot_prod
-    //             ^------------------^
-    //                    new_grad
-    double prev_obj = (double)prev_obj_f;
-    point *old_grad = malloc((size_t)nsites * sizeof(point));
-    parallel_grad(old_grad, x_k, (size_t)nsites, prev_obj_f);
-    double old_dot_prod = dot((float *)d, (float *)x_k, 2 * nsites);
-    point *new_grad = malloc((size_t)nsites * sizeof(point));
-
-    // HARDCODE
-    static const double c1 = 1e-4;
-    static const double c2 = 0.1;
-    static const double gamma = 0.7; // backtracking
-    double tmp_alpha = 1.0;
-    while (1) {
-        assert(tmp_alpha > 1e-10); // make sure it's not gotten tiny
-        update_sites(x_k, potential_x, d, nsites, (float)tmp_alpha);
-        double obj = (double)objective_function(potential_x, nsites);
-        bool wolfe_cond1 = obj <= prev_obj + c1 * tmp_alpha * old_dot_prod;
-        puts(wolfe_cond1 ? "1true" : "1false");
-        if (!wolfe_cond1) {
-            tmp_alpha *= gamma;
-            continue;
-        }
-
-        parallel_grad(new_grad, potential_x, (size_t)nsites, prev_obj_f);
-        double new_dot_prod = -dot((float *)d, (float *)new_grad, 2 * nsites);
-        bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
-        puts(wolfe_cond2 ? "2true" : "2false");
-        if (!wolfe_cond2) {
-            tmp_alpha *= gamma;
-            continue;
-        }
-
-        break;
-    }
-    *alpha = (float)tmp_alpha;
 }
 
 static inline void
@@ -292,6 +234,64 @@ copy(float *a, float *b, size_t len)
 }
 
 static void
+linesearch(point *x_k,
+           point *potential_x,
+           point *d,
+           size_t nsites,
+           float *alpha,
+           float prev_obj_f)
+{
+    //            obj        prev_obj               old_grad
+    //        v-----------v    v--v                v---------v
+    // >>     f (x + a * d) <= f(x) + c1 * a * d^T \nabla f(x)
+    //          ^---------^                    ^-------------^
+    //          potential_x                     old_dot_prod
+    //
+    //
+    //              new_dot_prod                    old_grad
+    //        v----------------------v             v---------v
+    // >>     -d^T \nabla f (x + a * d) <= -c2 d^T \nabla f(x)
+    //                      ^---------^        ^-------------^
+    //                      potential_x          old_dot_prod
+    //             ^------------------^
+    //                    new_grad
+    double prev_obj = (double)prev_obj_f;
+    point *old_grad = malloc(nsites * sizeof(point));
+    parallel_grad(old_grad, x_k, nsites, prev_obj_f);
+    double old_dot_prod = dot((float *)d, (float *)x_k, 2 * nsites);
+    point *new_grad = malloc(nsites * sizeof(point));
+
+    // HARDCODE
+    static const double c1 = 1e-4;
+    static const double c2 = 0.1;
+    static const double gamma = 0.7; // backtracking
+    double tmp_alpha = 1.0;
+    while (1) {
+        assert(tmp_alpha > 1e-10); // make sure it's not gotten tiny
+        update_sites(x_k, potential_x, d, (int)nsites, (float)tmp_alpha);
+        double obj = (double)objective_function(potential_x, (int)nsites);
+        bool wolfe_cond1 = obj <= prev_obj + c1 * tmp_alpha * old_dot_prod;
+        puts(wolfe_cond1 ? "1true" : "1false");
+        if (!wolfe_cond1) {
+            tmp_alpha *= gamma;
+            continue;
+        }
+
+        parallel_grad(new_grad, potential_x, nsites, prev_obj_f);
+        double new_dot_prod = -dot((float *)d, (float *)new_grad, 2 * nsites);
+        bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
+        puts(wolfe_cond2 ? "2true" : "2false");
+        if (!wolfe_cond2) {
+            tmp_alpha *= gamma;
+            continue;
+        }
+
+        break;
+    }
+    *alpha = (float)tmp_alpha;
+}
+
+static void
 conjugate(int i, struct arrays arr, int nsites, point *g[])
 {
     float *r_im1 = (float *)g[0], *r_i = (float *)g[1];
@@ -309,7 +309,7 @@ conjugate(int i, struct arrays arr, int nsites, point *g[])
         copy(r_i, d_i, len);
     } else {
         // a = argmin_a[f(x_im1 + a * d_im1)]
-        linesearch((point *)x_im1, (point *)x_i, (point *)d_im1, nsites,
+        linesearch((point *)x_im1, (point *)x_i, (point *)d_im1, (size_t)nsites,
                    &arr.alpha[i], prev_obj);
 
         // x_i = x_im1 + a * d_im1
@@ -361,7 +361,7 @@ steepest_descent(int i, struct arrays arr, int nsites, point *g[])
 
     parallel_grad(r_i, x_k1, (size_t)nsites, prev_obj);
     // a = argmin_a[f(x_k1 + a * r_i)]
-    linesearch(x_k1, x_k, r_i, nsites, &arr.alpha[i], prev_obj);
+    linesearch(x_k1, x_k, r_i, (size_t)nsites, &arr.alpha[i], prev_obj);
 
     update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
 }
