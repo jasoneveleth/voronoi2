@@ -258,7 +258,7 @@ linesearch(point *x_k,
     double prev_obj = (double)prev_obj_f;
     point *old_grad = malloc(nsites * sizeof(point));
     parallel_grad(old_grad, x_k, nsites, prev_obj_f);
-    double old_dot_prod = dot((float *)d, (float *)x_k, 2 * nsites);
+    double old_dot_prod = dot((float *)d, (float *)old_grad, 2 * nsites);
     point *new_grad = malloc(nsites * sizeof(point));
 
     // HARDCODE
