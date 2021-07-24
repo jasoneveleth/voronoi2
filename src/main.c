@@ -304,8 +304,7 @@ main(int argc, char **argv)
     int opt;
     opterr = 0;
     options.filepath = DEFAULT_INPUTFILE;
-    options.obj = PERIMETER;
-    options.obj |= REPULSION;
+    options.obj = PERIMETER | REPULSION;
     options.descent = CONSTANT_ALPHA;
     options.gradient = FINITE_DIFFERENCE;
     options.boundary = BOUNCE;
