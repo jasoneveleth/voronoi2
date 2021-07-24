@@ -33,6 +33,24 @@ calc_objective(point *sites, struct edgelist *edgelist, int nsites)
     return -1.0f;
 }
 
+static inline void
+bound_vec(float *a, size_t len)
+{
+    if (options.boundary == TORUS) {
+        for (size_t i = 0; i < len; i++) {
+            a[i] = frac(a[i]);
+            if (a[i] < 0) a[i] = 1 + a[i];
+        }
+    } else if (options.boundary == BOUNCE) {
+        for (size_t i = 0; i < len; i++) {
+            a[i] = fmodf(a[i], 2.0f);
+            if (a[i] > 1) {
+                a[i] = 2 - a[i];
+            }
+        }
+    }
+}
+
 static void
 update_sites(point *src, point *dest, point *grad, int nsites, float alpha)
 {
