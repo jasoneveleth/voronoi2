@@ -299,7 +299,7 @@ linesearch(point *x_k,
     static const double c1 = 1e-4;
     static const double c2 = 0.1;
     static const double gamma = 0.7; // backtracking
-    double tmp_alpha = 1.0;
+    double tmp_alpha = 1e-2;
     while (1) {
         assert(tmp_alpha > 1e-10); // make sure it's not gotten tiny
         assert(old_dot_prod < 0);  // make sure we are descending
