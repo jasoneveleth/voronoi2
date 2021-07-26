@@ -44,9 +44,7 @@ bound_vec(float *a, size_t len)
     } else if (options.boundary == BOUNCE) {
         for (size_t i = 0; i < len; i++) {
             a[i] = fmodf(a[i], 2.0f);
-            if (a[i] > 1) {
-                a[i] = 2 - a[i];
-            }
+            if (a[i] > 1) { a[i] = 2 - a[i]; }
         }
     }
 }
@@ -406,10 +404,11 @@ steepest_descent(int i, struct arrays arr, int nsites, point *g[])
 void
 gradient_descent(struct arrays arr, int nsites, const int pts_per_trial)
 {
-    // stores 4 gradient vectors in case they are needed by a descent method
+    // preallocate vectors in case they are needed by a descent method
     point *g[NGRADIENT_VECS] = {NULL, NULL, NULL, NULL};
     size_t grad_size = (size_t)nsites * sizeof(point);
     for (int i = 0; i < NGRADIENT_VECS; i++) g[i] = malloc(grad_size);
+
     for (int i = 0; i < (int)options.ntrials; i++) {
         myprint("\rdescent trial: %d ", i);
         assert(options.descent < NDESCENTTYPES); // validate enum
