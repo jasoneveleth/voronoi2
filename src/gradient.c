@@ -348,8 +348,6 @@ conjugate(int i, struct arrays arr, int nsites, point *g[])
         scale(x_i, len, -arr.alpha[i]);
         add(x_i, x_im1, len);
         bound_vec(x_i, len);
-        puts("##########");
-        print_vec(x_i, len, stdout);
 
         // r_i = - \nabla f(x_i)
         parallel_grad((point *)r_i, (point *)x_i, (size_t)nsites, prev_obj);
