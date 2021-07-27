@@ -202,7 +202,7 @@ if args.npoints:
 elif args.testing:
     test()
 else:
-    # render()
-    just_diagram()
+    render()
+    # just_diagram()
     # render(speed=3e-3)
 
