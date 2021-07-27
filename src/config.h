@@ -49,6 +49,7 @@ enum __attribute__((packed)) boundary_condition
 // all need to be nonzero when used
 struct options {
     const char *filepath;
+    const char *output_dir;
     enum objective_function obj;
     enum descent_method descent;
     enum gradient_method gradient;

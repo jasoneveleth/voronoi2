@@ -24,5 +24,6 @@
     "\t-h show this help message\n"
 #define DEFAULT_PROGNAME "voronoi"
 #define DEFAULT_INPUTFILE "input"
+#define DEFAULT_OUTPUT_DIR "output/"
 
 #endif

@@ -68,12 +68,17 @@ get_nsites(const char *const path)
 }
 
 static void
-binary_write(const char *const path, void *const buf, const size_t length)
+binary_write(const char *const file, void *const buf, const size_t length)
 {
-    FILE *file = fopen(path, "wb");
+    // HARDCODE char = 1 byte (for nice readablility)
+    char *path = malloc(strlen(file) + strlen(options.output_dir));
+    strcpy(path, options.output_dir);
+    strcat(path, file);
+
+    FILE *fp = fopen(path, "wb");
     FATAL(!file, "path: %s doesn't exist\n", path);
-    fwrite(buf, length, 1, file);
-    fclose(file);
+    fwrite(buf, length, 1, fp);
+    fclose(fp);
 }
 
 static void
@@ -169,7 +174,7 @@ edges2linesegs(point *buffer, size_t filelen, size_t nsites)
             better[i * 4 * shape + j * 4 + 3] = buffer[i * 2 * shape + j * 2];
         }
     }
-    binary_write("output/linesegs", better, filelen * 2);
+    binary_write("linesegs", better, filelen * 2);
     free(better);
 }
 
@@ -196,16 +201,16 @@ calc_arrays(void)
     free(arrs.linesegs);
 
     nbytes = sizeof(arrs.char_max_length[0]) * options.ntrials;
-    binary_write("output/char_max_length", arrs.char_max_length, nbytes);
+    binary_write("char_max_length", arrs.char_max_length, nbytes);
 
     nbytes = sizeof(arrs.char_min_length[0]) * options.ntrials;
-    binary_write("output/char_min_length", arrs.char_min_length, nbytes);
+    binary_write("char_min_length", arrs.char_min_length, nbytes);
 
     nbytes = sizeof(arrs.edgehist[0]) * nbins * options.ntrials;
-    binary_write("output/edgehist", arrs.edgehist, nbytes);
+    binary_write("edgehist", arrs.edgehist, nbytes);
 
     nbytes = sizeof(arrs.earthmover[0]) * options.ntrials;
-    binary_write("output/earthmover", arrs.earthmover, nbytes);
+    binary_write("earthmover", arrs.earthmover, nbytes);
 
     free(arrs.edgehist);
     free(arrs.char_max_length);
@@ -222,7 +227,7 @@ graph_file(const char *path)
     size_t nsites;
 
     file2sites(path, &sites, &nsites);
-    binary_write("output/sites", sites, nsites * sizeof(point));
+    binary_write("sites", sites, nsites * sizeof(point));
     fortunes(sites, (int)nsites, &e);
     free(sites);
 
@@ -241,7 +246,7 @@ graph_file(const char *path)
         better[j * 4 + 2] = edges[j * 2 + 1];
         better[j * 4 + 3] = edges[j * 2];
     }
-    binary_write("output/linesegs", better, size_of_edgelist * 2);
+    binary_write("linesegs", better, size_of_edgelist * 2);
     free(better);
     // preserve tests
 
@@ -267,19 +272,19 @@ big_func()
     gradient_descent(arrs, (int)nsites, (int)pts_per_trial);
     size_t nbytes;
     nbytes = sizeof(arrs.linesegs[0]) * options.ntrials * (3 * nsites - 6) * 2;
-    binary_write("output/edges", arrs.linesegs, nbytes);
+    binary_write("edges", arrs.linesegs, nbytes);
 
     nbytes = sizeof(arrs.sites[0]) * (size_t)nsites * options.ntrials;
-    binary_write("output/sites", arrs.sites, nbytes);
+    binary_write("sites", arrs.sites, nbytes);
 
     nbytes = sizeof(arrs.perimeter[0]) * (size_t)options.ntrials;
-    binary_write("output/perimeter", arrs.perimeter, nbytes);
+    binary_write("perimeter", arrs.perimeter, nbytes);
 
     nbytes = sizeof(arrs.objective_function[0]) * options.ntrials;
-    binary_write("output/objective_function", arrs.objective_function, nbytes);
+    binary_write("objective_function", arrs.objective_function, nbytes);
 
     nbytes = sizeof(arrs.alpha[0]) * options.ntrials;
-    binary_write("output/alpha", arrs.alpha, nbytes);
+    binary_write("alpha", arrs.alpha, nbytes);
 
     free(arrs.linesegs);
     free(arrs.objective_function);
@@ -304,6 +309,7 @@ main(int argc, char **argv)
     int opt;
     opterr = 0;
     options.filepath = DEFAULT_INPUTFILE;
+    options.output_dir = DEFAULT_OUTPUT_DIR;
     options.obj = PERIMETER | REPULSION;
     options.descent = CONSTANT_ALPHA;
     options.gradient = FINITE_DIFFERENCE;
@@ -372,6 +378,15 @@ main(int argc, char **argv)
 
         case 'n':
             options.ntrials = (size_t)atoi(optarg);
+            break;
+
+        case 'f':
+            {
+                size_t len = strlen(optarg);
+                FATAL(optarg[len - 1] != '/', "%s\n",
+                      "outputdir needs to end with '/'");
+                options.output_dir = optarg;
+            }
             break;
 
         case 'h':
