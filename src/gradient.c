@@ -44,6 +44,7 @@ bound_vec(float *const a, const size_t len)
     } else if (options.boundary == BOUNCE) {
         for (size_t i = 0; i < len; i++) {
             a[i] = fmodf(a[i], 2.0f);
+            if (a[i] < 0) { a[i] = -a[i]; }
             if (a[i] > 1) { a[i] = 2 - a[i]; }
         }
     }
