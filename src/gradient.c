@@ -34,7 +34,7 @@ calc_objective(point *sites, struct edgelist *edgelist, int nsites)
 }
 
 static inline void
-bound_vec(float *a, size_t len)
+bound_vec(float *const a, const size_t len)
 {
     if (options.boundary == TORUS) {
         for (size_t i = 0; i < len; i++) {
@@ -224,7 +224,7 @@ polakribiere(float *r_im1, float *r_i, size_t len)
 }
 
 static double
-dot(float *a, float *b, size_t len)
+dot(const float *const a, const float *const b, const size_t len)
 {
     double res = 0;
     for (size_t i = 0; i < len; i++) { res += (double)a[i] * (double)b[i]; }
@@ -232,97 +232,93 @@ dot(float *a, float *b, size_t len)
 }
 
 static inline void
-add(float *a, float *b, size_t len)
+add(float *const a, const float *const b, const size_t len)
 {
     for (size_t i = 0; i < len; i++) { a[i] += b[i]; }
 }
 
 static inline void
-scale(float *a, size_t len, float c)
+scale(float *const a, size_t len, const float c)
 {
     for (size_t i = 0; i < len; i++) { a[i] *= c; }
 }
 
 static inline void
-copy(float *a, float *b, size_t len)
+copy(float *const a, const float *const b, const size_t len)
 {
     for (size_t i = 0; i < len; i++) { a[i] = b[i]; }
 }
 
 static inline void
-print_vec(float *a, size_t len, FILE *file)
+print_vec(const float *const a, const size_t len, FILE *file)
 {
     for (size_t i = 0; i < len; i++) { fprintf(file, "%f\n", (double)a[i]); }
 }
 
-static inline void
-print_input(point *a, int nsites)
-{
-    puts("##########");
-    for (int i = 0; i < nsites; i++) {
-        printf("%f\t%f\n", (double)a[i].x, (double)a[i].y);
-    }
-    puts("##########");
-}
-
+//            obj        prev_obj               old_grad
+//        v-----------v    v--v                v---------v
+// >>     f (x + a * d) <= f(x) + c1 * a * d^T \nabla f(x)
+//          ^---------^                    ^-------------^
+//             new_x                        old_dot_prod
+//
+//
+//              new_dot_prod                    old_grad
+//        v----------------------v             v---------v
+// >>     -d^T \nabla f (x + a * d) <= -c2 d^T \nabla f(x)
+//                      ^---------^        ^-------------^
+//                          new_x            old_dot_prod
+//             ^------------------^
+//                    new_grad
 static void
-linesearch(point *x_k,
-           point *potential_x,
-           point *d,
-           size_t nsites,
-           float *alpha,
-           float prev_obj_f)
+linesearch(
+    point *x_k_pt, point *d_pt, size_t nsites, float *alpha, float prev_obj_f)
 {
-    //            obj        prev_obj               old_grad
-    //        v-----------v    v--v                v---------v
-    // >>     f (x + a * d) <= f(x) + c1 * a * d^T \nabla f(x)
-    //          ^---------^                    ^-------------^
-    //          potential_x                     old_dot_prod
-    //
-    //
-    //              new_dot_prod                    old_grad
-    //        v----------------------v             v---------v
-    // >>     -d^T \nabla f (x + a * d) <= -c2 d^T \nabla f(x)
-    //                      ^---------^        ^-------------^
-    //                      potential_x          old_dot_prod
-    //             ^------------------^
-    //                    new_grad
-    double prev_obj = (double)prev_obj_f;
-    point *old_grad = malloc(nsites * sizeof(point));
-    parallel_grad(old_grad, x_k, nsites, prev_obj_f);
-    double old_dot_prod = dot((float *)d, (float *)old_grad, 2 * nsites);
-    point *new_grad = malloc(nsites * sizeof(point));
+    size_t len = nsites * 2;
+    float *x_k = (float *)x_k_pt;
+    const float *const d = (float *)d_pt;
+
+    float *old_grad = malloc(len * sizeof(float));
+    float *new_grad = malloc(len * sizeof(float));
+    float *new_x = malloc(len * sizeof(float));
+
+    parallel_grad((point *)old_grad, x_k_pt, nsites, prev_obj_f);
+    double old_dot_prod = dot(d, old_grad, len);
+    assert(old_dot_prod < 0); // descend direction
 
     // HARDCODE
     static const double c1 = 1e-4;
     static const double c2 = 0.1;
-    static const double gamma = 0.7; // backtracking
-    double tmp_alpha = 1e-2;
+    static const double backtrack = 0.7;
+    double a = 1e-2;
     while (1) {
-        assert(tmp_alpha > 1e-10); // make sure it's not gotten tiny
-        assert(old_dot_prod < 0);  // make sure we are descending
-        update_sites(x_k, potential_x, d, (int)nsites, (float)tmp_alpha);
-        print_input(potential_x, (int)nsites);
-        double obj = (double)objective_function(potential_x, (int)nsites);
-        bool wolfe_cond1 = obj <= prev_obj + c1 * tmp_alpha * old_dot_prod;
-        if (!wolfe_cond1) {
-            tmp_alpha *= gamma;
-            continue;
-        }
+        a *= backtrack;
+        if (a < 1e-10) break; // too small HARDCODE
 
-        parallel_grad(new_grad, potential_x, nsites, prev_obj_f);
-        double new_dot_prod = -dot((float *)d, (float *)new_grad, 2 * nsites);
-        bool wolfe_cond2 = new_dot_prod <= -c2 * old_dot_prod;
-        if (!wolfe_cond2) {
-            tmp_alpha *= gamma;
-            continue;
-        }
+        // new_x = x_k + a * d
+        copy(new_x, d, len);
+        scale(new_x, len, (float)a);
+        add(new_x, x_k, len);
+        bound_vec(new_x, len);
+
+        double prev_obj = (double)prev_obj_f;
+        double obj = (double)objective_function((point *)new_x, (int)nsites);
+
+        bool wolfe_cond1 = obj <= prev_obj + a * c1 * old_dot_prod;
+        if (!wolfe_cond1) continue;
+
+        parallel_grad((point *)new_grad, (point *)new_x, nsites, prev_obj_f);
+        double new_dot_prod = dot(d, new_grad, len);
+        bool wolfe_cond2 = -new_dot_prod <= -c2 * old_dot_prod;
+        if (!wolfe_cond2) continue;
 
         break;
     }
-    *alpha = (float)tmp_alpha;
-    free(old_grad);
+    *alpha = (float)a;
+    fprintf(stderr, a < 1e-10 ? "linesearch got too small\n" : "");
+
+    free(new_x);
     free(new_grad);
+    free(old_grad);
 }
 
 static void
@@ -342,13 +338,17 @@ conjugate(int i, struct arrays arr, int nsites, point *g[])
         scale(d_i, len, -1.0f);
         copy(r_i, d_i, len);
     } else {
-        // a = argmin_a[f(x_im1 + a * d_im1)]
-        linesearch((point *)x_im1, (point *)x_i, (point *)d_im1, (size_t)nsites,
+        // a = argmin_a[f(x_im1 - a * d_im1)]
+        linesearch((point *)x_im1, (point *)d_im1, (size_t)nsites,
                    &arr.alpha[i], prev_obj);
 
-        // x_i = x_im1 + a * d_im1
-        update_sites((point *)x_im1, (point *)x_i, (point *)d_im1, nsites,
-                     arr.alpha[i]);
+        // x_i = x_im1 - a * d_im1
+        copy(x_i, d_im1, len);
+        scale(x_i, len, -arr.alpha[i]);
+        add(x_i, x_im1, len);
+        bound_vec(x_i, len);
+        puts("##########");
+        print_vec(x_i, len, stdout);
 
         // r_i = - \nabla f(x_i)
         parallel_grad((point *)r_i, (point *)x_i, (size_t)nsites, prev_obj);
@@ -381,7 +381,12 @@ constant_alpha(int i, struct arrays arr, int nsites, point *g[])
 
     parallel_grad(r_i, x_k1, (size_t)nsites, prev_obj);
     arr.alpha[i] = options.alpha;
-    update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
+
+    size_t len = (size_t)nsites * 2;
+    copy((float *)x_k, (float *)r_i, len);
+    scale((float *)x_k, len, -arr.alpha[i]);
+    add((float *)x_k, (float *)x_k1, len);
+    bound_vec((float *)x_k, len);
 }
 
 static void
@@ -392,13 +397,19 @@ steepest_descent(int i, struct arrays arr, int nsites, point *g[])
     point *x_k = &arr.sites[i * nsites];
     point *r_i = g[0];
     const float prev_obj = arr.objective_function[i - 1];
+    size_t len = (size_t)nsites * 2;
 
     parallel_grad(r_i, x_k1, (size_t)nsites, prev_obj);
-    scale((float *)r_i, 2 * (size_t)nsites, -1);
-    // a = argmin_a[f(x_k1 + a * r_i)]
-    linesearch(x_k1, x_k, r_i, (size_t)nsites, &arr.alpha[i], prev_obj);
+    scale((float *)r_i, len, -1);
 
-    update_sites(x_k1, x_k, r_i, nsites, arr.alpha[i]);
+    // a = argmin_a[f(x_k1 + a * r_i)]
+    linesearch(x_k1, r_i, (size_t)nsites, &arr.alpha[i], prev_obj);
+
+    // x_k = x_k1 + a * r_i
+    copy((float *)x_k, (float *)r_i, len);
+    scale((float *)x_k, len, arr.alpha[i]);
+    add((float *)x_k, (float *)x_k1, len);
+    bound_vec((float *)x_k, len);
 }
 
 void
