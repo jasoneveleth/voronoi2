@@ -208,12 +208,6 @@ handle_circle_event(struct event *event,
     edgetwin->origin = center;
     other_bp->edge = edge;
 
-    // TODO set pointers between the two new halfedges, and two (maybe 4) old
-    // halfedges right
-    //                 ==
-    // Set the pointers between them appropriately. Attach the three
-    // new records to the half-edge records that end at the vertex.
-
     check_new_circle(heap, bprevleaf(prevleaf), prevleaf, nextleaf);
     check_new_circle(heap, prevleaf, nextleaf, bnextleaf(nextleaf));
 }
