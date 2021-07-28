@@ -71,12 +71,12 @@ static void
 binary_write(const char *const file, void *const buf, const size_t length)
 {
     // HARDCODE char = 1 byte (for nice readablility)
-    char *path = malloc(strlen(file) + strlen(options.output_dir));
+    char *path = calloc(1, strlen(file) + strlen(options.output_dir) + 1);
     strcpy(path, options.output_dir);
     strcat(path, file);
 
     FILE *fp = fopen(path, "wb");
-    FATAL(!file, "path: %s doesn't exist\n", path);
+    FATAL(!fp, "path: %s doesn't exist\n", path);
     fwrite(buf, length, 1, fp);
     fclose(fp);
 }
@@ -188,7 +188,10 @@ calc_arrays(void)
     size_t size_of_edgehist = options.ntrials * nbins;
 
     size_t nbytes;
-    arrs.linesegs = from_file("output/edges", &nbytes);
+    char *path = calloc(1, strlen(options.output_dir) + strlen("edges") + 1);
+    strcpy(path, options.output_dir);
+    strcat(path, "edges");
+    arrs.linesegs = from_file(path, &nbytes);
     edges2linesegs(arrs.linesegs, nbytes, nsites);
 
     arrs.edgehist = calloc(size_of_edgehist, sizeof(float));
