@@ -29,8 +29,112 @@ def setup_ax(ax, title, xlim, ylim):
     ax.set_xlim(xlim[0], xlim[1])
     ax.set_ylim(ylim[0], ylim[1])
 
-def arr(filename, dtype='float32'):
-    return np.fromfile('output/' + filename, dtype=dtype);
+def arr(filename, directory='output/', dtype='float32'):
+    return np.fromfile(directory + filename, dtype=dtype);
+
+def multi(speed=0):
+    nsites = len(open('input').readlines())
+    linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
+
+    perimeters = [arr('perimeter', 'dc/'), arr('perimeter', 'db/'), arr('perimeter', 'ds/')]
+    sites = [arr('sites', 'dc/'), arr('sites', 'db/'), arr('sites', 'ds/')]
+    linesegs = [arr('linesegs', 'dc/'), arr('linesegs', 'db/'), arr('linesegs', 'ds/')]
+    char_max_length = [arr('char_max_length', 'dc/'), arr('char_max_length', 'db/'), arr('char_max_length', 'ds/')]
+    char_min_length = [arr('char_min_length', 'dc/'), arr('char_min_length', 'db/'), arr('char_min_length', 'ds/')]
+    objfunc = [arr('objective_function', 'dc/'), arr('objective_function', 'db/'), arr('objective_function', 'ds/')]
+    edgedist = [arr('edgehist', 'dc/'), arr('edgehist', 'db/'), arr('edgehist', 'ds/')]
+    earthmover = [arr('earthmover', 'dc/'), arr('earthmover', 'db/'), arr('earthmover', 'ds/')]
+    alpha = [arr('alpha', 'dc/'), arr('alpha', 'db/'), arr('alpha', 'ds/')]
+
+    for i in range(3):
+        sites[i] = sites[i].reshape((-1, nsites, 2))
+        linesegs[i] = linesegs[i].reshape(linesegs_shape)
+        edgedist[i] = edgedist[i].reshape((-1, int(nsites * 1.4143)))
+
+    graph_len = sites[0].shape[0]
+    nframes = graph_len
+    if speed != 0:
+        nframes = min(int(math.fsum(alpha[0]) / speed), int(math.fsum(alpha[1]) / speed), int(math.fsum(alpha[2]) / speed))
+
+    fig = plt.figure()
+    fig.set_size_inches(16, 10)
+    fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.3, hspace=0.3)
+
+    diagram_axs = (fig.add_subplot(231, aspect='equal'), fig.add_subplot(232, aspect='equal'), fig.add_subplot(233, aspect='equal'))
+    setup_ax(diagram_axs[0], 'constant alpha', (0, 1), (0, 1))
+    setup_ax(diagram_axs[1], 'barzilai borwein', (0, 1), (0, 1))
+    setup_ax(diagram_axs[2], 'steepest descent', (0, 1), (0, 1))
+
+    edgedist_ax = (fig.add_subplot(437), fig.add_subplot(438), fig.add_subplot(439))
+    edge_dist_bars = []
+    for i in range(3):
+        view = 5/np.sqrt(nsites)
+        setup_ax(edgedist_ax[i], 'edge distribution', (-view/50, view), (0, np.max(edgedist) * (4/3)))
+        # HARDCODE 1.4143
+        nbars = int(sites[i].shape[1] * 1.4143)
+        x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
+        edge_dist_bars.append(edgedist_ax[i].bar(x, edgedist[i][0], width=(1/sites[i].shape[1]), align='edge'))
+
+    objfunc_ax = fig.add_subplot(4, 3, 10)
+    setup_ax(objfunc_ax, 'obj. function', (1, graph_len), (0, (4/3)*np.max(objfunc)))
+    objfunc_line = []
+    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="dc")[0])
+    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="db")[0])
+    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="ds")[0])
+    objfunc_ax.legend()
+
+    alpha_ax = fig.add_subplot(4, 3, 11)
+    setup_ax(alpha_ax, "alpha", (1, graph_len), (0, 0.1))
+    alpha_line = []
+    alpha_line.append(alpha_ax.plot([], [], lw=3, label="dc")[0])
+    alpha_line.append(alpha_ax.plot([], [], lw=3, label="db")[0])
+    alpha_line.append(alpha_ax.plot([], [], lw=3, label="ds")[0])
+    alpha_ax.legend()
+
+    perimeter_ax = fig.add_subplot(4, 3, 12)
+    setup_ax(perimeter_ax, "perimeter", (1, graph_len), (0, (4/3)*np.max(perimeters)))
+    perimeter_line = []
+    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="dc")[0])
+    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="db")[0])
+    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="ds")[0])
+    perimeter_ax.legend()
+
+    edge_line_coll = (matplotlib.collections.LineCollection(()), matplotlib.collections.LineCollection(()), matplotlib.collections.LineCollection(()))
+    sites_line = []
+    for i in range(3):
+        diagram_axs[i].add_collection(edge_line_coll[i])
+        line, = diagram_axs[i].plot([], [], 'ro', ms=5)
+        sites_line.append(line)
+
+    # dumb but needed
+    def init():
+        pass
+
+    def animate(frame_num):
+        trial_num = [frame_num, frame_num, frame_num]
+        if speed != 0:
+            for j in range(3):
+                counter = 0
+                for i,_ in enumerate(alpha[j]):
+                    if (math.fsum(alpha[j][:i+1]) > speed * frame_num):
+                        break
+                    counter += 1
+                trial_num[j] = counter
+
+        for i in range(3):
+            end = trial_num[i] + 1 # +1 because end is not included in range
+            edge_line_coll[i].set_segments(linesegs[i][trial_num[i]])
+            sites_line[i].set_data(sites[i][trial_num[i],:,0], sites[i][trial_num[i],:,1])
+            for j, b in enumerate(edge_dist_bars[i]):
+                b.set_height(edgedist[i][trial_num[i]][j])
+            objfunc_line[i].set_data(np.arange(1, end+1), objfunc[i][:end])
+            alpha_line[i].set_data(np.arange(1, end+1), alpha[i][:end])
+            perimeter_line[i].set_data(np.arange(1, end+1), perimeters[i][:end])
+        myprint(f'\rrender trial: {frame_num} ')
+
+    anim = matplotlib.animation.FuncAnimation(fig, animate, init_func=init, frames=nframes, interval=50, blit=False)
+    anim.save('newest.mp4')
+    log_time('\x1b[2K\r')
 
 def just_diagram(speed=0):
     nsites = len(open('input').readlines())
@@ -202,7 +306,8 @@ if args.npoints:
 elif args.testing:
     test()
 else:
-    render()
+    multi(speed=3e-3)
+    # render()
     # just_diagram()
     # render(speed=3e-3)
 
