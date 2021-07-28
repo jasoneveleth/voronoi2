@@ -45,7 +45,7 @@ all: format voronoi
 format:
 	@-clang-format -i -style=file $(SRC) $(ONLY_FORMAT)
 
-%.o: %.c
+%.o: %.c %.h
 	$(CC) $(FLAGS) -c $< -o $@
 
 # the leading '@' means don't echo the command
