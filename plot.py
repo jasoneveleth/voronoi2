@@ -61,9 +61,9 @@ def multi(speed=0):
     fig.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.3, hspace=0.3)
 
     diagram_axs = (fig.add_subplot(231, aspect='equal'), fig.add_subplot(232, aspect='equal'), fig.add_subplot(233, aspect='equal'))
-    setup_ax(diagram_axs[0], 'constant alpha', (0, 1), (0, 1))
+    setup_ax(diagram_axs[0], 'steepest w/o linesearch', (0, 1), (0, 1))
     setup_ax(diagram_axs[1], 'barzilai borwein', (0, 1), (0, 1))
-    setup_ax(diagram_axs[2], 'steepest descent', (0, 1), (0, 1))
+    setup_ax(diagram_axs[2], 'steepest w/ linsearch', (0, 1), (0, 1))
 
     edgedist_ax = (fig.add_subplot(437), fig.add_subplot(438), fig.add_subplot(439))
     edge_dist_bars = []
@@ -75,28 +75,36 @@ def multi(speed=0):
         x = np.linspace(0, 1.4143, num=nbars, endpoint=False)
         edge_dist_bars.append(edgedist_ax[i].bar(x, edgedist[i][0], width=(1/sites[i].shape[1]), align='edge'))
 
-    objfunc_ax = fig.add_subplot(4, 3, 10)
-    setup_ax(objfunc_ax, 'obj. function', (1, graph_len), (0, (4/3)*np.max(objfunc)))
+    objfunc_ax = fig.add_subplot(4, 4, 13)
+    setup_ax(objfunc_ax, 'f(X)', (1, graph_len), (0, (4/3)*np.max(objfunc)))
     objfunc_line = []
-    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="dc")[0])
-    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="db")[0])
-    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="ds")[0])
+    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="w/o linesearch")[0])
+    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="Barzilai")[0])
+    objfunc_line.append(objfunc_ax.plot([], [], lw=3, label="w linesearch")[0])
     objfunc_ax.legend()
 
-    alpha_ax = fig.add_subplot(4, 3, 11)
-    setup_ax(alpha_ax, "alpha", (1, graph_len), (0, 0.1))
+    alpha_ax = fig.add_subplot(4, 4, 14)
+    setup_ax(alpha_ax, "stepsize", (1, graph_len), (0, 0.1))
     alpha_line = []
-    alpha_line.append(alpha_ax.plot([], [], lw=3, label="dc")[0])
-    alpha_line.append(alpha_ax.plot([], [], lw=3, label="db")[0])
-    alpha_line.append(alpha_ax.plot([], [], lw=3, label="ds")[0])
+    alpha_line.append(alpha_ax.plot([], [], lw=3, label="w/o linesearch")[0])
+    alpha_line.append(alpha_ax.plot([], [], lw=3, label="Barzilai")[0])
+    alpha_line.append(alpha_ax.plot([], [], lw=3, label="w linesearch")[0])
     alpha_ax.legend()
 
-    perimeter_ax = fig.add_subplot(4, 3, 12)
+    earthmover_ax = fig.add_subplot(4, 4, 15)
+    setup_ax(earthmover_ax, "earthmover", (1, graph_len), (0, (4/3)*np.max(earthmover)))
+    earthmoverline = []
+    earthmoverline.append(earthmover_ax.plot([], [], lw=3, label="w/o linesearch")[0])
+    earthmoverline.append(earthmover_ax.plot([], [], lw=3, label="Barzilai")[0])
+    earthmoverline.append(earthmover_ax.plot([], [], lw=3, label="w linesearch")[0])
+    earthmover_ax.legend()
+
+    perimeter_ax = fig.add_subplot(4, 4, 16)
     setup_ax(perimeter_ax, "perimeter", (1, graph_len), (0, (4/3)*np.max(perimeters)))
     perimeter_line = []
-    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="dc")[0])
-    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="db")[0])
-    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="ds")[0])
+    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="w/o linesearch")[0])
+    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="Barzilai")[0])
+    perimeter_line.append(perimeter_ax.plot([], [], lw=3, label="w linesearch")[0])
     perimeter_ax.legend()
 
     edge_line_coll = (matplotlib.collections.LineCollection(()), matplotlib.collections.LineCollection(()), matplotlib.collections.LineCollection(()))
@@ -121,6 +129,7 @@ def multi(speed=0):
                     counter += 1
                 trial_num[j] = counter
 
+        print(trial_num)
         for i in range(3):
             end = trial_num[i] + 1 # +1 because end is not included in range
             edge_line_coll[i].set_segments(linesegs[i][trial_num[i]])
@@ -129,6 +138,7 @@ def multi(speed=0):
                 b.set_height(edgedist[i][trial_num[i]][j])
             objfunc_line[i].set_data(np.arange(1, end+1), objfunc[i][:end])
             alpha_line[i].set_data(np.arange(1, end+1), alpha[i][:end])
+            earthmoverline[i].set_data(np.arange(1, end+1), earthmover[i][:end])
             perimeter_line[i].set_data(np.arange(1, end+1), perimeters[i][:end])
         myprint(f'\rrender trial: {frame_num} ')
 
