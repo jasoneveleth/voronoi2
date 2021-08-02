@@ -290,10 +290,11 @@ linesearch(
     static const double c1 = 1e-4;
     static const double c2 = 0.1;
     static const double backtrack = 0.7;
+    static const double limit = 1e-10; // 3e-5 for 1000pts
     double a = 1e-2;
     while (1) {
         a *= backtrack;
-        if (a < 1e-10) break; // too small HARDCODE
+        if (a < limit) break; // too small HARDCODE
 
         // new_x = x_k + a * d
         copy(new_x, d, len);
@@ -315,7 +316,7 @@ linesearch(
         break;
     }
     *alpha = (float)a;
-    fprintf(stderr, a < 1e-10 ? "linesearch got too small\n" : "");
+    fprintf(stderr, a < limit ? "linesearch got too small\n" : "");
 
     free(new_x);
     free(new_grad);
