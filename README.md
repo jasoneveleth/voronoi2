@@ -30,7 +30,7 @@ Check options with `$ ./voronoi -h`
   multiple parts
 - 1e-4 is good for 100 points, 2e-5 is good for 2000 points
 
-## Updates
+## Implementation
 
 So I realized that I invented a lot of complexity when I wrote this the last 
 time. After looking at [this 
@@ -49,7 +49,11 @@ rearrange the tree in a nontrivial way - like skipping over a node by
 reassigning pointers. To do that it'd be like O(n) or something idk. Anyway, I 
 reimplemented everything and now it works!
 
-## Debug
+## Current Bugs
+
+None
+
+## Past Bugs
 
 - I didn't initialize a lot of fields in structs to NULL, like bnodes and
   hnodes. That caused undefined jumping behavior if that memory wasn't right. I
@@ -76,6 +80,6 @@ reimplemented everything and now it works!
 
 - didn't go from half edges to edges by multiplying by 2
 
-## Possible speed optimizations (test to make sure it is an issue)
+## Possible speed optimizations
 
 - rebalance tree
