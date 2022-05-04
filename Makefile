@@ -15,12 +15,13 @@ FLAGS += -Wno-error=unused-function
 FLAGS += -Wno-error=double-promotion
 FLAGS += -Wno-reserved-id-macro
 FLAGS += -Wno-format-nonliteral
-FLAGS += -g -O3 -march=native
+FLAGS += -g -O3
 # FLAGS += -pg
 FLAGS += -DNTHREADS=16
 LINKER = -lpthread
 
 UNAME := $(shell uname)
+ARCH := $(shell uname -m)
 
 # linux is annoying and doesn't link math library by default
 ifeq ($(UNAME), Linux)
@@ -30,6 +31,12 @@ endif
 # probably shouldn't use Weverthing but this fixes it for mac
 ifeq ($(UNAME), Darwin)
 FLAGS += -Wno-poison-system-directories -DMAC
+endif
+
+ifeq ($(ARCH), arm64)
+FLAGS += -mcpu=apple-m1
+else
+FLAGS += -march=native
 endif
 
 SRC := $(wildcard src/*.c)
