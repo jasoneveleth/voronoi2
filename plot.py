@@ -32,6 +32,7 @@ def setup_ax(ax, title, xlim, ylim):
 def arr(filename, directory='output/', dtype='float32'):
     return np.fromfile(directory + filename, dtype=dtype);
 
+# rename 'output/' to 'dc/' 'ds/' and 'db/' for constant, steepest, and barzilai repectively
 def multi(speed=0):
     nsites = len(open('input').readlines())
     linesegs_shape = (-1, 2*(3*nsites - 6), 2, 2)
@@ -316,8 +317,8 @@ if args.npoints:
 elif args.testing:
     test()
 else:
-    multi(speed=3e-3)
-    # render()
+    render()
+    # multi(speed=3e-3)
     # just_diagram()
     # render(speed=3e-3)
 
