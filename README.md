@@ -2,14 +2,14 @@
 
 ## Install
 
-<pre><code>
-<span style="user-select: none">$ </span> git clone https://github.com/jasoneveleth/voronoi2
-<span style="user-select: none">$ </span> cd voronoi2
-<span style="user-select: none">$ </span> python3 -m venv .env
-<span style="user-select: none">$ </span> . .env/bin/activate
-<span style="user-select: none">$ </span> python -m pip install matplotlib numpy
-<span style="user-select: none">$ </span> make run
-</code></pre>
+```bash
+$ git clone https://github.com/jasoneveleth/voronoi2
+$ cd voronoi2
+$ python3 -m venv .env
+$ . .env/bin/activate
+$ python -m pip install matplotlib numpy
+$ make run
+```
 
 This will make 'newest.mp4' in the current directory. Look at it with `open
 newest.mp4`
